@@ -23,7 +23,7 @@
     background-color: #ebedee;
   }
   .card {
-    /* ▼ 変更点: スマホ対応（画面の90%幅、ただし最大360pxまで） */
+    /* スマホ対応（画面の90%幅、ただし最大360pxまで） */
     width: 90%;
     max-width: var(--card-w);
     
@@ -31,8 +31,6 @@
     border-radius: 20px;
     padding: 28px 22px 26px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    
-    /* 内容が溢れないようにボックスサイズを調整 */
     box-sizing: border-box;
   }
   h2 {
@@ -45,7 +43,6 @@
   }
   .dress-display { margin: 10px 0 16px; display: grid; place-items: center; }
   
-  /* ▼ 変更点: 画像がカード幅を超えないように制限を追加 */
   .dress-wrapper { 
     position: relative; 
     width: 220px; 
@@ -73,6 +70,49 @@
     border-radius: 8px; border: 1px solid #d7d7d7; font-family: inherit; font-size: 14px;
   }
 
+  /* ▼ 追加: スライダーエリアのスタイル */
+  .slider-group {
+    margin-bottom: 16px;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-label {
+    font-size: 11px;
+    color: #555;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ddd;
+    outline: none;
+  }
+  /* 色相スライダーの背景を虹色に */
+  #hueRange {
+    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  }
+  /* つまみのスタイル */
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #999;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
   /* グリッドを 1fr 1fr にして半々に分割 */
   .row {
     display: grid;
@@ -90,7 +130,7 @@
     border: 1px solid #d7d7d7;
     background: transparent;
     cursor: pointer;
-    box-sizing: border-box; /* パディングを含めた幅計算 */
+    box-sizing: border-box;
   }
 
   .submit-btn {
@@ -105,7 +145,7 @@
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(10px);
     background: rgba(0,0,0,.8); color: #fff; font-size: 13px; padding: 10px 14px;
     border-radius: 10px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
-    white-space: nowrap; /* テキストの折り返し防止 */
+    white-space: nowrap;
     z-index: 9999;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -131,7 +171,21 @@
   </div>
 
   <div class="field">
-    <label for="colorInput">カラーを選択</label>
+    <label>色を調整</label>
+    <div class="slider-group">
+      <div class="slider-row">
+        <span class="slider-label">色味</span>
+        <input type="range" id="hueRange" min="0" max="360" value="0" />
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">鮮やかさ</span>
+        <input type="range" id="satRange" min="0" max="100" value="50" />
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="colorInput">詳細カラー設定 / おまかせ</label>
     <div class="row">
       <input type="color" id="colorInput" class="color-input" value="#D1909F" />
       <button id="randomBtn" class="submit-btn" style="margin-top:0; padding:0; height:44px; background:#444;">✨おまかせカラー</button>
@@ -200,6 +254,9 @@
   const overlaySat   = document.getElementById('overlaySat');
 
   const colorInput   = document.getElementById('colorInput');
+  const hueRange     = document.getElementById('hueRange');
+  const satRange     = document.getElementById('satRange');
+  
   const submitBtn    = document.getElementById('submitBtn');
   const randomBtn    = document.getElementById('randomBtn');
   const nameInput    = document.getElementById('nameInput');
@@ -207,13 +264,12 @@
 
   const COLORS = ['#D1909F','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   let currentColor = COLORS[0];
+  let currentL = 0.7; // 明度はスライダーが無いのでデフォルト値を保持
 
+  /* 初期値を入力欄にセット */
   if (colorInput) {
-    if (colorInput.value) {
-      currentColor = colorInput.value;
-    } else {
-      colorInput.value = currentColor;
-    }
+    colorInput.value = currentColor;
+    syncSlidersFromHex(currentColor);
   }
 
   /* ========= URL パラメータ取り込み ========= */
@@ -256,7 +312,7 @@
       directParts = colored.map(c => c.el);
       baseAvgL = colored.reduce((sum, c) => sum + c.hsl.l, 0) / colored.length;
       baseAvgS = colored.reduce((sum, c) => sum + c.hsl.s, 0) / colored.length;
-      directParts.forEach(el => { el.style.transition = 'fill .35s ease'; });
+      directParts.forEach(el => { el.style.transition = 'fill .1s ease'; }); // スライダー反応よくするため少し早く
       dressWrapper.dataset.mode = 'direct';
       dressObj.style.display = 'block';
       dressImg.style.display = 'none';
@@ -266,7 +322,6 @@
     } catch (e) { return false; }
   }
 
-  /* ========= Fallback ========= */
   function enableFallback(){
     dressWrapper.dataset.mode = 'fallback';
     dressObj.style.display = 'none';
@@ -276,10 +331,17 @@
     dressImg.style.filter = 'none';
   }
 
-  /* ========= 色適用 ========= */
+  /* ========= 色適用ロジック ========= */
   function applyColor(colorHex){
     currentColor = colorHex;
+    
+    // カラーピッカーの値も更新（スライダー操作時用）
+    if(colorInput && document.activeElement !== colorInput) {
+      colorInput.value = currentColor;
+    }
+
     if (dressWrapper.dataset.mode === 'auto') return;
+
     if (dressWrapper.dataset.mode === 'direct') {
       const target = hexToRgb(colorHex);
       const baseHSL = rgbToHsl(target.r, target.g, target.b);
@@ -305,10 +367,10 @@
         const newS = Math.max(0, Math.min(1, baseHSL.s * ratioS));
         el.setAttribute('fill', hslToHex(baseHSL.h, newS, newL));
       });
-      overlayHue.style.background = 'transparent';
-      overlaySat.style.background = 'transparent';
       return;
     }
+    
+    // fallback
     overlayHue.style.background = colorHex;
     overlaySat.style.background = colorHex;
     const rgb = hexToRgb(colorHex);
@@ -317,15 +379,49 @@
     dressImg.style.filter = `hue-rotate(${delta}deg)`;
   }
 
-  /* ========= イベント ========= */
-  if (colorInput) {
-    colorInput.addEventListener('input', (e)=>{ applyColor(e.target.value); });
+  /* Hexからスライダー位置を同期 */
+  function syncSlidersFromHex(hex) {
+    const rgb = hexToRgb(hex);
+    if(!rgb) return;
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    hueRange.value = hsl.h;
+    satRange.value = hsl.s * 100;
+    currentL = hsl.l; // 現在の明度を記憶
   }
+
+  /* スライダーから色を作って適用 */
+  function updateFromSliders() {
+    const h = parseFloat(hueRange.value);
+    const s = parseFloat(satRange.value) / 100;
+    // 明度は極端にならないよう調整しつつ維持、あるいは固定値
+    // ここでは色が綺麗に出やすいよう彩度に合わせて少し補正
+    const hex = hslToHex(h, s, currentL);
+    applyColor(hex);
+  }
+
+  /* ========= イベント設定 ========= */
+
+  // カラーピッカー操作時
+  if (colorInput) {
+    colorInput.addEventListener('input', (e)=>{
+      const val = e.target.value;
+      syncSlidersFromHex(val); // スライダーも動かす
+      applyColor(val);
+    });
+  }
+
+  // スライダー操作時
+  hueRange.addEventListener('input', updateFromSliders);
+  satRange.addEventListener('input', updateFromSliders);
+
+  // おまかせボタン
   randomBtn.addEventListener('click', ()=>{
     const pick = COLORS[Math.floor(Math.random()*COLORS.length)];
-    if (colorInput) colorInput.value = pick;
+    syncSlidersFromHex(pick); // スライダーも動かす
     applyColor(pick);
   });
+
+  // 初期ロード
   dressObj.addEventListener('load', ()=>{
     const wired = tryWireSvgDirect();
     if (!wired) enableFallback();
@@ -385,7 +481,6 @@
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
 
     const rgb = hexToRgb(currentColor);
-    // rgb数値をカンマ区切りで送信
     const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
 
     const payload = {
