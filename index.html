@@ -23,10 +23,8 @@
     background-color: #ebedee;
   }
   .card {
-    /* スマホ対応（画面の90%幅、ただし最大360pxまで） */
     width: 90%;
     max-width: var(--card-w);
-    
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     padding: 28px 22px 26px;
@@ -70,50 +68,63 @@
     border-radius: 8px; border: 1px solid #d7d7d7; font-family: inherit; font-size: 14px;
   }
 
-  /* ▼ 追加: スライダーエリアのスタイル */
+  /* ▼ スライダーエリアのスタイル（ラベルなし版） */
   .slider-group {
     margin-bottom: 16px;
-    background: #f9f9f9;
-    padding: 12px;
+    background: #f0f0f0;
+    padding: 16px 12px;
     border-radius: 12px;
   }
   .slider-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+    height: 24px; /* スライダーの操作エリア確保 */
   }
   .slider-row:last-child { margin-bottom: 0; }
-  .slider-label {
-    font-size: 11px;
-    color: #555;
-    width: 40px;
-    flex-shrink: 0;
-  }
+
+  /* スライダー本体のデザイン強化 */
   input[type="range"] {
-    flex: 1;
-    height: 6px;
-    border-radius: 3px;
+    width: 100%;
+    height: 12px; /* バーを少し太くして色を見やすく */
+    border-radius: 6px;
     -webkit-appearance: none;
     appearance: none;
-    background: #ddd;
     outline: none;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.05);
   }
-  /* 色相スライダーの背景を虹色に */
+  
+  /* 色味（Hue）スライダー：固定の虹色 */
   #hueRange {
-    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+    background: linear-gradient(to right, 
+      hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), 
+      hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%)
+    );
   }
+
+  /* 鮮やかさ（Sat）スライダー：JSで動的に書き換えるため初期値はCSSでは指定しない */
+  #satRange {
+    /* 初期フォールバック */
+    background: linear-gradient(to right, #888, #f00);
+  }
+
   /* つまみのスタイル */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px; height: 18px;
+    width: 24px; height: 24px;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid #999;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transform: scale(1);
+    transition: transform 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.1);
   }
 
-  /* グリッドを 1fr 1fr にして半々に分割 */
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr; 
@@ -121,7 +132,6 @@
     align-items: center;
   }
   
-  /* カラー入力を幅100%にし、高さをボタンに合わせて調整 */
   .color-input {
     width: 100%;
     height: 44px;
@@ -171,21 +181,17 @@
   </div>
 
   <div class="field">
-    <label>色を調整</label>
     <div class="slider-group">
       <div class="slider-row">
-        <span class="slider-label">色味</span>
-        <input type="range" id="hueRange" min="0" max="360" value="0" />
+        <input type="range" id="hueRange" min="0" max="360" value="0" aria-label="Hue" />
       </div>
       <div class="slider-row">
-        <span class="slider-label">鮮やかさ</span>
-        <input type="range" id="satRange" min="0" max="100" value="50" />
+        <input type="range" id="satRange" min="0" max="100" value="50" aria-label="Saturation" />
       </div>
     </div>
   </div>
 
   <div class="field">
-    <label for="colorInput">詳細カラー設定 / おまかせ</label>
     <div class="row">
       <input type="color" id="colorInput" class="color-input" value="#D1909F" />
       <button id="randomBtn" class="submit-btn" style="margin-top:0; padding:0; height:44px; background:#444;">✨おまかせカラー</button>
@@ -264,9 +270,8 @@
 
   const COLORS = ['#D1909F','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   let currentColor = COLORS[0];
-  let currentL = 0.7; // 明度はスライダーが無いのでデフォルト値を保持
+  let currentL = 0.7;
 
-  /* 初期値を入力欄にセット */
   if (colorInput) {
     colorInput.value = currentColor;
     syncSlidersFromHex(currentColor);
@@ -276,7 +281,7 @@
   const params = new URLSearchParams(location.search);
   if (params.get('name')) nameInput.value = decodeURIComponent(params.get('name'));
 
-  /* ========= SVG 直接塗り替え（ドレスだけ） ========= */
+  /* ========= SVG 直接塗り替え ========= */
   let directParts = [];
   let baseAvgL = 0, baseAvgS = 0;
 
@@ -312,7 +317,10 @@
       directParts = colored.map(c => c.el);
       baseAvgL = colored.reduce((sum, c) => sum + c.hsl.l, 0) / colored.length;
       baseAvgS = colored.reduce((sum, c) => sum + c.hsl.s, 0) / colored.length;
-      directParts.forEach(el => { el.style.transition = 'fill .1s ease'; }); // スライダー反応よくするため少し早く
+      
+      // スライダー反応よくするため少し早く
+      directParts.forEach(el => { el.style.transition = 'fill .1s ease'; }); 
+      
       dressWrapper.dataset.mode = 'direct';
       dressObj.style.display = 'block';
       dressImg.style.display = 'none';
@@ -331,11 +339,21 @@
     dressImg.style.filter = 'none';
   }
 
-  /* ========= 色適用ロジック ========= */
+  /* ========= 色適用 & スライダー背景更新 ========= */
+  
+  // 鮮やかさバーの背景色を動的に更新する関数
+  function updateSliderUI(hue) {
+    // 左端(0%): グレー, 右端(100%): そのHueの純色
+    // 明度は見た目が綺麗な50%で固定して表示
+    const colorStart = `hsl(${hue}, 0%, 50%)`;
+    const colorEnd   = `hsl(${hue}, 100%, 50%)`;
+    satRange.style.background = `linear-gradient(to right, ${colorStart}, ${colorEnd})`;
+  }
+
   function applyColor(colorHex){
     currentColor = colorHex;
     
-    // カラーピッカーの値も更新（スライダー操作時用）
+    // カラーピッカー同期
     if(colorInput && document.activeElement !== colorInput) {
       colorInput.value = currentColor;
     }
@@ -379,53 +397,57 @@
     dressImg.style.filter = `hue-rotate(${delta}deg)`;
   }
 
-  /* Hexからスライダー位置を同期 */
   function syncSlidersFromHex(hex) {
     const rgb = hexToRgb(hex);
     if(!rgb) return;
     const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
     hueRange.value = hsl.h;
     satRange.value = hsl.s * 100;
-    currentL = hsl.l; // 現在の明度を記憶
+    currentL = hsl.l;
+    
+    // バーの色も更新
+    updateSliderUI(hsl.h);
   }
 
-  /* スライダーから色を作って適用 */
   function updateFromSliders() {
     const h = parseFloat(hueRange.value);
     const s = parseFloat(satRange.value) / 100;
-    // 明度は極端にならないよう調整しつつ維持、あるいは固定値
-    // ここでは色が綺麗に出やすいよう彩度に合わせて少し補正
+    
+    // バーの色をリアルタイム更新
+    updateSliderUI(h);
+
     const hex = hslToHex(h, s, currentL);
     applyColor(hex);
   }
 
   /* ========= イベント設定 ========= */
-
-  // カラーピッカー操作時
   if (colorInput) {
     colorInput.addEventListener('input', (e)=>{
       const val = e.target.value;
-      syncSlidersFromHex(val); // スライダーも動かす
+      syncSlidersFromHex(val);
       applyColor(val);
     });
   }
 
-  // スライダー操作時
   hueRange.addEventListener('input', updateFromSliders);
   satRange.addEventListener('input', updateFromSliders);
 
-  // おまかせボタン
   randomBtn.addEventListener('click', ()=>{
     const pick = COLORS[Math.floor(Math.random()*COLORS.length)];
-    syncSlidersFromHex(pick); // スライダーも動かす
+    syncSlidersFromHex(pick);
     applyColor(pick);
   });
 
-  // 初期ロード
   dressObj.addEventListener('load', ()=>{
     const wired = tryWireSvgDirect();
     if (!wired) enableFallback();
     applyColor(currentColor);
+    // 初期表示時にバーの色をセット
+    const rgb = hexToRgb(currentColor);
+    if(rgb){
+       const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+       updateSliderUI(hsl.h);
+    }
   });
 
   /* ========= 送信まわり ========= */
