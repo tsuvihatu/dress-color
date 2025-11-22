@@ -23,11 +23,17 @@
     background-color: #ebedee;
   }
   .card {
-    width: var(--card-w);
+    /* ▼ 変更点: スマホ対応（画面の90%幅、ただし最大360pxまで） */
+    width: 90%;
+    max-width: var(--card-w);
+    
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     padding: 28px 22px 26px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    
+    /* 内容が溢れないようにボックスサイズを調整 */
+    box-sizing: border-box;
   }
   h2 {
     margin: 0 0 10px;
@@ -38,7 +44,14 @@
     font-size: 18px;
   }
   .dress-display { margin: 10px 0 16px; display: grid; place-items: center; }
-  .dress-wrapper { position: relative; width: 220px; height: 280px; }
+  
+  /* ▼ 変更点: 画像がカード幅を超えないように制限を追加 */
+  .dress-wrapper { 
+    position: relative; 
+    width: 220px; 
+    height: 280px; 
+    max-width: 100%; 
+  }
 
   #dressObj { width: 100%; height: 100%; border: 0; display: block; }
   #dressImg { width: 100%; height: 100%; display: none; object-fit: contain; }
@@ -60,7 +73,7 @@
     border-radius: 8px; border: 1px solid #d7d7d7; font-family: inherit; font-size: 14px;
   }
 
-  /* ▼ 変更点: グリッドを 1fr 1fr にして半々に分割 */
+  /* グリッドを 1fr 1fr にして半々に分割 */
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr; 
@@ -68,7 +81,7 @@
     align-items: center;
   }
   
-  /* ▼ 変更点: カラー入力を幅100%にし、高さをボタンに合わせて調整 */
+  /* カラー入力を幅100%にし、高さをボタンに合わせて調整 */
   .color-input {
     width: 100%;
     height: 44px;
@@ -77,6 +90,7 @@
     border: 1px solid #d7d7d7;
     background: transparent;
     cursor: pointer;
+    box-sizing: border-box; /* パディングを含めた幅計算 */
   }
 
   .submit-btn {
@@ -91,6 +105,8 @@
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(10px);
     background: rgba(0,0,0,.8); color: #fff; font-size: 13px; padding: 10px 14px;
     border-radius: 10px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    white-space: nowrap; /* テキストの折り返し防止 */
+    z-index: 9999;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
@@ -203,7 +219,6 @@
   /* ========= URL パラメータ取り込み ========= */
   const params = new URLSearchParams(location.search);
   if (params.get('name')) nameInput.value = decodeURIComponent(params.get('name'));
-  const qrParam = params.get('qr') || params.get('qr_id') || '';
 
   /* ========= SVG 直接塗り替え（ドレスだけ） ========= */
   let directParts = [];
@@ -374,12 +389,10 @@
     const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
 
     const payload = {
-      name,
-      color: colorToSend, 
-      qr: qrParam || '',
-      userAgent: navigator.userAgent,
-      referrer: document.referrer || '',
-      ts: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      name: name,
+      color: colorToSend,
+      userAgent: navigator.userAgent
     };
 
     const ok = await sendPayload(ENDPOINT_URL, payload);
