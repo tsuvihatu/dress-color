@@ -47,7 +47,6 @@
     backdrop-filter: blur(8px);
   }
 
-  /* ふわっとした光（修正: 色の連動をわかりやすく調整） */
   .card::before {
     content: "";
     position: absolute;
@@ -429,13 +428,13 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(90,59,64,0.4); /* 背景色を少しリッチなブラウン系に */
+    background: rgba(60, 40, 45, 0.5); /* 背景を少し濃いブラウンに */
     display: none;
     place-items: center;
     z-index: 10000;
     opacity: 0;
     transition: opacity 0.2s ease;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
   }
 
   .modal-overlay.open {
@@ -444,27 +443,39 @@
   }
 
   .modal {
-    background: rgba(255,255,255,0.98);
+    /* 紙の質感: ほんのり温かみのある白 */
+    background: #fffcfb; 
     width: 88%;
-    max-width: 320px;
-    padding: 32px 24px 24px; /* 余白を広めに */
-    border-radius: 20px;
-    text-align: center; /* 中央揃え */
+    max-width: 340px;
+    /* 内側の余白をたっぷりとる */
+    padding: 40px 28px 32px; 
+    border-radius: 8px; /* 角を少し立てて「カードっぽさ」を出す */
+    text-align: center;
+    
+    /* ★ゴージャスポイント: 内側に白と金のラインを描く */
     box-shadow: 
-      0 20px 50px rgba(0,0,0,0.15),
-      0 0 0 1px rgba(255,255,255,0.8) inset;
+      0 25px 60px rgba(0,0,0,0.3),       /* 深い影で浮遊感 */
+      0 0 0 6px #fffcfb inset,           /* 余白 */
+      0 0 0 7px var(--gold-main) inset;  /* 金のライン */
+      
     transform: scale(0.94);
     transition: transform 0.2s ease;
     position: relative;
+    border: 1px solid rgba(255,255,255,0.6);
   }
 
-  /* モーダルの二重線装飾 */
-  .modal::after {
-    content: "";
+  /* 上部の飾り文字 "CONFIRMATION" */
+  .modal::before {
+    content: "CONFIRMATION";
     position: absolute;
-    inset: 8px;
-    border: 1px solid rgba(205, 161, 86, 0.4); /* 薄いゴールド */
-    border-radius: 16px;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--gold-main);
+    font-family: serif;
+    opacity: 0.8;
     pointer-events: none;
   }
 
@@ -473,45 +484,43 @@
   }
 
   .modal h3 {
-    margin: 0 0 16px;
-    font-size: 16px;
+    margin: 0 0 20px;
+    font-size: 18px;
     color: var(--text-main);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     font-weight: 600;
     font-family: "Yu Mincho", serif;
-  }
-
-  .modal h3::after {
-    content: "";
-    display: block;
-    width: 40px;
-    height: 1px;
-    background: var(--gold-main);
-    margin: 8px auto 0;
+    /* 文字の下に装飾線を引く */
+    border-bottom: 1px solid rgba(205, 161, 86, 0.3);
+    display: inline-block;
+    padding-bottom: 8px;
   }
 
   /* プレビューエリア */
   .modal-preview-box {
     margin: 0 auto 16px;
-    width: 220px; /* 以前より少し小さくしてバランス調整 */
+    width: 200px;
     position: relative;
+    /* 画像にも少し影を落とす */
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
   }
 
-  /* 選択したカラーコード */
+  /* カラーコードのタグ */
   .modal-color-code {
     font-family: "JetBrains Mono", monospace;
     font-size: 11px;
-    color: rgba(122,78,84,0.7);
-    margin-bottom: 20px;
+    color: var(--text-sub);
+    margin-bottom: 24px;
     display: inline-block;
-    padding: 2px 8px;
-    background: #f9f4f4;
-    border-radius: 4px;
+    padding: 3px 10px;
+    background: #f7f0f0;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
   }
 
-  /* お名前表示エリア（オシャレに） */
+  /* ゲスト情報エリア */
   .modal-guest-info {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     position: relative;
     z-index: 1;
   }
@@ -522,68 +531,66 @@
     color: var(--gold-main);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   .modal-guest-name {
-    font-size: 18px;
+    font-size: 20px; /* 名前を大きく */
     color: var(--text-main);
     font-weight: 600;
     font-family: "Yu Mincho", serif;
-    border-bottom: 1px solid rgba(205, 161, 86, 0.3); /* 下線で署名風 */
     display: inline-block;
-    min-width: 120px;
-    padding-bottom: 2px;
+    min-width: 140px;
+    padding-bottom: 4px;
+    /* 署名のような下線 */
+    border-bottom: 1px solid rgba(122,78,84,0.3);
   }
 
   .modal-msg {
-    font-size: 11px;
-    color: rgba(122,78,84,0.8);
-    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-bottom: 24px;
+    font-weight: 500;
   }
 
   .modal-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 16px;
     position: relative;
-    z-index: 2; /* 枠線より上に */
+    z-index: 2;
+    padding: 0 10px; /* ボタンが見切れないように */
   }
 
   .modal-btn {
-    padding: 11px 0;
-    border-radius: 999px;
+    padding: 12px 0;
+    border-radius: 4px; /* カードに合わせてボタンも少し角張らせる */
     border: none;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
     font-weight: 600;
-    font-family: "Noto Sans JP", sans-serif;
+    font-family: "Yu Mincho", serif; /* ボタンも明朝体にして高級感 */
+    transition: all 0.2s ease;
   }
 
   .btn-cancel {
     background: transparent;
-    color: #7a4e54;
-    border: 1px solid rgba(210,145,155,0.6);
+    color: #8a6e72;
+    border: 1px solid rgba(138, 110, 114, 0.4);
+  }
+  .btn-cancel:active {
+    background: rgba(138, 110, 114, 0.05);
   }
 
   .btn-confirm {
-    background: var(--gold-main);
+    background: linear-gradient(135deg, #ddb065, #cda156); /* 金色のグラデーション */
     color: #fff;
-    box-shadow: 0 4px 12px rgba(205, 161, 86, 0.4);
+    box-shadow: 0 4px 15px rgba(205, 161, 86, 0.4);
   }
-  /* ▲▲▲ モーダルデザイン修正（ここまで） ▲▲▲ */
-
-  .btn-cancel {
-    background: rgba(255,245,247,0.96);
-    color: #7a4e54;
-    border: 1px solid rgba(210,145,155,0.7);
-  }
-
-  .btn-confirm {
-    background: #cda156;
-    color: #fffdf5;
-    box-shadow: 0 8px 20px rgba(136,102,63,0.55);
+  .btn-confirm:active {
+    box-shadow: 0 2px 8px rgba(205, 161, 86, 0.4);
+    transform: translateY(1px);
   }
 
   .toast {
