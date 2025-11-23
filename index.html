@@ -1311,6 +1311,10 @@ submitBtn.addEventListener('click', () => {
     confirmModal.classList.add('open');
   });
 
+  cancelSendBtn.addEventListener('click', () => {
+      confirmModal.classList.remove('open');
+    });
+
   finalSendBtn.addEventListener('click', async () => {
     confirmModal.classList.remove('open');
 
