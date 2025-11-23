@@ -13,6 +13,13 @@
     --card-w: 380px;
     --accent: #e6a3af;
     --accent-soft: rgba(230, 163, 175, 0.35);
+
+    /* 追加：モーダルやフォーカスで使う色 */
+    --gold-main: #cda156;
+    --gold-soft: #e9cf93;
+    --gold-deep: #a57b3f;
+    --text-main: #5a3b40;
+    --text-sub: rgba(90, 59, 64, 0.82);
   }
 
   * {
@@ -26,7 +33,7 @@
     place-items: center;
     font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
     color: #5a3b40;
-    /* 修正: 背景画像のグラデーションを薄く(0.4 -> 0.1)してfile_back.jpgを見えやすく */
+    /* 背景画像のグラデーションを薄くして file_back.jpg を見せる */
     background:
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       url('file_back.jpg') center/cover no-repeat fixed;
@@ -36,7 +43,7 @@
   .card {
     position: relative;
     width: min(var(--card-w), 94vw);
-    /* 修正: カード自体の透過度を下げ(0.45 -> 0.75)、文字を読みやすく */
+    /* カード自体の透過度を下げて文字を読みやすく */
     background: rgba(255,255,255,0.75);
     border-radius: 24px;
     padding: 26px 22px 24px;
@@ -52,11 +59,11 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    /* 左上を白っぽく、右下を選択色(--accent-soft)にして変化を強調 */
+    /* 左上を白っぽく、右下を選択色に */
     background:
       radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8), transparent 60%),
       radial-gradient(circle at 90% 110%, var(--accent-soft), transparent 70%);
-    opacity: 0.6; /* 少し強調 */
+    opacity: 0.6;
     pointer-events: none;
     z-index: -1;
   }
@@ -185,38 +192,29 @@
     letter-spacing: 0.04em;
   }
 
- .field input[type="text"] {
+  .field input[type="text"] {
     width: 100%;
-    padding: 10px 4px;        /* 内部の余白調整 */
-    border-radius: 0;         /* 角丸をなくす */
-    border: none;             /* 枠線を消す */
-    border-bottom: 1px solid rgba(122,78,84,0.5); /* 下線だけ引く */
-    background: transparent;  /* 背景を透明に */
+    padding: 10px 4px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(122,78,84,0.5);
+    background: transparent;
     color: #5a3b40;
-    font-size: 16px;          /* 少し文字を大きくして書きやすく */
+    font-size: 16px;
     outline: none;
-    font-family: "Yu Mincho", serif; /* 署名っぽく明朝体に */
-    transition: border-bottom-color 0.3s ease;
-  }
-
-  .field input[type="text"]::placeholder {
-    color: rgba(170,130,135,0.6);
-    font-size: 13px;
-    font-family: sans-serif; /* プレースホルダーは読みやすくゴシック体で */
-  }
-
-  .field input[type="text"]:focus {
-    border-bottom: 2px solid var(--gold-main); /* フォーカス時にゴールドの線に */
-    box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3); /* ほんのり下に光を落とす */
+    font-family: "Yu Mincho", serif;
+    transition: border-bottom-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .field input[type="text"]::placeholder {
     color: rgba(170,130,135,0.7);
+    font-size: 13px;
+    font-family: sans-serif;
   }
 
   .field input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(230,163,175,0.35);
+    border-bottom: 2px solid var(--gold-main);
+    box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3);
   }
 
   /* スライダー */
@@ -230,7 +228,7 @@
 
   .slider-row {
     display: grid;
-    grid-template-columns: 56px 1fr; /* ラベル + バーのみ */
+    grid-template-columns: 56px 1fr;
     column-gap: 8px;
     align-items: center;
     margin-bottom: 11px;
@@ -248,7 +246,6 @@
     white-space: nowrap;
   }
 
-  /* 右側の数値は表示しない */
   .slider-value {
     display: none;
   }
@@ -341,7 +338,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;          /* 実際の input は透明 */
+    opacity: 0;
     cursor: pointer;
     z-index: 1;
   }
@@ -373,7 +370,6 @@
     font-family: "Yu Mincho", "YuMincho", serif; /* 明朝体に変更 */
   }
 
-  /* ゴールド系単色ボタン（選択色に依存しない） */
   .btn-main {
     margin-top: 10px;
     background: #cda156;
@@ -424,17 +420,20 @@
     text-align: center;
   }
 
-  /* モーダル */
-.modal-overlay {
+  /* ================= モーダル（上品ゴージャス版） ================= */
+
+  .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(60, 40, 45, 0.5);
     display: none;
     place-items: center;
     z-index: 10000;
     opacity: 0;
-    transition: opacity 0.2s ease;
-    backdrop-filter: blur(5px);
+    transition: opacity 0.22s ease;
+    backdrop-filter: blur(6px);
+    background:
+      radial-gradient(circle at 50% 10%, rgba(255,255,255,0.2), transparent 60%),
+      rgba(60, 40, 45, 0.55);
   }
 
   .modal-overlay.open {
@@ -443,67 +442,123 @@
   }
 
   .modal {
-    /* 紙の質感 */
-    background: #fffcfb; 
-    width: 88%;
-    max-width: 340px;
-    padding: 40px 28px 32px; 
-    border-radius: 24px;
-    text-align: center;
-    
-      
-    transform: scale(0.94);
-    transition: transform 0.2s ease;
     position: relative;
+    width: 88%;
+    max-width: 360px;
+    padding: 46px 30px 30px;
+    border-radius: 26px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(255,255,255,0.9), transparent 55%),
+      radial-gradient(circle at 100% 100%, rgba(255,239,220,0.95), transparent 60%),
+      linear-gradient(135deg, #fffaf6, #f7ede3);
+    box-shadow:
+      0 18px 40px rgba(80, 50, 45, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.9);
+    transform: translateY(8px) scale(0.96);
+    transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
   }
 
-  /* ★修正: 内側にクッキリとした金色の枠線を作成 */
   .modal::after {
     content: "";
     position: absolute;
-    inset: 12px; /* 外側から少し内側へ */
-    border: 2px solid var(--gold-main); /* 金色の実線 */
-    border-radius: 16px; /* 枠線も丸く */
+    inset: 12px;
+    border-radius: 18px;
+    border: 2px solid var(--gold-main);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.5) inset,
+      0 0 16px rgba(205,161,86,0.25);
     pointer-events: none;
   }
 
-  /* 上部の飾り文字 */
   .modal::before {
     content: "CONFIRMATION";
     position: absolute;
-    top: 16px;
+    top: 14px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
     letter-spacing: 0.25em;
-    color: var(--gold-main);
+    color: var(--gold-deep);
     font-family: serif;
-    opacity: 0.8;
+    opacity: 0.95;
+    padding: 2px 16px 3px;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg,
+        rgba(255,255,255,0.96),
+        rgba(255,248,235,0.98),
+        rgba(255,255,255,0.96));
+    border: 1px solid rgba(205,161,86,0.6);
+    box-shadow:
+      0 1px 3px rgba(205,161,86,0.45),
+      0 0 0 1px rgba(255,255,255,0.8);
     pointer-events: none;
   }
 
   .modal-overlay.open .modal {
-    transform: scale(1);
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 22px 55px rgba(80, 50, 45, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.95);
   }
 
   .modal h3 {
-    margin: 0 0 20px;
+    position: relative;
+    margin: 6px 0 26px;
     font-size: 18px;
     color: var(--text-main);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
     font-weight: 600;
     font-family: "Yu Mincho", serif;
-    border-bottom: 1px solid rgba(205, 161, 86, 0.3);
     display: inline-block;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(205, 161, 86, 0.35);
   }
 
-  /* プレビューエリア */
+  .modal h3::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -11px;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(205,161,86,0.8);
+    box-shadow:
+      0 0 0 2px #fffcfb,
+      0 4px 10px rgba(90,59,64,0.25);
+    background:
+      radial-gradient(circle at 30% 20%, #fff, #f1d79a 55%, #cda156 100%);
+  }
+
+  /* プレビューエリア（額縁＋台座影） */
   .modal-preview-box {
-    margin: 0 auto 16px;
-    width: 230px; /* ドレス画像を大きく */
+    margin: 6px auto 22px;
+    width: 230px;
     position: relative;
+    padding: 14px 16px 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(205, 161, 86, 0.3);
+    box-shadow:
+      0 10px 22px rgba(90,59,64,0.18),
+      inset 0 0 0 1px rgba(255,255,255,0.9);
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+  }
+
+  .modal-preview-box::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -18px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.18), transparent 65%);
+    filter: blur(3px);
+    z-index: -1;
   }
 
   .modal-color-code {
@@ -518,8 +573,18 @@
     letter-spacing: 0.05em;
   }
 
+  /* ゲスト名エリアをカード風に */
   .modal-guest-info {
-    margin-bottom: 28px;
+    margin: 32px auto 26px;
+    padding: 10px 16px 14px;
+    max-width: 220px;
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,246,238,0.96));
+    border: 1px solid rgba(205,161,86,0.35);
+    box-shadow:
+      0 6px 12px rgba(90,59,64,0.12),
+      0 0 0 1px rgba(255,255,255,0.8) inset;
     position: relative;
     z-index: 1;
   }
@@ -528,26 +593,26 @@
     display: block;
     font-size: 9px;
     color: var(--gold-main);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     margin-bottom: 6px;
   }
 
   .modal-guest-name {
-    font-size: 20px;
+    font-size: 19px;
     color: var(--text-main);
     font-weight: 600;
     font-family: "Yu Mincho", serif;
     display: inline-block;
     min-width: 140px;
     padding-bottom: 4px;
-    border-bottom: 1px solid rgba(122,78,84,0.3);
+    border-bottom: 1px solid rgba(122,78,84,0.28);
   }
 
   .modal-msg {
     font-size: 12px;
     color: var(--text-sub);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     font-weight: 500;
   }
 
@@ -558,39 +623,86 @@
     position: relative;
     z-index: 2;
     padding: 0 10px;
+    border-top: 1px dashed rgba(205,161,86,0.4);
+    padding-top: 18px;
   }
 
   .modal-btn {
     padding: 12px 0;
-    border-radius: 6px;
+    border-radius: 999px;
     border: none;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.16em;
     font-weight: 600;
     font-family: "Yu Mincho", serif;
     transition: all 0.2s ease;
   }
 
+  /* キャンセルボタン：控えめなパールホワイト */
   .btn-cancel {
-    background: transparent;
+    background: linear-gradient(135deg, #ffffff, #f7f0f0);
     color: #8a6e72;
     border: 1px solid rgba(138, 110, 114, 0.4);
+    box-shadow: 0 2px 5px rgba(90,59,64,0.18);
   }
+
+  .btn-cancel:hover {
+    background: linear-gradient(135deg, #ffffff, #fdf7f7);
+  }
+
   .btn-cancel:active {
-    background: rgba(138, 110, 114, 0.05);
+    box-shadow: 0 1px 2px rgba(90,59,64,0.25) inset;
+    background: linear-gradient(135deg, #faf5f5, #f5ecec);
   }
 
+  /* 送信ボタン：金色シール感を強める */
   .btn-confirm {
-    background: linear-gradient(135deg, #ddb065, #cda156);
+    position: relative;
+    background: linear-gradient(135deg, #e3c47b, #cda156);
     color: #fff;
-    box-shadow: 0 4px 15px rgba(205, 161, 86, 0.4);
-  }
-  .btn-confirm:active {
-    box-shadow: 0 2px 8px rgba(205, 161, 86, 0.4);
-    transform: translateY(1px);
+    box-shadow:
+      0 4px 14px rgba(205,161,86,0.6),
+      0 0 0 1px rgba(255,255,255,0.9);
+    overflow: hidden;
   }
 
+  .btn-confirm::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -30%;
+    width: 40%;
+    height: 200%;
+    transform: skewX(-25deg);
+    background: linear-gradient(
+      to right,
+      rgba(255,255,255,0),
+      rgba(255,255,255,0.6),
+      rgba(255,255,255,0)
+    );
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.4s ease;
+  }
+
+  .btn-confirm:hover::after {
+    opacity: 1;
+    transform: translateX(220%) skewX(-25deg);
+  }
+
+  .btn-confirm:hover {
+    background: linear-gradient(135deg, #edd088, #d3aa5f);
+    box-shadow:
+      0 6px 18px rgba(205,161,86,0.7),
+      0 0 0 1px rgba(255,255,255,1);
+  }
+
+  .btn-confirm:active {
+    transform: translateY(1px);
+    box-shadow:
+      0 2px 8px rgba(205,161,86,0.55),
+      0 0 0 1px rgba(255,255,255,0.95);
+  }
 
   .toast {
     position: fixed;
@@ -624,29 +736,25 @@
     letter-spacing: 0.05em;
   }
 
-  /* スマホ向け調整 (微調整版) */
+  /* スマホ向け調整 */
   @media (max-width: 600px) {
     body {
       display: flex;
       flex-direction: column;
-      /* 修正: 上部に余裕を持たせ、背景が見えるように */
       justify-content: center;
       align-items: center;
       padding: 30px 0 24px;
     }
     .card {
       width: 94vw;
-      /* 修正: カード内側の余白を増やして圧迫感を軽減 */
       padding: 24px 20px 22px;
       border-radius: 22px;
     }
     .card::after {
-      /* 修正: スマホの小さいカードに合わせて内枠を調整 */
       inset: 8px;
       border-radius: 16px;
     }
     .dress-wrapper {
-      /* 修正: ドレス表示サイズを微増 */
       width: 260px;
       height: 320px;
     }
@@ -711,17 +819,17 @@
         <input type="color" id="colorInput" class="color-input" value="#E6A3AF" />
         <div id="colorChip" class="color-chip"></div>
       </div>
-      <button id="randomBtn" class="btn-ghost">おまかせカラー</button>
+      <button id="randomBtn" class="btn-ghost">✨ おまかせカラー</button>
     </div>
   </div>
 
-<div style="margin-top: 30px;">
+  <div style="margin-top: 30px;">
     <p class="input-guide" style="margin-bottom:8px; font-size:12px; color:rgba(122,78,84,0.8); text-align:center; letter-spacing:0.05em;">
       <span style="opacity:0.7;">🖊️</span> 最後に、お名前を添えて投票してください
     </p>
-    
+
     <div class="field">
-      <label for="nameInput" style="display:flex; align-items:center; gap:6px;">
+      <label for="nameInput" style="display:flex; align-items:center; gap:6px;"></label>
       <input type="text" id="nameInput" placeholder="例）山田花子" />
     </div>
   </div>
@@ -1239,7 +1347,7 @@
     }
   }
 
-submitBtn.addEventListener('click', () => {
+  submitBtn.addEventListener('click', () => {
     let name = nameInput.value.trim();
     if (!name) {
       alert('お名前を入力してください');
@@ -1273,7 +1381,6 @@ submitBtn.addEventListener('click', () => {
         cloneSvg.style.width = '100%';
         cloneSvg.style.height = 'auto';
         cloneSvg.style.display = 'block';
-        // 影をつけて立体感を出す
         cloneSvg.style.filter = 'drop-shadow(0 10px 10px rgba(0,0,0,0.15))';
         previewContainer.appendChild(cloneSvg);
       }
@@ -1288,20 +1395,17 @@ submitBtn.addEventListener('click', () => {
     }
     modalBody.appendChild(previewContainer);
 
-
-    // 3. お名前表示エリア（ここをオシャレに！）
+    // 3. お名前表示エリア
     const guestInfoDiv = document.createElement('div');
     guestInfoDiv.className = 'modal-guest-info';
 
-    // 小さなラベル "GUEST"
     const labelSpan = document.createElement('span');
     labelSpan.className = 'modal-guest-label';
     labelSpan.textContent = 'GUEST';
-    
-    // 名前本体 "〇〇 〇〇"
+
     const nameDiv = document.createElement('div');
     nameDiv.className = 'modal-guest-name';
-    nameDiv.textContent = name + ' 様'; // 「様」を自動でつける
+    nameDiv.textContent = name + ' 様';
 
     guestInfoDiv.appendChild(labelSpan);
     guestInfoDiv.appendChild(nameDiv);
@@ -1318,8 +1422,8 @@ submitBtn.addEventListener('click', () => {
   });
 
   cancelSendBtn.addEventListener('click', () => {
-      confirmModal.classList.remove('open');
-    });
+    confirmModal.classList.remove('open');
+  });
 
   finalSendBtn.addEventListener('click', async () => {
     confirmModal.classList.remove('open');
