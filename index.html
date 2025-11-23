@@ -360,27 +360,18 @@
 
   .btn-main,
   .btn-ghost {
-      height: 44px;
-      background: rgba(255,255,255,0.9);
-      color: var(--text-main);
-      border: 1px solid rgba(210,145,155,0.8);
-      
-      /* ▼▼▼ フォント修正ここから ▼▼▼ */
-      font-family: "Yu Mincho", "YuMincho", serif; /* 明朝体に変更 */
-      font-size: 13px;       /* 少し大きく */
-      font-weight: 600;      /* 程よい太さ */
-      letter-spacing: 0.1em; /* 文字間隔を広げてオシャレに */
-      /* ▲▲▲ フォント修正ここまで ▲▲▲ */
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255,255,255,1);
-    }
-
-    .btn-ghost:active {
-      background: rgba(255,245,247,1);
-      transform: translateY(1px);
-    }
+    width: 100%;
+    border-radius: 999px;
+    border: none;
+    padding: 11px 14px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.2s ease, opacity 0.2s ease;
+    font-family: "Yu Mincho", "YuMincho", serif; /* 明朝体に変更 */
+  }
 
   /* ゴールド系単色ボタン（選択色に依存しない） */
   .btn-main {
