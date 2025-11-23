@@ -128,9 +128,6 @@
     max-width: 100%;
   }
 
-  /* 修正: ドレス背景の「謎の楕円」(.dress-wrapper::before) を削除しました。
-  */
-
   #dressObj {
     width: 100%;
     height: 100%;
@@ -526,6 +523,15 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* Footer Style (新規追加) */
+  .footer {
+    margin-top: 16px;
+    font-size: 10px;
+    color: rgba(90, 59, 64, 0.5);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
   /* スマホ向け調整 (微調整版) */
   @media (max-width: 600px) {
     body {
@@ -573,7 +579,7 @@
     <p class="tagline">WEDDING COLOR QUIZ</p>
     <h2>ドレスの色あてクイズ</h2>
     <p class="card-sub">
-      新婦はどの色のドレスで登場するでしょう？<br>
+      新婦はどの色のドレスで再登場するでしょう？<br>
       「これだ！」と思う一色を選んでください。
     </p>
   </header>
@@ -582,10 +588,6 @@
     <div class="dress-wrapper" id="dressWrapper" data-mode="auto">
       <object id="dressObj" type="image/svg+xml" data="file.svg" aria-label="dress"></object>
       <img id="dressImg" src="file.svg" alt="dress" />
-    </div>
-    <div class="color-meta">
-      <span class="color-meta-label">COLOR</span>
-      <span class="color-meta-value" id="colorHexLabel">#E6A3AF</span>
     </div>
   </div>
 
@@ -598,7 +600,7 @@
     <label>バーで色を細かく調整</label>
     <div class="slider-group">
       <div class="slider-row">
-        <span class="slider-label">色合い</span>
+        <span class="slider-label">色あい</span>
         <input type="range" id="hueRange" min="0" max="360" value="0" aria-label="色合い" />
         <span class="slider-value" id="hueValue">0°</span>
       </div>
@@ -629,9 +631,13 @@
   <button id="submitBtn" class="btn-main">この色で投票する</button>
   <div class="note">
     「お名前」と「選んだ色」のみが記録されます。<br />
-    オフライン中でも一時保存され、あとで自動送信されます。
+    複数回送信された場合は、最新のものが有効になります。
   </div>
 </div>
+
+<footer class="footer">
+  <small>&copy; 2025 Shiro Tamiya</small>
+</footer>
 
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
