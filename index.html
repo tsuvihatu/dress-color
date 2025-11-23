@@ -26,33 +26,37 @@
     place-items: center;
     font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
     color: #5a3b40;
+    /* 修正: 背景画像のグラデーションを薄く(0.4 -> 0.1)してfile_back.jpgを見えやすく */
     background:
-      linear-gradient(135deg, rgba(255,248,244,0.55), rgba(255,234,239,0.55)),
+      linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       url('file_back.jpg') center/cover no-repeat fixed;
   }
 
   .card {
     position: relative;
     width: min(var(--card-w), 94vw);
-    background: rgba(255,255,255,0.9); /* 透過を少し上げて背景を見せる */
+    /* 修正: カード自体の透過度を下げ(0.45 -> 0.75)、文字を読みやすく */
+    background: rgba(255,255,255,0.75);
     border-radius: 24px;
     padding: 26px 22px 24px;
-    border: 1px solid rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,255,255,0.7);
     box-shadow:
       0 18px 40px rgba(204,150,153,0.35),
       0 0 0 1px rgba(255,255,255,0.8);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
   }
 
+  /* ふわっとした光（修正: 色の連動をわかりやすく調整） */
   .card::before {
     content: "";
     position: absolute;
     inset: -1px;
     border-radius: inherit;
+    /* 左上を白っぽく、右下を選択色(--accent-soft)にして変化を強調 */
     background:
-      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.9), transparent 60%),
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8), transparent 60%),
       radial-gradient(circle at 90% 110%, var(--accent-soft), transparent 70%);
-    opacity: 0.55; /* 少し弱めて背景がのぞくように */
+    opacity: 0.6; /* 少し強調 */
     pointer-events: none;
     z-index: -1;
   }
@@ -72,13 +76,13 @@
     margin-bottom: 8px;
   }
 
-  /* 見出しの上の横棒 */
+  /* 見出し上の横棒 */
   .card-header::before {
     content: "";
     display: block;
     width: 80px;
     height: 1px;
-    margin: 0 auto 8px;
+    margin: 0 auto 6px;
     background: linear-gradient(
       90deg,
       transparent,
@@ -124,18 +128,8 @@
     max-width: 100%;
   }
 
-  .dress-wrapper::before {
-    content: "";
-    position: absolute;
-    inset: 10% 18%;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at 50% 8%, rgba(255,255,255,0.95), transparent 65%),
-      radial-gradient(circle at 50% 115%, var(--accent-soft), transparent 80%);
-    opacity: 0.9;
-    mix-blend-mode: multiply;
-    pointer-events: none;
-  }
+  /* 修正: ドレス背景の「謎の楕円」(.dress-wrapper::before) を削除しました。
+  */
 
   #dressObj {
     width: 100%;
@@ -214,7 +208,7 @@
     box-shadow: 0 0 0 1px rgba(230,163,175,0.35);
   }
 
-  /* スライダーまわり */
+  /* スライダー */
   .slider-group {
     margin-bottom: 4px;
     background: rgba(255,242,245,0.96);
@@ -225,7 +219,7 @@
 
   .slider-row {
     display: grid;
-    grid-template-columns: 56px 1fr auto; /* ラベルをギリギリ・バーを最大限 */
+    grid-template-columns: 56px 1fr; /* ラベル + バーのみ */
     column-gap: 8px;
     align-items: center;
     margin-bottom: 11px;
@@ -236,19 +230,16 @@
   }
 
   .slider-label {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     color: rgba(122,78,84,0.9);
     width: 56px;
-    white-space: nowrap; /* 「鮮やかさ」を1行に */
+    white-space: nowrap;
   }
 
+  /* 右側の数値は表示しない */
   .slider-value {
-    font-size: 11px;
-    color: rgba(122,78,84,0.9);
-    min-width: 42px;
-    text-align: right;
-    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    display: none;
   }
 
   input[type="range"] {
@@ -322,30 +313,37 @@
 
   .row {
     display: grid;
-    grid-template-columns: minmax(0,1.05fr) minmax(0,1fr);
+    grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
     gap: 8px;
     align-items: center;
   }
 
-  .color-input {
+  /* 色見本タブ（カスタム） */
+  .color-chip-wrapper {
+    position: relative;
     width: 100%;
     height: 44px;
-    border-radius: 999px;
-    border: 1px solid rgba(210,170,172,0.9);
-    background: #fff;
-    cursor: pointer;
-    padding: 0;
-    overflow: hidden;
   }
 
-  .color-input::-webkit-color-swatch-wrapper {
-    padding: 4px 10px;
-    border-radius: 999px;
+  .color-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;          /* 実際の input は透明 */
+    cursor: pointer;
   }
-  .color-input::-webkit-color-swatch,
-  .color-input::-moz-color-swatch {
+
+  .color-chip {
+    position: absolute;
+    inset: 0;
     border-radius: 999px;
-    border: none;
+    border: 1px solid rgba(210,170,172,0.9);
+    background: var(--chip-color, #E6A3AF);
+    box-sizing: border-box;
+    box-shadow:
+      0 1px 2px rgba(140,100,100,0.25),
+      inset 0 0 0 1px rgba(255,255,255,0.6);
   }
 
   .btn-main,
@@ -363,7 +361,7 @@
     font-family: "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
-  /* ゴールド単色ボタン */
+  /* ゴールド系単色ボタン（選択色に依存しない） */
   .btn-main {
     margin-top: 10px;
     background: #cda156;
@@ -414,6 +412,7 @@
     text-align: center;
   }
 
+  /* モーダル */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -527,7 +526,34 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* PC・タブレット向け */
+  /* スマホ向け調整 (微調整版) */
+  @media (max-width: 600px) {
+    body {
+      display: flex;
+      flex-direction: column;
+      /* 修正: 上部に余裕を持たせ、背景が見えるように */
+      justify-content: center;
+      align-items: center;
+      padding: 30px 0 24px;
+    }
+    .card {
+      width: 94vw;
+      /* 修正: カード内側の余白を増やして圧迫感を軽減 */
+      padding: 24px 20px 22px;
+      border-radius: 22px;
+    }
+    .card::after {
+      /* 修正: スマホの小さいカードに合わせて内枠を調整 */
+      inset: 8px;
+      border-radius: 16px;
+    }
+    .dress-wrapper {
+      /* 修正: ドレス表示サイズを微増 */
+      width: 230px;
+      height: 290px;
+    }
+  }
+
   @media (min-width: 768px) {
     .card {
       width: min(440px, 420px);
@@ -536,35 +562,6 @@
     .dress-wrapper {
       width: 250px;
       height: 320px;
-    }
-  }
-
-  /* スマホ向けレイアウト調整 */
-  @media (max-width: 600px) {
-    body {
-      display: flex;               /* グリッドからフレックスに切り替え */
-      flex-direction: column;
-      justify-content: flex-start; /* 上寄せ */
-      align-items: center;
-      padding: 18px 0 24px;
-    }
-    .card {
-      width: 94vw;
-      padding: 22px 16px 20px;
-      border-radius: 22px;
-    }
-    .card-sub {
-      font-size: 11px;
-    }
-    .dress-wrapper {
-      width: 210px;
-      height: 270px;
-    }
-    .field label {
-      font-size: 11px;
-    }
-    .note {
-      font-size: 10px;
     }
   }
 </style>
@@ -621,7 +618,10 @@
   <div class="field">
     <label>色見本から選ぶ・おまかせ</label>
     <div class="row">
-      <input type="color" id="colorInput" class="color-input" value="#E6A3AF" />
+      <div class="color-chip-wrapper">
+        <input type="color" id="colorInput" class="color-input" value="#E6A3AF" />
+        <div id="colorChip" class="color-chip"></div>
+      </div>
       <button id="randomBtn" class="btn-ghost">✨ おまかせカラー</button>
     </div>
   </div>
@@ -633,7 +633,6 @@
   </div>
 </div>
 
-<!-- 確認モーダル -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
     <h3>投票内容の確認</h3>
@@ -648,6 +647,7 @@
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
+  /* ========= 色変換ユーティリティ ========= */
   function hexToRgb(hex){
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return m ? { r: parseInt(m[1],16), g: parseInt(m[2],16), b: parseInt(m[3],16) } : null;
@@ -702,11 +702,13 @@
 
   function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
 
+  /* ========= DOM参照 ========= */
   const dressWrapper = document.getElementById('dressWrapper');
   const dressObj     = document.getElementById('dressObj');
   const dressImg     = document.getElementById('dressImg');
 
   const colorInput   = document.getElementById('colorInput');
+  const colorChip    = document.getElementById('colorChip');
   const hueRange     = document.getElementById('hueRange');
   const satRange     = document.getElementById('satRange');
   const lightRange   = document.getElementById('lightRange');
@@ -726,6 +728,7 @@
   const cancelSendBtn= document.getElementById('cancelSendBtn');
   const finalSendBtn = document.getElementById('finalSendBtn');
 
+  /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   const MAX_NAME_LENGTH = 50;
 
@@ -753,6 +756,10 @@
   let currentColor = COLORS[0];
   let currentL = 0.7;
 
+  function setChipColor(hex){
+    if (colorChip) colorChip.style.background = hex;
+  }
+
   if (colorInput) {
     colorInput.value = currentColor;
     syncSlidersFromHex(currentColor);
@@ -761,6 +768,7 @@
   const params = new URLSearchParams(location.search);
   if (params.get('name')) nameInput.value = decodeURIComponent(params.get('name'));
 
+  /* ========= SVG 直接塗り替え用 ========= */
   let directParts = [];
   let baseAvgL = 0, baseAvgS = 0;
   let minOrigL = 0, maxOrigL = 1;
@@ -836,10 +844,11 @@
     dressImg.style.filter = 'none';
   }
 
+  /* ========= UI 更新系 ========= */
   function updateSliderUI(h, s, l) {
     if (typeof h !== 'number') h = parseFloat(hueRange.value) || 0;
     if (typeof s !== 'number') s = (parseFloat(satRange.value) || 0) / 100;
-    if (typeof l !== 'number') l = (parseFloat(lightRange.value) || 0) / 100;
+    if (typeof l !== 'number') l = (parseFloat(lightRange.value) || 50) / 100;
 
     const sPercent = clamp01(s) * 100;
     const lPercent = clamp01(l) * 100;
@@ -884,11 +893,13 @@
     applyColor(hex);
   }
 
+  /* ========= 色適用 ========= */
   function applyColor(colorHex){
     currentColor = colorHex;
     if (colorInput && document.activeElement !== colorInput) {
       colorInput.value = currentColor;
     }
+    setChipColor(colorHex);
 
     const rgb = hexToRgb(colorHex);
     if (!rgb) return;
@@ -898,7 +909,7 @@
     document.documentElement.style.setProperty('--accent', colorHex);
     document.documentElement.style.setProperty(
       '--accent-soft',
-      `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.35)`
+      `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`
     );
     if (colorHexLabel) {
       colorHexLabel.textContent = colorHex.toUpperCase();
@@ -982,6 +993,7 @@
     }
   }
 
+  /* ========= イベント ========= */
   if (colorInput) {
     colorInput.addEventListener('input', e => {
       const val = e.target.value;
@@ -994,7 +1006,7 @@
   satRange.addEventListener('input', updateFromSliders);
   lightRange.addEventListener('input', updateFromSliders);
 
-  // 明るめの色のみから選ぶおまかせカラー
+  // 明るめのおまかせカラー
   randomBtn.addEventListener('click', () => {
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
@@ -1017,6 +1029,7 @@
     }
   });
 
+  /* ========= rate limit ========= */
   function checkRateLimit(){
     const now = Date.now();
     let arr;
