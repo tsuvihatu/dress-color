@@ -19,6 +19,11 @@
     --text-sub: #7e5b60;
   }
 
+  /* 全体設定：ダブルタップ拡大防止 */
+  html {
+    touch-action: manipulation;
+  }
+
   * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -36,11 +41,6 @@
       #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
     overscroll-behavior-y: none;
-  }
-
-  /* 連打拡大防止に .btn-retry を追加 */
-  button, input, .stock-dot, .color-chip-wrapper, .stock-area, .tap-game-btn, .btn-retry {
-    touch-action: manipulation;
   }
 
   .card {
@@ -190,10 +190,9 @@
     background: radial-gradient(circle at center, #2b1f22 0%, #0f080a 100%);
     z-index: 20000;
     display: none; flex-direction: column; justify-content: center; align-items: center;
-    /* スクロール設定の修正 */
+    padding: 20px; /* ← 40pxから減らして余白を調整 */
     overflow-y: auto; 
-    -webkit-overflow-scrolling: touch; /* iOSでのスムーズスクロール */
-    padding: 40px 20px; /* 上下に余裕を持たせる */
+    -webkit-overflow-scrolling: touch;
   }
   .game-screen.active, .ranking-screen.active { display: flex; }
 
@@ -233,7 +232,6 @@
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     color: #fff; font-size: 24px; font-weight: bold; letter-spacing: 0.1em;
-    /* 影の範囲を狭く調整 */
     box-shadow: 
       0 0 15px rgba(230, 163, 175, 0.25),
       inset 0 0 12px rgba(255,255,255,0.1);
@@ -242,13 +240,12 @@
     position: relative; overflow: visible;
     -webkit-tap-highlight-color: transparent;
     font-family: "Yu Mincho", serif;
-    flex-shrink: 0; /* 縮み防止 */
+    flex-shrink: 0;
   }
   
   .tap-game-btn:active { 
     transform: scale(0.96); 
     background: rgba(255, 255, 255, 0.15);
-    /* 押した時も少し控えめに */
     box-shadow: 0 0 30px rgba(230, 163, 175, 0.5), inset 0 0 20px rgba(255,255,255,0.3);
   }
   .tap-game-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
@@ -315,11 +312,11 @@
     width: 240px; max-width: 240px; box-sizing: border-box;
   }
 
-  /* 再挑戦ボタンの間隔を広げる */
+  /* 再挑戦ボタン */
   .btn-retry {
     background: transparent; color: rgba(255,255,255,0.8);
     border: 1px solid rgba(255,255,255,0.4);
-    margin-top: 24px; /* 間隔を広げた */
+    margin-top: 24px;
     font-size: 12px; padding: 11px 14px;
     width: 240px; max-width: 240px; box-sizing: border-box;
   }
@@ -445,7 +442,6 @@
   <div class="modal">
     <h3>隠しモード発見！</h3>
     <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
-      おめでとうございます！<br>
       連打ミニゲームに挑戦しますか？<br>
       3秒間で何回タップできるか競争！<br>
       <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
@@ -1158,6 +1154,8 @@
     meDiv.style.marginBottom = "10px";
     meDiv.style.fontWeight = "bold";
     meDiv.style.color = "var(--gold-main)";
+    // 中央揃えに修正
+    meDiv.style.textAlign = "center"; 
     meDiv.textContent = `あなたのスコア: ${myScore}回`;
     rankingListContainer.appendChild(meDiv);
 
