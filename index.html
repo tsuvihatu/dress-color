@@ -1103,14 +1103,35 @@
   });
 
   function addStock(hex) {
-    // プレースホルダーがあれば消す
+    // 1. プレースホルダー（文字）があれば先に消す
     const placeholder = stockArea.querySelector('.stock-placeholder');
     if (placeholder) placeholder.remove();
 
-    // 5個以上なら古いものを消す
-    if (stockArea.childElementCount >= 5) {
-      stockArea.removeChild(stockArea.firstChild);
+    // 2. 現在のストック数を確認し、4個になるまで古いものから消す
+    // (これから1個足すので、結果的に5個になります)
+    // ">= 5" にすることで、万が一7個あっても3個消して正常な状態に戻します
+    while (stockArea.childElementCount >= 5) {
+      stockArea.removeChild(stockArea.firstElementChild);
     }
+    
+    // 3. 新しいドットを作成
+    const dot = document.createElement('div');
+    dot.className = 'stock-dot';
+    dot.style.background = hex;
+    
+    // タップでその色を呼び出す処理
+    dot.addEventListener('click', () => {
+      triggerHaptic('light'); // 軽い振動
+      applyColor(hex);
+      syncSlidersFromHex(hex);
+      // ポヨンと跳ねるアニメーション
+      dot.style.transform = 'scale(1.2)';
+      setTimeout(()=> dot.style.transform = '', 200);
+    });
+
+    // 4. 追加
+    stockArea.appendChild(dot);
+  }
     
     const dot = document.createElement('div');
     dot.className = 'stock-dot';
