@@ -798,8 +798,8 @@
 
   const submitBtn    = document.getElementById('submitBtn');
   const randomBtn    = document.getElementById('randomBtn');
-  const keepBtn      = document.getElementById('keepBtn'); // 追加
-  const stockArea    = document.getElementById('stockArea'); // 追加
+  const keepBtn      = document.getElementById('keepBtn');
+  const stockArea    = document.getElementById('stockArea');
   const nameInput    = document.getElementById('nameInput');
   const toast        = document.getElementById('toast');
 
@@ -1086,7 +1086,62 @@
   satRange.addEventListener('input', updateFromSliders);
   lightRange.addEventListener('input', updateFromSliders);
 
-  randomBtn.addEventListener('click', () => {
+  /* --- SHAKE FUNCTIONALITY START --- */
+  // シェイク検知用変数
+  let shakeLastX = null, shakeLastY = null, shakeLastZ = null;
+  let lastShakeTime = 0;
+  let isShakeSensorEnabled = false;
+  const SHAKE_THRESHOLD = 20; // 感度調整用
+  const SHAKE_COOLDOWN = 1000; // 連続発火防止(1秒)
+
+  // シェイクを検知してランダムカラーを実行する関数
+  function handleMotion(event) {
+    const current = event.accelerationIncludingGravity;
+    if (!current) return;
+
+    const now = Date.now();
+    if ((now - lastShakeTime) < SHAKE_COOLDOWN) return;
+
+    if (shakeLastX !== null) {
+      const deltaX = Math.abs(shakeLastX - current.x);
+      const deltaY = Math.abs(shakeLastY - current.y);
+      const deltaZ = Math.abs(shakeLastZ - current.z);
+
+      if ((deltaX + deltaY + deltaZ) > SHAKE_THRESHOLD) {
+          lastShakeTime = now;
+          triggerHaptic('heavy'); // 振動でフィードバック
+          
+          // ランダムロジック実行
+          executeRandomColor();
+      }
+    }
+
+    shakeLastX = current.x;
+    shakeLastY = current.y;
+    shakeLastZ = current.z;
+  }
+
+  // iOS 13+向けのパーミッション要求を含むセンサー初期化
+  function initShakeSensor() {
+    if (isShakeSensorEnabled) return;
+
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            window.addEventListener('devicemotion', handleMotion, true);
+            isShakeSensorEnabled = true;
+          }
+        })
+        .catch(console.error);
+    } else {
+      // 非iOS 13+ または Android
+      window.addEventListener('devicemotion', handleMotion, true);
+      isShakeSensorEnabled = true;
+    }
+  }
+
+  function executeRandomColor() {
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
     const l = 0.6 + Math.random() * 0.3;
@@ -1094,42 +1149,41 @@
     if (colorInput) colorInput.value = hex;
     syncSlidersFromHex(hex);
     applyColor(hex);
+  }
+  /* --- SHAKE FUNCTIONALITY END --- */
+
+  randomBtn.addEventListener('click', () => {
+    // 初回クリック時にセンサー許可を求める
+    initShakeSensor();
+    // 通常のランダム実行
+    executeRandomColor();
   });
 
-  // KEEPボタンの処理（新規追加）
   keepBtn.addEventListener('click', () => {
     triggerHaptic('medium');
     addStock(currentColor);
   });
 
   function addStock(hex) {
-    // 1. プレースホルダー（文字）があれば先に消す
     const placeholder = stockArea.querySelector('.stock-placeholder');
     if (placeholder) placeholder.remove();
 
-    // 2. 現在のストック数を確認し、4個になるまで古いものから消す
-    // (これから1個足すので、結果的に5個になります)
-    // ">= 5" にすることで、万が一7個あっても3個消して正常な状態に戻します
     while (stockArea.childElementCount >= 5) {
       stockArea.removeChild(stockArea.firstElementChild);
     }
     
-    // 3. 新しいドットを作成
     const dot = document.createElement('div');
     dot.className = 'stock-dot';
     dot.style.background = hex;
     
-    // タップでその色を呼び出す処理
     dot.addEventListener('click', () => {
-      triggerHaptic('light'); // 軽い振動
+      triggerHaptic('light');
       applyColor(hex);
       syncSlidersFromHex(hex);
-      // ポヨンと跳ねるアニメーション
       dot.style.transform = 'scale(1.2)';
       setTimeout(()=> dot.style.transform = '', 200);
     });
 
-    // 4. 追加
     stockArea.appendChild(dot);
   }
 
@@ -1354,7 +1408,6 @@ submitBtn.addEventListener('click', () => {
   });
 
   /* ========= Haptics (触覚フィードバック) ========= */
-  // 機能: Android端末などで、スライダー操作やボタン押下時に振動させる
   function triggerHaptic(style = 'light') {
     if (!navigator.vibrate) return;
 
@@ -1366,7 +1419,7 @@ submitBtn.addEventListener('click', () => {
         navigator.vibrate(15); // ボタンを押した感
         break;
       case 'heavy':
-        navigator.vibrate([30, 50, 30]); // 強調
+        navigator.vibrate([30, 50, 30]); // 強調（シェイク時など）
         break;
     }
   }
@@ -1377,7 +1430,6 @@ submitBtn.addEventListener('click', () => {
 
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value);
-      // 10刻みで振動（例: 10, 20, 30...）
       if (currentVal % 10 === 0 && currentVal !== lastVal) {
         triggerHaptic('light');
       }
@@ -1386,7 +1438,7 @@ submitBtn.addEventListener('click', () => {
   });
 
   // ボタン類の「コツッ」感
-  const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn']; // keepBtn追加
+  const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn'];
   clickableIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
