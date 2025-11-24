@@ -30,7 +30,6 @@
     place-items: center;
     font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
     color: #5a3b40;
-    /* 修正: 背景画像のグラデーションを薄く(0.4 -> 0.1)してfile_back.jpgを見えやすく */
     background:
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       url('file_back.jpg') center/cover no-repeat fixed;
@@ -40,7 +39,6 @@
   .card {
     position: relative;
     width: min(var(--card-w), 94vw);
-    /* 修正: カード自体の透過度を下げ(0.45 -> 0.75)、文字を読みやすく */
     background: rgba(255,255,255,0.75);
     border-radius: 24px;
     padding: 26px 22px 24px;
@@ -56,16 +54,14 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    /* 左上を白っぽく、右下を選択色(--accent-soft)にして変化を強調 */
     background:
       radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8), transparent 60%),
       radial-gradient(circle at 90% 110%, var(--accent-soft), transparent 70%);
-    opacity: 0.6; /* 少し強調 */
+    opacity: 0.6; 
     pointer-events: none;
     z-index: -1;
   }
 
-  /* 内側の枠で二重ライン */
   .card::after {
     content: "";
     position: absolute;
@@ -81,7 +77,6 @@
     margin-bottom: 8px;
   }
 
-  /* 見出し上の横棒 */
   .card-header::before {
     content: "";
     display: block;
@@ -151,32 +146,6 @@
     z-index: 1;
   }
 
-  .color-meta {
-    display: flex;
-    justify-content: center;
-    align-items: baseline;
-    gap: 8px;
-    margin-top: 6px;
-    font-size: 11px;
-  }
-
-  .color-meta-label {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(122,78,84,0.7);
-  }
-
-  .color-meta-value {
-    font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(210,145,155,0.6);
-    background: rgba(255,245,247,0.95);
-    color: #7a4e54;
-  }
-
   .field {
     margin-bottom: 14px;
   }
@@ -191,15 +160,15 @@
 
  .field input[type="text"] {
     width: 100%;
-    padding: 10px 4px;        /* 内部の余白調整 */
-    border-radius: 0;         /* 角丸をなくす */
-    border: none;             /* 枠線を消す */
-    border-bottom: 1px solid rgba(122,78,84,0.5); /* 下線だけ引く */
-    background: transparent;  /* 背景を透明に */
+    padding: 10px 4px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(122,78,84,0.5);
+    background: transparent;
     color: #5a3b40;
-    font-size: 16px;          /* 少し文字を大きくして書きやすく */
+    font-size: 16px;
     outline: none;
-    font-family: "Yu Mincho", serif; /* 署名っぽく明朝体に */
+    font-family: "Yu Mincho", serif;
     transition: border-bottom-color 0.3s ease;
     text-align: center;
   }
@@ -207,24 +176,14 @@
   .field input[type="text"]::placeholder {
     color: rgba(170,130,135,0.6);
     font-size: 13px;
-    font-family: sans-serif; /* プレースホルダーは読みやすくゴシック体で */
+    font-family: sans-serif;
   }
 
   .field input[type="text"]:focus {
-    border-bottom: 2px solid var(--gold-main); /* フォーカス時にゴールドの線に */
-    box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3); /* ほんのり下に光を落とす */
+    border-bottom: 2px solid var(--gold-main);
+    box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3);
   }
 
-  .field input[type="text"]::placeholder {
-    color: rgba(170,130,135,0.7);
-  }
-
-  .field input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(230,163,175,0.35);
-  }
-
-  /* スライダー */
   .slider-group {
     margin-bottom: 4px;
     background: rgba(255,242,245,0.96);
@@ -235,7 +194,7 @@
 
   .slider-row {
     display: grid;
-    grid-template-columns: 56px 1fr; /* ラベル + バーのみ */
+    grid-template-columns: 56px 1fr;
     column-gap: 8px;
     align-items: center;
     margin-bottom: 11px;
@@ -253,7 +212,6 @@
     white-space: nowrap;
   }
 
-  /* 右側の数値は表示しない */
   .slider-value {
     display: none;
   }
@@ -334,7 +292,6 @@
     align-items: center;
   }
 
-  /* 色見本タブ（カスタム） */
   .color-chip-wrapper {
     position: relative;
     width: 100%;
@@ -346,7 +303,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;          /* 実際の input は透明 */
+    opacity: 0;
     cursor: pointer;
     z-index: 1;
   }
@@ -375,10 +332,9 @@
     cursor: pointer;
     outline: none;
     transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.2s ease, opacity 0.2s ease;
-    font-family: "Yu Mincho", "YuMincho", serif; /* 明朝体に変更 */
+    font-family: "Yu Mincho", "YuMincho", serif;
   }
 
-  /* ゴールド系単色ボタン（選択色に依存しない） */
   .btn-main {
     margin-top: 10px;
     background: #cda156;
@@ -429,7 +385,6 @@
     text-align: center;
   }
 
-  /* モーダル */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -448,31 +403,26 @@
   }
 
   .modal {
-    /* 紙の質感 */
     background: #fffcfb; 
     width: 88%;
     max-width: 340px;
     padding: 40px 28px 32px; 
     border-radius: 24px;
     text-align: center;
-    
-      
     transform: scale(0.94);
     transition: transform 0.2s ease;
     position: relative;
   }
 
-  /* ★修正: 内側にクッキリとした金色の枠線を作成 */
   .modal::after {
     content: "";
     position: absolute;
-    inset: 12px; /* 外側から少し内側へ */
-    border: 2px solid var(--gold-main); /* 金色の実線 */
-    border-radius: 16px; /* 枠線も丸く */
+    inset: 12px;
+    border: 2px solid var(--gold-main);
+    border-radius: 16px;
     pointer-events: none;
   }
 
-  /* 上部の飾り文字 */
   .modal::before {
     content: "CONFIRMATION";
     position: absolute;
@@ -503,24 +453,11 @@
     padding-bottom: 8px;
   }
 
-  /* プレビューエリア */
   .modal-preview-box {
     margin: 0 auto 16px;
-    width: 230px; /* ドレス画像を大きく */
+    width: 230px;
     position: relative;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
-  }
-
-  .modal-color-code {
-    font-family: "JetBrains Mono", monospace;
-    font-size: 11px;
-    color: var(--text-sub);
-    margin-bottom: 24px;
-    display: inline-block;
-    padding: 3px 10px;
-    background: #f7f0f0;
-    border-radius: 99px;
-    letter-spacing: 0.05em;
   }
 
   .modal-guest-info {
@@ -596,7 +533,6 @@
     transform: translateY(1px);
   }
 
-
   .toast {
     position: fixed;
     left: 50%;
@@ -620,38 +556,24 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Footer Style (新規追加) */
-  .footer {
-    margin-top: 16px;
-    font-size: 10px;
-    color: rgba(90, 59, 64, 0.5);
-    text-align: center;
-    letter-spacing: 0.05em;
-  }
-
-  /* スマホ向け調整 (微調整版) */
   @media (max-width: 600px) {
     body {
       display: flex;
       flex-direction: column;
-      /* 修正: 上部に余裕を持たせ、背景が見えるように */
       justify-content: center;
       align-items: center;
       padding: 30px 0 24px;
     }
     .card {
       width: 94vw;
-      /* 修正: カード内側の余白を増やして圧迫感を軽減 */
       padding: 24px 20px 22px;
       border-radius: 22px;
     }
     .card::after {
-      /* 修正: スマホの小さいカードに合わせて内枠を調整 */
       inset: 8px;
       border-radius: 16px;
     }
     .dress-wrapper {
-      /* 修正: ドレス表示サイズを微増 */
       width: 260px;
       height: 320px;
     }
@@ -1111,7 +1033,6 @@
   satRange.addEventListener('input', updateFromSliders);
   lightRange.addEventListener('input', updateFromSliders);
 
-  // 明るめのおまかせカラー
   randomBtn.addEventListener('click', () => {
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
@@ -1257,18 +1178,14 @@ submitBtn.addEventListener('click', () => {
       return;
     }
 
-    // 制御文字などを除去
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
 
-    // モーダルの中身をリセット
     modalBody.innerHTML = '';
 
-    // 1. ドレスのプレビュー表示（画像生成）
     const previewContainer = document.createElement('div');
     previewContainer.className = 'modal-preview-box';
 
     if (dressWrapper.dataset.mode === 'direct') {
-      // SVGモードの場合
       const svgDoc = dressObj.contentDocument;
       const originalSvg = svgDoc && svgDoc.querySelector('svg');
       if (originalSvg) {
@@ -1278,12 +1195,10 @@ submitBtn.addEventListener('click', () => {
         cloneSvg.style.width = '100%';
         cloneSvg.style.height = 'auto';
         cloneSvg.style.display = 'block';
-        // 影をつけて立体感を出す
         cloneSvg.style.filter = 'drop-shadow(0 10px 10px rgba(0,0,0,0.15))';
         previewContainer.appendChild(cloneSvg);
       }
     } else {
-      // 画像フォールバックモードの場合
       const imgClone = dressImg.cloneNode(true);
       imgClone.style.display = 'block';
       imgClone.style.width = '100%';
@@ -1293,32 +1208,26 @@ submitBtn.addEventListener('click', () => {
     }
     modalBody.appendChild(previewContainer);
 
-
-    // 3. お名前表示エリア（ここをオシャレに！）
     const guestInfoDiv = document.createElement('div');
     guestInfoDiv.className = 'modal-guest-info';
 
-    // 小さなラベル "GUEST"
     const labelSpan = document.createElement('span');
     labelSpan.className = 'modal-guest-label';
     labelSpan.textContent = 'GUEST';
     
-    // 名前本体 "〇〇 〇〇"
     const nameDiv = document.createElement('div');
     nameDiv.className = 'modal-guest-name';
-    nameDiv.textContent = name + ' 様'; // 「様」を自動でつける
+    nameDiv.textContent = name + ' 様';
 
     guestInfoDiv.appendChild(labelSpan);
     guestInfoDiv.appendChild(nameDiv);
     modalBody.appendChild(guestInfoDiv);
 
-    // 4. 確認メッセージ
     const msgP = document.createElement('p');
     msgP.className = 'modal-msg';
     msgP.textContent = 'この内容で投票してよろしいですか？';
     modalBody.appendChild(msgP);
 
-    // モーダルを開く
     confirmModal.classList.add('open');
   });
 
@@ -1354,8 +1263,53 @@ submitBtn.addEventListener('click', () => {
     showToast('投票を送信しました');
   });
 
-  window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
+  /* ========= Haptics (触覚フィードバック) ========= */
+  // 機能: Android端末などで、スライダー操作やボタン押下時に振動させる
+  function triggerHaptic(style = 'light') {
+    if (!navigator.vibrate) return;
 
+    switch (style) {
+      case 'light':
+        navigator.vibrate(5);  // 極短。スライダーのカチカチ感
+        break;
+      case 'medium':
+        navigator.vibrate(15); // ボタンを押した感
+        break;
+      case 'heavy':
+        navigator.vibrate([30, 50, 30]); // 強調
+        break;
+    }
+  }
+
+  // スライダーの「カリカリ」感
+  [hueRange, satRange, lightRange].forEach(range => {
+    let lastVal = parseInt(range.value);
+
+    range.addEventListener('input', (e) => {
+      const currentVal = parseInt(e.target.value);
+      // 10刻みで振動（例: 10, 20, 30...）
+      if (currentVal % 10 === 0 && currentVal !== lastVal) {
+        triggerHaptic('light');
+      }
+      lastVal = currentVal;
+    });
+  });
+
+  // ボタン類の「コツッ」感
+  const clickableIds = ['submitBtn', 'randomBtn', 'cancelSendBtn', 'finalSendBtn'];
+  clickableIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', () => {
+        triggerHaptic('medium');
+      });
+    }
+  });
+  if (colorInput) {
+    colorInput.addEventListener('click', () => triggerHaptic('medium'));
+  }
+
+  window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
   applyColor(currentColor);
 </script>
 </body>
