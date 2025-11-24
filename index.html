@@ -449,7 +449,7 @@
 
   /* === KEEPの文字サイズ調整 === */
   .stock-placeholder {
-    font-size: 12px; /* 10px -> 12px に変更 */
+    font-size: 12px; /* 12px に設定 */
     color: rgba(122,78,84,0.5);
     letter-spacing: 0.1em;
   }
@@ -504,7 +504,7 @@
   .modal::before {
     content: "CONFIRMATION";
     position: absolute;
-    top: 24px; /* 16px -> 24px に変更してタイトルに近づけた */
+    top: 24px; 
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
@@ -550,7 +550,8 @@
     color: var(--gold-main);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    margin-bottom: 6px;
+    /* === ここでGUESTとお名前の距離を近づけました === */
+    margin-bottom: 2px; /* 6px -> 2px */
   }
 
   .modal-guest-name {
