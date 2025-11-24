@@ -38,7 +38,8 @@
     overscroll-behavior-y: none;
   }
 
-  button, input, .stock-dot, .color-chip-wrapper, .stock-area, .tap-game-btn {
+  /* 連打拡大防止に .btn-retry を追加 */
+  button, input, .stock-dot, .color-chip-wrapper, .stock-area, .tap-game-btn, .btn-retry {
     touch-action: manipulation;
   }
 
@@ -189,8 +190,10 @@
     background: radial-gradient(circle at center, #2b1f22 0%, #0f080a 100%);
     z-index: 20000;
     display: none; flex-direction: column; justify-content: center; align-items: center;
-    padding: 20px; text-align: center;
-    overflow: hidden;
+    /* スクロール設定の修正 */
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch; /* iOSでのスムーズスクロール */
+    padding: 40px 20px; /* 上下に余裕を持たせる */
   }
   .game-screen.active, .ranking-screen.active { display: flex; }
 
@@ -239,6 +242,7 @@
     position: relative; overflow: visible;
     -webkit-tap-highlight-color: transparent;
     font-family: "Yu Mincho", serif;
+    flex-shrink: 0; /* 縮み防止 */
   }
   
   .tap-game-btn:active { 
@@ -252,6 +256,7 @@
   /* 飾り用のエネルギーリング（結果画面用） */
   .decoration-wrapper {
     position: relative; width: 240px; height: 240px; margin: 0 auto 16px;
+    flex-shrink: 0;
   }
   .energy-ring-deco {
     position: absolute; inset: 0; border-radius: 50%;
@@ -439,10 +444,11 @@
 <div class="modal-overlay" id="gameInviteModal">
   <div class="modal">
     <h3>隠しモード発見！</h3>
-    <p class="modal-msg" style="margin-top:16px;">
+    <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
       おめでとうございます！<br>
       連打ミニゲームに挑戦しますか？<br>
-      （3秒間で何回タップできるか競争！）
+      3秒間で何回タップできるか競争！<br>
+      <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
     <div class="modal-actions">
       <button class="modal-btn btn-cancel" id="gameDeclineBtn">やらない</button>
