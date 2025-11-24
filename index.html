@@ -237,32 +237,33 @@
     border-radius: 999px;
   }
 
-  /* === つまみのデザイン（サイズを28pxにアップ） === */
+  /* === つまみのデザイン（サイズを25pxに設定） === */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 28px;  /* 22px -> 28px */
-    height: 28px; /* 22px -> 28px */
+    width: 25px;  /* 25px */
+    height: 25px; /* 25px */
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
-    /* 二重丸の線を少し太く調整 */
+    
+    /* 二重丸のバランス調整 */
     box-shadow:
       0 1px 4px rgba(160,110,120,0.45),
-      inset 0 0 0 2px #ffffff,               /* 白い隙間 1.5px -> 2px */
-      inset 0 0 0 4.5px rgba(210,145,155,0.5); /* 内側のリング 3px -> 4.5px */
+      inset 0 0 0 2px #ffffff,
+      inset 0 0 0 4px rgba(210,145,155,0.5);
     
-    /* トラック10px、つまみ28pxなので、(10-28)/2 = -9px */
-    transform: translateY(-9px);
+    /* トラック10px、つまみ25pxなので、(10-25)/2 = -7.5px */
+    transform: translateY(-7.5px);
     transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
 
   input[type="range"]:active::-webkit-slider-thumb {
-    transform: translateY(-9px) scale(1.1);
+    transform: translateY(-7.5px) scale(1.1);
     border-color: var(--gold-main);
     box-shadow:
       0 2px 8px rgba(160,110,120,0.6),
       inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4.5px var(--gold-main);
+      inset 0 0 0 4px var(--gold-main);
   }
 
   /* Firefox用 */
@@ -272,15 +273,15 @@
   }
 
   input[type="range"]::-moz-range-thumb {
-    width: 28px;  /* 22px -> 28px */
-    height: 28px; /* 22px -> 28px */
+    width: 25px;  /* 25px */
+    height: 25px; /* 25px */
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
     box-shadow:
       0 1px 4px rgba(160,110,120,0.45),
       inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4.5px rgba(210,145,155,0.5);
+      inset 0 0 0 4px rgba(210,145,155,0.5);
   }
   
   input[type="range"]:active::-moz-range-thumb {
@@ -288,7 +289,7 @@
     box-shadow:
       0 2px 8px rgba(160,110,120,0.6),
       inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4.5px var(--gold-main);
+      inset 0 0 0 4px var(--gold-main);
   }
   /* === スライダーデザイン終了 === */
 
