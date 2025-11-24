@@ -17,10 +17,6 @@
     --gold-main: #cda156;
     --text-main: #5a3b40;
     --text-sub: #7e5b60;
-
-    /* ▼追加: 傾きに合わせて変化させる変数の初期値 */
-    --grad-x: 90%;
-    --grad-y: 110%;
   }
 
   * {
@@ -36,7 +32,7 @@
     color: #5a3b40;
     background:
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
-      url('file_back.jpg') center/cover no-repeat fixed;
+      #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
   }
 
@@ -53,7 +49,6 @@
     backdrop-filter: blur(8px);
   }
 
-  /* ▼変更: グラデーションの位置を変数化し、滑らかに動くように設定 */
   .card::before {
     content: "";
     position: absolute;
@@ -61,12 +56,10 @@
     border-radius: inherit;
     background:
       radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8), transparent 60%),
-      radial-gradient(circle at var(--grad-x) var(--grad-y), var(--accent-soft), transparent 70%);
+      radial-gradient(circle at 90% 110%, var(--accent-soft), transparent 70%);
     opacity: 0.6; 
     pointer-events: none;
     z-index: -1;
-    transition: background 0.1s ease-out;
-    will-change: background;
   }
 
   .card::after {
@@ -194,17 +187,18 @@
   .slider-group {
     margin-bottom: 4px;
     background: rgba(255,242,245,0.96);
-    padding: 10px 10px 4px;
-    border-radius: 14px;
+    padding: 14px 14px 8px;
+    border-radius: 16px;
     border: 1px solid rgba(230,163,175,0.5);
+    box-shadow: inset 0 1px 4px rgba(160,110,120,0.05);
   }
 
   .slider-row {
     display: grid;
     grid-template-columns: 56px 1fr;
-    column-gap: 8px;
+    column-gap: 12px;
     align-items: center;
-    margin-bottom: 11px;
+    margin-bottom: 16px;
   }
 
   .slider-row:last-child {
@@ -212,11 +206,12 @@
   }
 
   .slider-label {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     color: rgba(122,78,84,0.9);
     width: 56px;
     white-space: nowrap;
+    font-weight: bold;
   }
 
   .slider-value {
@@ -225,7 +220,7 @@
 
   input[type="range"] {
     width: 100%;
-    height: 8px;
+    height: 12px;
     border-radius: 999px;
     -webkit-appearance: none;
     appearance: none;
@@ -233,49 +228,62 @@
     cursor: pointer;
     background: rgba(255,255,255,0.7);
     border: 1px solid rgba(222,180,184,0.7);
+    touch-action: none;
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
-    height: 8px;
+    height: 12px;
     border-radius: 999px;
   }
 
+  /* === つまみのデザイン調整（二重丸に変更） === */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: #ffffff;
-    border: 1px solid rgba(210,145,155,0.9);
+    /* 外側の枠線 */
+    border: 1px solid rgba(210,145,155,0.6);
+    /* box-shadowで内側の二重線を表現 */
     box-shadow:
-      0 0 0 3px rgba(255,255,255,0.9),
-      0 3px 6px rgba(160,110,120,0.4);
-    transform: translateY(-5px);
-    transition: transform 0.1s ease, box-shadow 0.15s ease;
+      0 1px 4px rgba(160,110,120,0.4),       /* 外側の影 */
+      inset 0 0 0 2px #ffffff,               /* 白い隙間 */
+      inset 0 0 0 3.5px rgba(210,145,155,0.5); /* 内側の色付きリング */
+    transform: translateY(-8px);
+    transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
 
   input[type="range"]:active::-webkit-slider-thumb {
-    transform: translateY(-5px) scale(1.05);
+    transform: translateY(-8px) scale(1.1);
+    /* アクティブ時は色を濃くする */
+    border-color: var(--gold-main);
     box-shadow:
-      0 0 0 4px rgba(255,255,255,1),
-      0 4px 8px rgba(160,110,120,0.6);
+      0 2px 8px rgba(160,110,120,0.6),
+      inset 0 0 0 2px #ffffff,
+      inset 0 0 0 3.5px var(--gold-main);
   }
 
-  input[type="range"]::-moz-range-track {
-    height: 8px;
-    border-radius: 999px;
-  }
-
+  /* Firefox用も同様に */
   input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: #ffffff;
-    border: 1px solid rgba(210,145,155,0.9);
+    border: 1px solid rgba(210,145,155,0.6);
     box-shadow:
-      0 0 0 3px rgba(255,255,255,0.9),
-      0 3px 6px rgba(160,110,120,0.4);
+      0 1px 4px rgba(160,110,120,0.4),
+      inset 0 0 0 2px #ffffff,
+      inset 0 0 0 3.5px rgba(210,145,155,0.5);
   }
+  input[type="range"]:active::-moz-range-thumb {
+      border-color: var(--gold-main);
+      box-shadow:
+        0 2px 8px rgba(160,110,120,0.6),
+        inset 0 0 0 2px #ffffff,
+        inset 0 0 0 3.5px var(--gold-main);
+  }
+  /* === つまみのデザイン調整終了 === */
 
   #hueRange {
     background: linear-gradient(to right,
@@ -283,7 +291,7 @@
       hsl(180,100%,70%), hsl(240,100%,70%), hsl(300,100%,70%), hsl(360,100%,70%)
     );
   }
-
+  
   #satRange {
     background: linear-gradient(to right, #e0d5d6, #ff7f7f);
   }
@@ -299,7 +307,6 @@
     align-items: center;
   }
 
-  /* 2つのボタンを横並びにするためのラッパー */
   .btn-group {
     display: flex;
     gap: 6px;
@@ -378,8 +385,8 @@
     background: rgba(255,255,255,0.85);
     color: #7a4e54;
     border: 1px solid rgba(210,145,155,0.8);
-    font-size: 11px; /* 少し小さくして2つ並べやすく */
-    padding: 0;      /* パディングを減らす */
+    font-size: 11px;
+    padding: 0;
   }
 
   .btn-ghost:hover {
@@ -391,21 +398,20 @@
     transform: translateY(1px);
   }
 
-  /* KEEPボタン専用スタイル */
   #keepBtn {
     border-color: rgba(205, 161, 86, 0.6);
     color: #8c6a28;
     background: rgba(255, 252, 240, 0.7);
   }
 
-  /* ストックエリアのスタイル */
   .stock-area {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: 12px;
     height: 36px;
     align-items: center;
+    position: relative;
   }
 
   .stock-dot {
@@ -421,6 +427,16 @@
   
   .stock-dot:active {
     transform: scale(0.9);
+  }
+
+  .pop-anim {
+    animation: popBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes popBounce {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
   }
 
   .stock-placeholder {
@@ -805,8 +821,8 @@
 
   const submitBtn    = document.getElementById('submitBtn');
   const randomBtn    = document.getElementById('randomBtn');
-  const keepBtn      = document.getElementById('keepBtn'); // 追加
-  const stockArea    = document.getElementById('stockArea'); // 追加
+  const keepBtn      = document.getElementById('keepBtn'); 
+  const stockArea    = document.getElementById('stockArea');
   const nameInput    = document.getElementById('nameInput');
   const toast        = document.getElementById('toast');
 
@@ -1103,41 +1119,89 @@
     applyColor(hex);
   });
 
-  // KEEPボタンの処理（新規追加）
+  // KEEPボタンの処理（アニメーション付き）
   keepBtn.addEventListener('click', () => {
     triggerHaptic('medium');
     addStock(currentColor);
   });
 
   function addStock(hex) {
-    // 1. プレースホルダー（文字）があれば先に消す
+    // 1. プレースホルダー消去
     const placeholder = stockArea.querySelector('.stock-placeholder');
     if (placeholder) placeholder.remove();
 
-    // 2. 現在のストック数を確認し、4個になるまで古いものから消す
-    // (これから1個足すので、結果的に5個になります)
-    // ">= 5" にすることで、万が一7個あっても3個消して正常な状態に戻します
+    // 2. 枠数制限（最大4個まで、5個目は古いものを削除）
     while (stockArea.childElementCount >= 5) {
       stockArea.removeChild(stockArea.firstElementChild);
     }
     
-    // 3. 新しいドットを作成
-    const dot = document.createElement('div');
-    dot.className = 'stock-dot';
-    dot.style.background = hex;
+    // 3. ドットを作成するが、最初は見えない状態にする
+    const newDot = document.createElement('div');
+    newDot.className = 'stock-dot';
+    newDot.style.background = hex;
+    newDot.style.opacity = '0'; // アニメーション完了まで隠す
     
     // タップでその色を呼び出す処理
-    dot.addEventListener('click', () => {
-      triggerHaptic('light'); // 軽い振動
+    newDot.addEventListener('click', () => {
+      triggerHaptic('light'); 
       applyColor(hex);
       syncSlidersFromHex(hex);
-      // ポヨンと跳ねるアニメーション
-      dot.style.transform = 'scale(1.2)';
-      setTimeout(()=> dot.style.transform = '', 200);
+      newDot.style.transform = 'scale(1.2)';
+      setTimeout(()=> newDot.style.transform = '', 200);
     });
 
-    // 4. 追加
-    stockArea.appendChild(dot);
+    stockArea.appendChild(newDot);
+
+    // === アニメーション処理の実行 ===
+    runFlyAnimation(colorChip, newDot, hex);
+  }
+
+  // 飛んでいくアニメーション関数
+  function runFlyAnimation(startElem, endElem, color) {
+    const startRect = startElem.getBoundingClientRect();
+    const endRect = endElem.getBoundingClientRect();
+
+    const flyer = document.createElement('div');
+    flyer.style.position = 'fixed';
+    flyer.style.width = '32px';
+    flyer.style.height = '32px';
+    flyer.style.borderRadius = '50%';
+    flyer.style.backgroundColor = color;
+    flyer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+    flyer.style.zIndex = '9999';
+    flyer.style.pointerEvents = 'none'; // クリックの邪魔をしない
+    
+    // 初期位置セット
+    flyer.style.left = startRect.left + 'px';
+    flyer.style.top = startRect.top + 'px';
+    
+    document.body.appendChild(flyer);
+
+    // アニメーション実行 (Web Animations API)
+    const anim = flyer.animate([
+      {
+        left: startRect.left + 'px',
+        top: startRect.top + 'px',
+        transform: 'scale(1)'
+      },
+      {
+        left: endRect.left + 'px',
+        top: endRect.top + 'px',
+        transform: 'scale(0.8)'
+      }
+    ], {
+      duration: 500,
+      easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' // ふわっと加速してスッと止まる感じ
+    });
+
+    anim.onfinish = () => {
+      flyer.remove();
+      // 元のドットを表示して、ポンッと弾ませる
+      endElem.style.opacity = '1';
+      endElem.classList.add('pop-anim');
+      // アニメーションクラスは再利用しないので放置でも良いが、一応
+      setTimeout(() => endElem.classList.remove('pop-anim'), 500);
+    };
   }
 
   dressObj.addEventListener('load', () => {
@@ -1361,30 +1425,27 @@ submitBtn.addEventListener('click', () => {
   });
 
   /* ========= Haptics (触覚フィードバック) ========= */
-  // 機能: Android端末などで、スライダー操作やボタン押下時に振動させる
   function triggerHaptic(style = 'light') {
     if (!navigator.vibrate) return;
 
     switch (style) {
       case 'light':
-        navigator.vibrate(5);  // 極短。スライダーのカチカチ感
+        navigator.vibrate(5); 
         break;
       case 'medium':
-        navigator.vibrate(15); // ボタンを押した感
+        navigator.vibrate(15); 
         break;
       case 'heavy':
-        navigator.vibrate([30, 50, 30]); // 強調
+        navigator.vibrate([30, 50, 30]); 
         break;
     }
   }
 
-  // スライダーの「カリカリ」感
   [hueRange, satRange, lightRange].forEach(range => {
     let lastVal = parseInt(range.value);
 
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value);
-      // 10刻みで振動（例: 10, 20, 30...）
       if (currentVal % 10 === 0 && currentVal !== lastVal) {
         triggerHaptic('light');
       }
@@ -1392,8 +1453,7 @@ submitBtn.addEventListener('click', () => {
     });
   });
 
-  // ボタン類の「コツッ」感
-  const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn']; // keepBtn追加
+  const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn'];
   clickableIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -1408,56 +1468,6 @@ submitBtn.addEventListener('click', () => {
 
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
   applyColor(currentColor);
-
-  /* ========= ▼追加: 傾き検知 (Motion Parallax) ========= */
-  function handleOrientation(event) {
-    const beta = event.beta || 0;  // 前後の傾き
-    const gamma = event.gamma || 0; // 左右の傾き
-    const sensitivity = 1.5; 
-
-    // 基本位置(右下)を中心に、傾き分だけずらす
-    let x = 90 + (gamma * sensitivity);
-    let y = 110 + ((beta - 45) * sensitivity); 
-
-    // 範囲制限
-    x = Math.min(Math.max(x, 20), 150);
-    y = Math.min(Math.max(y, 50), 180);
-
-    document.documentElement.style.setProperty('--grad-x', `${x}%`);
-    document.documentElement.style.setProperty('--grad-y', `${y}%`);
-  }
-
-  // iOS 13+ 用の許可リクエスト処理
-  let motionPermissionRequested = false;
-
-  function requestMotionPermission() {
-    if (motionPermissionRequested) return;
-    motionPermissionRequested = true;
-
-    if (
-      typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function'
-    ) {
-      DeviceOrientationEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            window.addEventListener('deviceorientation', handleOrientation);
-          }
-        })
-        .catch(console.error);
-    } else {
-      window.addEventListener('deviceorientation', handleOrientation);
-    }
-  }
-
-  // 最初の操作で許可を求める
-  document.body.addEventListener('click', requestMotionPermission, { once: true });
-  document.body.addEventListener('touchstart', requestMotionPermission, { once: true });
-
-  // Android等は即時監視
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') {
-     window.addEventListener('deviceorientation', handleOrientation);
-  }
 </script>
 </body>
 </html>
