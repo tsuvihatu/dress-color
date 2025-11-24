@@ -237,16 +237,16 @@
     border-radius: 999px;
   }
 
-  /* === つまみのデザイン（サイズを25pxに設定） === */
+  /* === つまみのデザイン（25px） === */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 25px;  /* 25px */
-    height: 25px; /* 25px */
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
     
-    /* 二重丸のバランス調整 */
+    /* 二重丸デザイン */
     box-shadow:
       0 1px 4px rgba(160,110,120,0.45),
       inset 0 0 0 2px #ffffff,
@@ -273,8 +273,8 @@
   }
 
   input[type="range"]::-moz-range-thumb {
-    width: 25px;  /* 25px */
-    height: 25px; /* 25px */
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
@@ -447,8 +447,9 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
+  /* === KEEPの文字サイズ調整 === */
   .stock-placeholder {
-    font-size: 10px;
+    font-size: 12px; /* 10px -> 12px に変更 */
     color: rgba(122,78,84,0.5);
     letter-spacing: 0.1em;
   }
@@ -499,10 +500,11 @@
     pointer-events: none;
   }
 
+  /* === モーダルの CONFIRMATION 位置調整 === */
   .modal::before {
     content: "CONFIRMATION";
     position: absolute;
-    top: 16px;
+    top: 24px; /* 16px -> 24px に変更してタイトルに近づけた */
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
