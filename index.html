@@ -21,6 +21,8 @@
 
   * {
     box-sizing: border-box;
+    /* タップ時のハイライトを無効化（連打時のチカチカ防止） */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -34,6 +36,19 @@
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
+    /* iOSでのバウンススクロール防止 */
+    overscroll-behavior-y: none;
+  }
+
+  /* === 連打拡大防止設定 === */
+  /* ここに含まれる要素はダブルタップしても拡大されません */
+  button, 
+  input, 
+  .stock-dot, 
+  .color-chip-wrapper, 
+  .stock-area, 
+  .tap-game-btn {
+    touch-action: manipulation;
   }
 
   .card {
@@ -47,6 +62,7 @@
       0 18px 40px rgba(204,150,153,0.35),
       0 0 0 1px rgba(255,255,255,0.8);
     backdrop-filter: blur(8px);
+    z-index: 1;
   }
 
   .card::before {
@@ -218,7 +234,7 @@
     display: none;
   }
 
-  /* === スライダー本体（10px） === */
+  /* === スライダー (10px線, 25pxつまみ) === */
   input[type="range"] {
     width: 100%;
     height: 10px;
@@ -237,7 +253,6 @@
     border-radius: 999px;
   }
 
-  /* === つまみのデザイン（25px） === */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 25px;
@@ -245,14 +260,10 @@
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
-    
-    /* 二重丸デザイン */
     box-shadow:
       0 1px 4px rgba(160,110,120,0.45),
       inset 0 0 0 2px #ffffff,
       inset 0 0 0 4px rgba(210,145,155,0.5);
-    
-    /* トラック10px、つまみ25pxなので、(10-25)/2 = -7.5px */
     transform: translateY(-7.5px);
     transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
@@ -266,7 +277,6 @@
       inset 0 0 0 4px var(--gold-main);
   }
 
-  /* Firefox用 */
   input[type="range"]::-moz-range-track {
     height: 10px;
     border-radius: 999px;
@@ -291,7 +301,6 @@
       inset 0 0 0 2px #ffffff,
       inset 0 0 0 4px var(--gold-main);
   }
-  /* === スライダーデザイン終了 === */
 
   #hueRange {
     background: linear-gradient(to right,
@@ -447,9 +456,8 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* === KEEPの文字サイズ調整 === */
   .stock-placeholder {
-    font-size: 12px; /* 12px に設定 */
+    font-size: 12px;
     color: rgba(122,78,84,0.5);
     letter-spacing: 0.1em;
   }
@@ -462,7 +470,8 @@
     text-align: center;
   }
 
-.modal-overlay {
+  /* === モーダル共通 === */
+  .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(60, 40, 45, 0.5);
@@ -500,11 +509,10 @@
     pointer-events: none;
   }
 
-  /* === モーダルの CONFIRMATION 位置調整 === */
   .modal::before {
     content: "CONFIRMATION";
     position: absolute;
-    top: 24px; 
+    top: 24px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
@@ -550,8 +558,7 @@
     color: var(--gold-main);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    /* === ここでGUESTとお名前の距離を近づけました === */
-    margin-bottom: 0px; /* 6px -> 2px */
+    margin-bottom: 2px;
   }
 
   .modal-guest-name {
@@ -635,39 +642,149 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  @media (max-width: 600px) {
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 30px 0 24px;
-    }
-    .card {
-      width: 94vw;
-      padding: 24px 20px 22px;
-      border-radius: 22px;
-    }
-    .card::after {
-      inset: 8px;
-      border-radius: 16px;
-    }
-    .dress-wrapper {
-      width: 260px;
-      height: 320px;
-    }
+  /* === ゲーム・ランキング画面用スタイル === */
+  .game-screen, .ranking-screen {
+    position: fixed;
+    inset: 0;
+    background: #fdfcf8;
+    z-index: 20000;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  .game-screen.active, .ranking-screen.active {
+    display: flex;
   }
 
-  @media (min-width: 768px) {
-    .card {
-      width: min(440px, 420px);
-      padding: 26px 26px 24px;
-    }
-    .dress-wrapper {
-      width: 250px;
-      height: 320px;
-    }
+  .game-title {
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    color: var(--gold-main);
+    margin-bottom: 20px;
   }
+
+  .timer-display {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .score-display {
+    font-size: 24px;
+    color: var(--text-sub);
+    margin-bottom: 30px;
+  }
+  
+  .tap-game-btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #E6A3AF, #d48593);
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    box-shadow:
+      0 10px 25px rgba(230, 163, 175, 0.5),
+      inset 0 2px 5px rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: transform 0.05s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .tap-game-btn:active {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, #d48593, #E6A3AF);
+  }
+  
+  .tap-game-btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .countdown-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    display: none;
+    place-items: center;
+    font-size: 80px;
+    color: var(--gold-main);
+    font-weight: bold;
+    z-index: 10;
+  }
+
+  .ranking-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    width: 100%;
+    max-width: 340px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .ranking-item {
+    display: grid;
+    grid-template-columns: 40px 1fr 60px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(122,78,84,0.1);
+    font-size: 14px;
+  }
+
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #eee;
+    color: #555;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .rank-1 .rank-badge { background: #cda156; color: #fff; box-shadow: 0 2px 5px rgba(205,161,86,0.4); }
+  .rank-2 .rank-badge { background: #a0a0a0; color: #fff; }
+  .rank-3 .rank-badge { background: #c49c88; color: #fff; }
+
+  .rank-name {
+    text-align: left;
+    font-weight: 600;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rank-score {
+    text-align: right;
+    font-weight: bold;
+    color: var(--text-main);
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(205,161,86,0.3);
+    border-top-color: var(--gold-main);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
 </style>
 </head>
 <body>
@@ -756,6 +873,40 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="gameInviteModal">
+  <div class="modal">
+    <h3>隠しモード発見！</h3>
+    <p class="modal-msg" style="margin-top:16px;">
+      おめでとうございます！<br>
+      連打ミニゲームに挑戦しますか？<br>
+      （10秒間で何回タップできるか競争！）
+    </p>
+    <div class="modal-actions">
+      <button class="modal-btn btn-cancel" id="gameDeclineBtn">やらない</button>
+      <button class="modal-btn btn-confirm" id="gameAcceptBtn">挑戦する！</button>
+    </div>
+  </div>
+</div>
+
+<div class="game-screen" id="gameScreen">
+  <div class="countdown-overlay" id="gameCountdown">3</div>
+  <div class="game-title">10秒連打チャレンジ！</div>
+  <div class="timer-display" id="gameTimer">10.00</div>
+  <div class="score-display">SCORE: <span id="gameScore">0</span></div>
+  <button class="tap-game-btn" id="tapGameBtn" disabled>
+    <span id="tapBtnText">WAIT</span>
+  </button>
+</div>
+
+<div class="ranking-screen" id="rankingScreen">
+  <h3>TODAY'S RANKING</h3>
+  <div class="note" style="margin-bottom:10px;">上位ランカー</div>
+  <div id="rankingListContainer" class="ranking-list">
+    <div class="loading-spinner"></div>
+  </div>
+  <button class="btn-main" id="backToMainBtn" style="max-width:200px;">戻る</button>
+</div>
+
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
@@ -841,6 +992,20 @@
   const modalBody    = document.getElementById('modalBody');
   const cancelSendBtn= document.getElementById('cancelSendBtn');
   const finalSendBtn = document.getElementById('finalSendBtn');
+
+  /* ゲーム用DOM */
+  const gameInviteModal = document.getElementById('gameInviteModal');
+  const gameDeclineBtn = document.getElementById('gameDeclineBtn');
+  const gameAcceptBtn = document.getElementById('gameAcceptBtn');
+  const gameScreen = document.getElementById('gameScreen');
+  const gameCountdown = document.getElementById('gameCountdown');
+  const gameTimer = document.getElementById('gameTimer');
+  const gameScore = document.getElementById('gameScore');
+  const tapGameBtn = document.getElementById('tapGameBtn');
+  const tapBtnText = document.getElementById('tapBtnText');
+  const rankingScreen = document.getElementById('rankingScreen');
+  const rankingListContainer = document.getElementById('rankingListContainer');
+  const backToMainBtn = document.getElementById('backToMainBtn');
 
   /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
@@ -1007,7 +1172,6 @@
     applyColor(hex);
   }
 
-  /* ========= 色適用 ========= */
   function applyColor(colorHex){
     currentColor = colorHex;
     if (colorInput && document.activeElement !== colorInput) {
@@ -1107,7 +1271,6 @@
     }
   }
 
-  /* ========= イベント ========= */
   if (colorInput) {
     colorInput.addEventListener('input', e => {
       const val = e.target.value;
@@ -1130,29 +1293,221 @@
     applyColor(hex);
   });
 
-  // KEEPボタンの処理（アニメーション付き）
+  /* === KEEPボタン連打トリガー === */
+  let keepTapCount = 0;
+  let keepTapTimer = null;
+
   keepBtn.addEventListener('click', () => {
     triggerHaptic('medium');
     addStock(currentColor);
+
+    // 隠しコマンドロジック
+    if (keepTapCount === 0) {
+      // 最初のタップから10秒カウント開始
+      keepTapTimer = setTimeout(() => {
+        keepTapCount = 0; // 10秒経過でリセット
+      }, 10000);
+    }
+    
+    keepTapCount++;
+
+    if (keepTapCount >= 7) {
+      // 条件達成！
+      clearTimeout(keepTapTimer);
+      keepTapCount = 0;
+      // 少し遅らせてモーダル表示
+      setTimeout(() => {
+        gameInviteModal.classList.add('open');
+      }, 300);
+    }
   });
 
+  // ゲーム招待キャンセル
+  gameDeclineBtn.addEventListener('click', () => {
+    gameInviteModal.classList.remove('open');
+  });
+
+  // ゲーム開始承諾
+  gameAcceptBtn.addEventListener('click', () => {
+    gameInviteModal.classList.remove('open');
+    startGame();
+  });
+
+  /* === ゲームロジック === */
+  let gameActive = false;
+  let currentScore = 0;
+  let timeLeft = 10.00;
+  let gameInterval = null;
+
+  function startGame() {
+    gameScreen.classList.add('active');
+    tapGameBtn.disabled = true;
+    tapBtnText.textContent = "READY";
+    gameScore.textContent = "0";
+    gameTimer.textContent = "10.00";
+    currentScore = 0;
+    
+    // カウントダウン
+    let count = 3;
+    gameCountdown.textContent = count;
+    gameCountdown.style.display = "grid";
+    
+    const countInterval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        gameCountdown.textContent = count;
+      } else {
+        clearInterval(countInterval);
+        gameCountdown.textContent = "START!";
+        setTimeout(() => {
+          gameCountdown.style.display = "none";
+          startMainGame();
+        }, 500);
+      }
+    }, 1000);
+  }
+
+  function startMainGame() {
+    gameActive = true;
+    timeLeft = 10.00;
+    tapGameBtn.disabled = false;
+    tapBtnText.textContent = "TAP!";
+    
+    const startTime = Date.now();
+    
+    gameInterval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = (now - startTime) / 1000;
+      const remain = 10.00 - elapsed;
+      
+      if (remain <= 0) {
+        gameTimer.textContent = "0.00";
+        finishGame();
+      } else {
+        gameTimer.textContent = remain.toFixed(2);
+      }
+    }, 33); // 約30fps
+  }
+
+  tapGameBtn.addEventListener('click', (e) => {
+    // ボタンアニメーションのリセット（連打用）
+    e.currentTarget.style.transform = "scale(0.9)";
+    setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
+
+    if (gameActive) {
+      currentScore++;
+      gameScore.textContent = currentScore;
+      triggerHaptic('light');
+    }
+  });
+
+  async function finishGame() {
+    clearInterval(gameInterval);
+    gameActive = false;
+    tapGameBtn.disabled = true;
+    tapBtnText.textContent = "FINISH";
+    
+    // 少し待ってからランキングへ
+    setTimeout(async () => {
+      gameScreen.classList.remove('active');
+      await submitAndShowRanking(currentScore);
+    }, 1500);
+  }
+
+  /* === ランキングロジック === */
+  async function submitAndShowRanking(score) {
+    rankingScreen.classList.add('active');
+    rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
+
+    let name = nameInput.value.trim();
+    if (!name) name = "名無しゲスト";
+    
+    // スコア送信 & ランキング取得
+    // GAS側で action=game_score を処理してもらう
+    const payload = {
+      action: 'game_score', // GASでの分岐用
+      timestamp: new Date().toISOString(),
+      name: name,
+      score: score,
+      clientId: CLIENT_ID
+    };
+
+    try {
+      const body = new URLSearchParams(payload).toString();
+      const response = await fetch(ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: body
+      });
+      
+      const result = await response.json();
+      renderRanking(result.ranking, score, name);
+      
+    } catch(e) {
+      rankingListContainer.innerHTML = '<p>ランキングの取得に失敗しました</p>';
+      console.error(e);
+    }
+  }
+
+  function renderRanking(list, myScore, myName) {
+    if (!list || !Array.isArray(list)) {
+      rankingListContainer.innerHTML = '<p>データがありません</p>';
+      return;
+    }
+
+    rankingListContainer.innerHTML = '';
+    
+    // 自分のスコアをトップに簡易表示
+    const meDiv = document.createElement('div');
+    meDiv.style.marginBottom = "10px";
+    meDiv.style.fontWeight = "bold";
+    meDiv.style.color = "var(--gold-main)";
+    meDiv.textContent = `あなたのスコア: ${myScore}回`;
+    rankingListContainer.appendChild(meDiv);
+
+    list.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = `ranking-item rank-${index+1}`;
+      
+      const badge = document.createElement('div');
+      badge.className = 'rank-badge';
+      badge.textContent = index + 1;
+      
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'rank-name';
+      nameDiv.textContent = item.name;
+      
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'rank-score';
+      scoreDiv.textContent = item.score;
+      
+      row.appendChild(badge);
+      row.appendChild(nameDiv);
+      row.appendChild(scoreDiv);
+      rankingListContainer.appendChild(row);
+    });
+  }
+
+  // 元の画面に戻る
+  backToMainBtn.addEventListener('click', () => {
+    rankingScreen.classList.remove('active');
+  });
+
+
+  /* === 通常機能 === */
   function addStock(hex) {
-    // 1. プレースホルダー消去
     const placeholder = stockArea.querySelector('.stock-placeholder');
     if (placeholder) placeholder.remove();
 
-    // 2. 枠数制限（最大4個まで、5個目は古いものを削除）
     while (stockArea.childElementCount >= 5) {
       stockArea.removeChild(stockArea.firstElementChild);
     }
     
-    // 3. ドットを作成するが、最初は見えない状態にする
     const newDot = document.createElement('div');
     newDot.className = 'stock-dot';
     newDot.style.background = hex;
-    newDot.style.opacity = '0'; // アニメーション完了まで隠す
+    newDot.style.opacity = '0'; 
     
-    // タップでその色を呼び出す処理
     newDot.addEventListener('click', () => {
       triggerHaptic('light'); 
       applyColor(hex);
@@ -1162,12 +1517,9 @@
     });
 
     stockArea.appendChild(newDot);
-
-    // === アニメーション処理の実行 ===
     runFlyAnimation(colorChip, newDot, hex);
   }
 
-  // 飛んでいくアニメーション関数
   function runFlyAnimation(startElem, endElem, color) {
     const startRect = startElem.getBoundingClientRect();
     const endRect = endElem.getBoundingClientRect();
@@ -1180,37 +1532,20 @@
     flyer.style.backgroundColor = color;
     flyer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
     flyer.style.zIndex = '9999';
-    flyer.style.pointerEvents = 'none'; // クリックの邪魔をしない
-    
-    // 初期位置セット
+    flyer.style.pointerEvents = 'none';
     flyer.style.left = startRect.left + 'px';
     flyer.style.top = startRect.top + 'px';
-    
     document.body.appendChild(flyer);
 
-    // アニメーション実行 (Web Animations API)
     const anim = flyer.animate([
-      {
-        left: startRect.left + 'px',
-        top: startRect.top + 'px',
-        transform: 'scale(1)'
-      },
-      {
-        left: endRect.left + 'px',
-        top: endRect.top + 'px',
-        transform: 'scale(0.8)'
-      }
-    ], {
-      duration: 500,
-      easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' // ふわっと加速してスッと止まる感じ
-    });
+      { left: startRect.left + 'px', top: startRect.top + 'px', transform: 'scale(1)' },
+      { left: endRect.left + 'px', top: endRect.top + 'px', transform: 'scale(0.8)' }
+    ], { duration: 500, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
 
     anim.onfinish = () => {
       flyer.remove();
-      // 元のドットを表示して、ポンッと弾ませる
       endElem.style.opacity = '1';
       endElem.classList.add('pop-anim');
-      // アニメーションクラスは再利用しないので放置でも良いが、一応
       setTimeout(() => endElem.classList.remove('pop-anim'), 500);
     };
   }
@@ -1219,7 +1554,6 @@
     const ok = tryWireSvgDirect();
     if (!ok) enableFallback();
     applyColor(currentColor);
-
     const rgb = hexToRgb(currentColor);
     if (rgb) {
       const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
@@ -1227,43 +1561,29 @@
     }
   });
 
-  /* ========= rate limit ========= */
   function checkRateLimit(){
     const now = Date.now();
     let arr;
-    try {
-      arr = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]');
-      if (!Array.isArray(arr)) arr = [];
-    } catch(e){
-      arr = [];
-    }
-    arr = arr
-      .map(t => typeof t === 'number' ? t : 0)
-      .filter(t => t > 0 && now - t < RATE_LIMIT_WINDOW_MS);
-
+    try { arr = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]'); if (!Array.isArray(arr)) arr = []; } catch(e){ arr = []; }
+    arr = arr.map(t => typeof t === 'number' ? t : 0).filter(t => t > 0 && now - t < RATE_LIMIT_WINDOW_MS);
     let waitMs = 0;
-
     if (arr.length >= RATE_LIMIT_MAX) {
       const oldest = arr[0];
       const w = RATE_LIMIT_WINDOW_MS - (now - oldest);
       if (w > waitMs) waitMs = w;
     }
-
     if (arr.length) {
       const last = arr[arr.length - 1];
       const w = RATE_LIMIT_MIN_INTERVAL_MS - (now - last);
       if (w > waitMs) waitMs = w;
     }
-
     return { canSubmit: waitMs <= 0, waitMs, history: arr };
   }
 
   function registerSubmit(history){
     const now = Date.now();
     const arr = (history || []).concat(now);
-    try {
-      localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(arr));
-    } catch(e){}
+    try { localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(arr)); } catch(e){}
   }
 
   function formatWaitMessage(ms){
@@ -1278,35 +1598,21 @@
 
   function enqueueSubmission(payload){
     let arr;
-    try {
-      arr = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
-      if (!Array.isArray(arr)) arr = [];
-    } catch(e){
-      arr = [];
-    }
+    try { arr = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); if (!Array.isArray(arr)) arr = []; } catch(e){ arr = []; }
     arr.push(payload);
-    try {
-      localStorage.setItem(PENDING_KEY, JSON.stringify(arr));
-    } catch(e){}
+    try { localStorage.setItem(PENDING_KEY, JSON.stringify(arr)); } catch(e){}
   }
 
   async function flushQueue(endpoint){
     let arr;
-    try {
-      arr = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
-      if (!Array.isArray(arr)) arr = [];
-    } catch(e){
-      arr = [];
-    }
+    try { arr = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); if (!Array.isArray(arr)) arr = []; } catch(e){ arr = []; }
     if (!arr.length) return;
     const remain = [];
     for (const p of arr) {
       const ok = await sendPayload(endpoint, p, true);
       if (!ok) remain.push(p);
     }
-    try {
-      localStorage.setItem(PENDING_KEY, JSON.stringify(remain));
-    } catch(e){}
+    try { localStorage.setItem(PENDING_KEY, JSON.stringify(remain)); } catch(e){}
   }
 
   function showToast(msg='投票を送信しました'){
@@ -1318,10 +1624,8 @@
   async function sendPayload(endpoint, payload, isRetry=false){
     try {
       const body = new URLSearchParams(payload).toString();
-      if (navigator.sendBeacon) {
-        const ok = navigator.sendBeacon(endpoint, new Blob([body], {
-          type: 'application/x-www-form-urlencoded;charset=UTF-8'
-        }));
+      if (navigator.sendBeacon && !payload.action) { // ゲーム以外はsendBeacon可
+        const ok = navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/x-www-form-urlencoded;charset=UTF-8' }));
         if (ok) return true;
       }
       await fetch(endpoint, {
@@ -1332,96 +1636,60 @@
       });
       return true;
     } catch (e) {
-      if (!isRetry) enqueueSubmission(payload);
+      if (!isRetry && !payload.action) enqueueSubmission(payload);
       return false;
     }
   }
 
-submitBtn.addEventListener('click', () => {
+  submitBtn.addEventListener('click', () => {
     let name = nameInput.value.trim();
-    if (!name) {
-      alert('お名前を入力してください');
-      nameInput.focus();
-      return;
-    }
-    if (name.length > MAX_NAME_LENGTH) {
-      alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`);
-      nameInput.focus();
-      return;
-    }
-
+    if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
+    if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
-
     modalBody.innerHTML = '';
-
     const previewContainer = document.createElement('div');
     previewContainer.className = 'modal-preview-box';
-
     if (dressWrapper.dataset.mode === 'direct') {
       const svgDoc = dressObj.contentDocument;
       const originalSvg = svgDoc && svgDoc.querySelector('svg');
       if (originalSvg) {
         const cloneSvg = originalSvg.cloneNode(true);
-        cloneSvg.removeAttribute('width');
-        cloneSvg.removeAttribute('height');
-        cloneSvg.style.width = '100%';
-        cloneSvg.style.height = 'auto';
-        cloneSvg.style.display = 'block';
+        cloneSvg.removeAttribute('width'); cloneSvg.removeAttribute('height');
+        cloneSvg.style.width = '100%'; cloneSvg.style.height = 'auto'; cloneSvg.style.display = 'block';
         cloneSvg.style.filter = 'drop-shadow(0 10px 10px rgba(0,0,0,0.15))';
         previewContainer.appendChild(cloneSvg);
       }
     } else {
       const imgClone = dressImg.cloneNode(true);
-      imgClone.style.display = 'block';
-      imgClone.style.width = '100%';
-      imgClone.style.height = 'auto';
+      imgClone.style.display = 'block'; imgClone.style.width = '100%'; imgClone.style.height = 'auto';
       imgClone.style.filter = dressImg.style.filter + ' drop-shadow(0 10px 10px rgba(0,0,0,0.15))';
       previewContainer.appendChild(imgClone);
     }
     modalBody.appendChild(previewContainer);
-
     const guestInfoDiv = document.createElement('div');
     guestInfoDiv.className = 'modal-guest-info';
-
     const labelSpan = document.createElement('span');
-    labelSpan.className = 'modal-guest-label';
-    labelSpan.textContent = 'GUEST';
-    
+    labelSpan.className = 'modal-guest-label'; labelSpan.textContent = 'GUEST';
     const nameDiv = document.createElement('div');
-    nameDiv.className = 'modal-guest-name';
-    nameDiv.textContent = name + ' 様';
-
-    guestInfoDiv.appendChild(labelSpan);
-    guestInfoDiv.appendChild(nameDiv);
+    nameDiv.className = 'modal-guest-name'; nameDiv.textContent = name + ' 様';
+    guestInfoDiv.appendChild(labelSpan); guestInfoDiv.appendChild(nameDiv);
     modalBody.appendChild(guestInfoDiv);
-
     const msgP = document.createElement('p');
-    msgP.className = 'modal-msg';
-    msgP.textContent = 'この内容で投票してよろしいですか？';
+    msgP.className = 'modal-msg'; msgP.textContent = 'この内容で投票してよろしいですか？';
     modalBody.appendChild(msgP);
-
     confirmModal.classList.add('open');
   });
 
-  cancelSendBtn.addEventListener('click', () => {
-      confirmModal.classList.remove('open');
-    });
+  cancelSendBtn.addEventListener('click', () => { confirmModal.classList.remove('open'); });
 
   finalSendBtn.addEventListener('click', async () => {
     confirmModal.classList.remove('open');
-
     const name = nameInput.value.trim().replace(/[\u0000-\u001F\u007F]/g, '');
-
     const rl = checkRateLimit();
-    if (!rl.canSubmit) {
-      showToast(formatWaitMessage(rl.waitMs));
-      return;
-    }
+    if (!rl.canSubmit) { showToast(formatWaitMessage(rl.waitMs)); return; }
     registerSubmit(rl.history);
-
     const rgb = hexToRgb(currentColor);
     const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
-
     const payload = {
       timestamp: new Date().toISOString(),
       name: name,
@@ -1429,37 +1697,25 @@ submitBtn.addEventListener('click', () => {
       userAgent: navigator.userAgent,
       clientId: CLIENT_ID
     };
-
     const ok = await sendPayload(ENDPOINT_URL, payload);
     if (!ok) enqueueSubmission(payload);
     showToast('投票を送信しました');
   });
 
-  /* ========= Haptics (触覚フィードバック) ========= */
   function triggerHaptic(style = 'light') {
     if (!navigator.vibrate) return;
-
     switch (style) {
-      case 'light':
-        navigator.vibrate(5); 
-        break;
-      case 'medium':
-        navigator.vibrate(15); 
-        break;
-      case 'heavy':
-        navigator.vibrate([30, 50, 30]); 
-        break;
+      case 'light': navigator.vibrate(5); break;
+      case 'medium': navigator.vibrate(15); break;
+      case 'heavy': navigator.vibrate([30, 50, 30]); break;
     }
   }
 
   [hueRange, satRange, lightRange].forEach(range => {
     let lastVal = parseInt(range.value);
-
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value);
-      if (currentVal % 10 === 0 && currentVal !== lastVal) {
-        triggerHaptic('light');
-      }
+      if (currentVal % 10 === 0 && currentVal !== lastVal) { triggerHaptic('light'); }
       lastVal = currentVal;
     });
   });
@@ -1467,15 +1723,9 @@ submitBtn.addEventListener('click', () => {
   const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn'];
   clickableIds.forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('click', () => {
-        triggerHaptic('medium');
-      });
-    }
+    if (el) { el.addEventListener('click', () => { triggerHaptic('medium'); }); }
   });
-  if (colorInput) {
-    colorInput.addEventListener('click', () => triggerHaptic('medium'));
-  }
+  if (colorInput) { colorInput.addEventListener('click', () => triggerHaptic('medium')); }
 
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
   applyColor(currentColor);
