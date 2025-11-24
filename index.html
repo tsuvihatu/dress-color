@@ -1132,23 +1132,6 @@
     // 4. 追加
     stockArea.appendChild(dot);
   }
-    
-    const dot = document.createElement('div');
-    dot.className = 'stock-dot';
-    dot.style.background = hex;
-    
-    // タップでその色を呼び出す
-    dot.addEventListener('click', () => {
-      triggerHaptic('light'); // 軽い振動
-      applyColor(hex);
-      syncSlidersFromHex(hex);
-      // ポヨンと跳ねるアニメーション
-      dot.style.transform = 'scale(1.2)';
-      setTimeout(()=> dot.style.transform = '', 200);
-    });
-
-    stockArea.appendChild(dot);
-  }
 
   dressObj.addEventListener('load', () => {
     const ok = tryWireSvgDirect();
