@@ -17,6 +17,10 @@
     --gold-main: #cda156;
     --text-main: #5a3b40;
     --text-sub: #7e5b60;
+
+    /* ▼追加: 傾きに合わせて変化させる変数の初期値 */
+    --grad-x: 90%;
+    --grad-y: 110%;
   }
 
   * {
@@ -49,6 +53,7 @@
     backdrop-filter: blur(8px);
   }
 
+  /* ▼変更: グラデーションの位置を変数化し、滑らかに動くように設定 */
   .card::before {
     content: "";
     position: absolute;
@@ -56,10 +61,12 @@
     border-radius: inherit;
     background:
       radial-gradient(circle at 10% 0%, rgba(255,255,255,0.8), transparent 60%),
-      radial-gradient(circle at 90% 110%, var(--accent-soft), transparent 70%);
+      radial-gradient(circle at var(--grad-x) var(--grad-y), var(--accent-soft), transparent 70%);
     opacity: 0.6; 
     pointer-events: none;
     z-index: -1;
+    transition: background 0.1s ease-out;
+    will-change: background;
   }
 
   .card::after {
@@ -1401,6 +1408,56 @@ submitBtn.addEventListener('click', () => {
 
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
   applyColor(currentColor);
+
+  /* ========= ▼追加: 傾き検知 (Motion Parallax) ========= */
+  function handleOrientation(event) {
+    const beta = event.beta || 0;  // 前後の傾き
+    const gamma = event.gamma || 0; // 左右の傾き
+    const sensitivity = 1.5; 
+
+    // 基本位置(右下)を中心に、傾き分だけずらす
+    let x = 90 + (gamma * sensitivity);
+    let y = 110 + ((beta - 45) * sensitivity); 
+
+    // 範囲制限
+    x = Math.min(Math.max(x, 20), 150);
+    y = Math.min(Math.max(y, 50), 180);
+
+    document.documentElement.style.setProperty('--grad-x', `${x}%`);
+    document.documentElement.style.setProperty('--grad-y', `${y}%`);
+  }
+
+  // iOS 13+ 用の許可リクエスト処理
+  let motionPermissionRequested = false;
+
+  function requestMotionPermission() {
+    if (motionPermissionRequested) return;
+    motionPermissionRequested = true;
+
+    if (
+      typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function'
+    ) {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        })
+        .catch(console.error);
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  }
+
+  // 最初の操作で許可を求める
+  document.body.addEventListener('click', requestMotionPermission, { once: true });
+  document.body.addEventListener('touchstart', requestMotionPermission, { once: true });
+
+  // Android等は即時監視
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+     window.addEventListener('deviceorientation', handleOrientation);
+  }
 </script>
 </body>
 </html>
