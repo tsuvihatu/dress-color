@@ -443,7 +443,7 @@
     <h3>隠しモード発見！</h3>
     <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
       連打ミニゲームに挑戦しますか？<br>
-      3秒間で何回タップできるか競争！<br>
+      5秒間で何回タップできるか競争！<br>
       <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
     <div class="modal-actions">
@@ -455,7 +455,7 @@
 
 <div class="game-screen" id="gameScreen">
   <div class="countdown-overlay" id="gameCountdown">3</div>
-  <div class="game-title">3秒連打チャレンジ！</div>
+  <div class="game-title">5秒連打チャレンジ！</div>
   <div class="timer-display" id="gameTimer">3.00</div>
   <div class="score-display">SCORE: <span id="gameScore">0</span></div>
   
@@ -896,7 +896,7 @@
     if (lastActionWasRandom) {
       omakaseKeepCombo++;
       lastActionWasRandom = false; 
-      if (omakaseKeepCombo >= 7) {
+      if (omakaseKeepCombo >= 10) {
         omakaseKeepCombo = 0;
         triggerGameInvite();
         return;
@@ -924,18 +924,18 @@
     const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0');
     if (Date.now() < banUntil) return;
 
-    // 0.4秒遅延
+    // 0.5秒遅延
     setTimeout(() => {
       gameInviteModal.classList.add('open');
-    }, 400);
+    }, 500);
   }
 
-  // ゲーム招待キャンセル (2回拒否で10分BAN)
+  // ゲーム招待キャンセル (2回拒否で3分BAN)
   gameDeclineBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
     declineCount++;
     if (declineCount >= 2) {
-      const banUntil = Date.now() + 10 * 60 * 1000; // 10分
+      const banUntil = Date.now() + 3 * 60 * 1000; // 10分
       localStorage.setItem(GAME_BAN_KEY, banUntil);
       declineCount = 0;
     }
@@ -948,10 +948,10 @@
     startGame();
   });
 
-  /* === ゲームロジック (3秒版) === */
+  /* === ゲームロジック (5秒版) === */
   let gameActive = false;
   let currentScore = 0;
-  let timeLeft = 3.00;
+  let timeLeft = 5.00;
   let gameInterval = null;
 
   function startGame() {
@@ -961,7 +961,7 @@
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "READY";
     gameScore.textContent = "0";
-    gameTimer.textContent = "3.00";
+    gameTimer.textContent = "5.00";
     currentScore = 0;
     
     // カウントダウン
@@ -986,7 +986,7 @@
 
   function startMainGame() {
     gameActive = true;
-    timeLeft = 3.00;
+    timeLeft = 5.00;
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
     
@@ -995,7 +995,7 @@
     gameInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = (now - startTime) / 1000;
-      const remain = 3.00 - elapsed;
+      const remain = 5.00 - elapsed;
       
       if (remain <= 0) {
         gameTimer.textContent = "0.00";
