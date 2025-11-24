@@ -218,10 +218,10 @@
     display: none;
   }
 
-  /* === スライダー本体（中間の太さ 10px に設定） === */
+  /* === スライダー本体（10px） === */
   input[type="range"] {
     width: 100%;
-    height: 10px; /* 8px と 12px の中間 */
+    height: 10px;
     border-radius: 999px;
     -webkit-appearance: none;
     appearance: none;
@@ -233,15 +233,15 @@
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
-    height: 10px; /* 8px と 12px の中間 */
+    height: 10px;
     border-radius: 999px;
   }
 
-  /* つまみのデザイン（サイズ18px、二重丸デザインは維持） */
+  /* === つまみのデザイン（サイズを22pxにアップ） === */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 22px;  /* 18px -> 22px */
+    height: 22px; /* 18px -> 22px */
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
@@ -250,13 +250,13 @@
       inset 0 0 0 1.5px #ffffff,
       inset 0 0 0 3px rgba(210,145,155,0.5);
     
-    /* トラックが10px、つまみが18pxなので、(10-18)/2 = -4px */
-    transform: translateY(-4px);
+    /* トラック10px、つまみ22pxなので、(10-22)/2 = -6px */
+    transform: translateY(-6px);
     transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
 
   input[type="range"]:active::-webkit-slider-thumb {
-    transform: translateY(-4px) scale(1.15);
+    transform: translateY(-6px) scale(1.15);
     border-color: var(--gold-main);
     box-shadow:
       0 2px 6px rgba(160,110,120,0.6),
@@ -266,13 +266,13 @@
 
   /* Firefox用 */
   input[type="range"]::-moz-range-track {
-    height: 10px; /* 8px と 12px の中間 */
+    height: 10px;
     border-radius: 999px;
   }
 
   input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 22px;  /* 18px -> 22px */
+    height: 22px; /* 18px -> 22px */
     border-radius: 50%;
     background: #ffffff;
     border: 1px solid rgba(210,145,155,0.9);
