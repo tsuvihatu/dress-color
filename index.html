@@ -21,7 +21,7 @@
 
   * {
     box-sizing: border-box;
-    /* タップ時のハイライトを無効化（連打時のチカチカ防止） */
+    /* タップ時のハイライトを無効化 */
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -36,18 +36,11 @@
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
-    /* iOSでのバウンススクロール防止 */
     overscroll-behavior-y: none;
   }
 
-  /* === 連打拡大防止設定 === */
-  /* ここに含まれる要素はダブルタップしても拡大されません */
-  button, 
-  input, 
-  .stock-dot, 
-  .color-chip-wrapper, 
-  .stock-area, 
-  .tap-game-btn {
+  /* 連打拡大防止 */
+  button, input, .stock-dot, .color-chip-wrapper, .stock-area, .tap-game-btn {
     touch-action: manipulation;
   }
 
@@ -88,700 +81,169 @@
     pointer-events: none;
   }
 
-  .card-header {
-    text-align: center;
-    margin-bottom: 8px;
-  }
-
+  .card-header { text-align: center; margin-bottom: 8px; }
   .card-header::before {
-    content: "";
-    display: block;
-    width: 80px;
-    height: 1px;
-    margin: 0 auto 6px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(205, 161, 86,0.6),
-      transparent
-    );
+    content: ""; display: block; width: 80px; height: 1px; margin: 0 auto 6px;
+    background: linear-gradient(90deg, transparent, rgba(205, 161, 86,0.6), transparent);
   }
 
-  .tagline {
-    margin: 0 0 4px;
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(140,90,100,0.7);
-  }
+  .tagline { margin: 0 0 4px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(140,90,100,0.7); }
+  h2 { margin: 0; font-weight: 600; color: #4a2f33; letter-spacing: 0.12em; font-size: 18px; }
+  .card-sub { margin: 8px 0 12px; font-size: 12px; color: rgba(122,78,84,0.9); text-align: center; letter-spacing: 0.04em; }
 
-  h2 {
-    margin: 0;
-    font-weight: 600;
-    color: #4a2f33;
-    letter-spacing: 0.12em;
-    font-size: 18px;
-  }
+  .dress-display { margin: 6px 0 16px; display: grid; place-items: center; }
+  .dress-wrapper { position: relative; width: 230px; height: 290px; max-width: 100%; }
+  #dressObj { width: 100%; height: 100%; border: 0; display: block; position: relative; z-index: 1; }
+  #dressImg { width: 100%; height: 100%; display: none; object-fit: contain; position: relative; z-index: 1; }
 
-  .card-sub {
-    margin: 8px 0 12px;
-    font-size: 12px;
-    color: rgba(122,78,84,0.9);
-    text-align: center;
-    letter-spacing: 0.04em;
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: #7a4e54; margin-bottom: 6px; letter-spacing: 0.04em; }
+  .field input[type="text"] {
+    width: 100%; padding: 10px 4px; border-radius: 0; border: none;
+    border-bottom: 1px solid rgba(122,78,84,0.5); background: transparent;
+    color: #5a3b40; font-size: 16px; outline: none; font-family: "Yu Mincho", serif;
+    transition: border-bottom-color 0.3s ease; text-align: center;
   }
+  .field input[type="text"]:focus { border-bottom: 2px solid var(--gold-main); box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3); }
 
-  .dress-display {
-    margin: 6px 0 16px;
-    display: grid;
-    place-items: center;
-  }
+  .slider-group { margin-bottom: 4px; background: rgba(255,242,245,0.96); padding: 10px 10px 4px; border-radius: 14px; border: 1px solid rgba(230,163,175,0.5); box-shadow: inset 0 1px 4px rgba(160,110,120,0.05); }
+  .slider-row { display: grid; grid-template-columns: 56px 1fr; column-gap: 8px; align-items: center; margin-bottom: 11px; }
+  .slider-row:last-child { margin-bottom: 6px; }
+  .slider-label { font-size: 11px; letter-spacing: 0.08em; color: rgba(122,78,84,0.9); width: 56px; white-space: nowrap; font-weight: normal; }
+  .slider-value { display: none; }
 
-  .dress-wrapper {
-    position: relative;
-    width: 230px;
-    height: 290px;
-    max-width: 100%;
-  }
-
-  #dressObj {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-    position: relative;
-    z-index: 1;
-  }
-
-  #dressImg {
-    width: 100%;
-    height: 100%;
-    display: none;
-    object-fit: contain;
-    position: relative;
-    z-index: 1;
-  }
-
-  .field {
-    margin-bottom: 14px;
-  }
-
-  .field label {
-    display: block;
-    font-size: 12px;
-    color: #7a4e54;
-    margin-bottom: 6px;
-    letter-spacing: 0.04em;
-  }
-
- .field input[type="text"] {
-    width: 100%;
-    padding: 10px 4px;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid rgba(122,78,84,0.5);
-    background: transparent;
-    color: #5a3b40;
-    font-size: 16px;
-    outline: none;
-    font-family: "Yu Mincho", serif;
-    transition: border-bottom-color 0.3s ease;
-    text-align: center;
-  }
-
-  .field input[type="text"]::placeholder {
-    color: rgba(170,130,135,0.6);
-    font-size: 13px;
-    font-family: sans-serif;
-  }
-
-  .field input[type="text"]:focus {
-    border-bottom: 2px solid var(--gold-main);
-    box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3);
-  }
-
-  .slider-group {
-    margin-bottom: 4px;
-    background: rgba(255,242,245,0.96);
-    padding: 10px 10px 4px;
-    border-radius: 14px;
-    border: 1px solid rgba(230,163,175,0.5);
-    box-shadow: inset 0 1px 4px rgba(160,110,120,0.05);
-  }
-
-  .slider-row {
-    display: grid;
-    grid-template-columns: 56px 1fr;
-    column-gap: 8px;
-    align-items: center;
-    margin-bottom: 11px;
-  }
-
-  .slider-row:last-child {
-    margin-bottom: 6px;
-  }
-
-  .slider-label {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    color: rgba(122,78,84,0.9);
-    width: 56px;
-    white-space: nowrap;
-    font-weight: normal;
-  }
-
-  .slider-value {
-    display: none;
-  }
-
-  /* === スライダー (10px線, 25pxつまみ) === */
-  input[type="range"] {
-    width: 100%;
-    height: 10px;
-    border-radius: 999px;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
-    cursor: pointer;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(222,180,184,0.7);
-    touch-action: none;
-  }
-
-  input[type="range"]::-webkit-slider-runnable-track {
-    height: 10px;
-    border-radius: 999px;
-  }
-
+  /* スライダー設定 (10px線, 25pxつまみ) */
+  input[type="range"] { width: 100%; height: 10px; border-radius: 999px; -webkit-appearance: none; appearance: none; outline: none; cursor: pointer; background: rgba(255,255,255,0.7); border: 1px solid rgba(222,180,184,0.7); touch-action: none; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 999px; }
   input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1px solid rgba(210,145,155,0.9);
-    box-shadow:
-      0 1px 4px rgba(160,110,120,0.45),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4px rgba(210,145,155,0.5);
-    transform: translateY(-7.5px);
-    transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
+    -webkit-appearance: none; width: 25px; height: 25px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(210,145,155,0.9);
+    box-shadow: 0 1px 4px rgba(160,110,120,0.45), inset 0 0 0 2px #ffffff, inset 0 0 0 4px rgba(210,145,155,0.5);
+    transform: translateY(-7.5px); transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
-
-  input[type="range"]:active::-webkit-slider-thumb {
-    transform: translateY(-7.5px) scale(1.1);
-    border-color: var(--gold-main);
-    box-shadow:
-      0 2px 8px rgba(160,110,120,0.6),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4px var(--gold-main);
-  }
-
-  input[type="range"]::-moz-range-track {
-    height: 10px;
-    border-radius: 999px;
-  }
-
-  input[type="range"]::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1px solid rgba(210,145,155,0.9);
-    box-shadow:
-      0 1px 4px rgba(160,110,120,0.45),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4px rgba(210,145,155,0.5);
-  }
+  input[type="range"]:active::-webkit-slider-thumb { transform: translateY(-7.5px) scale(1.1); border-color: var(--gold-main); box-shadow: 0 2px 8px rgba(160,110,120,0.6), inset 0 0 0 2px #ffffff, inset 0 0 0 4px var(--gold-main); }
   
-  input[type="range"]:active::-moz-range-thumb {
-    border-color: var(--gold-main);
-    box-shadow:
-      0 2px 8px rgba(160,110,120,0.6),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 4px var(--gold-main);
-  }
+  #hueRange { background: linear-gradient(to right, hsl(0,100%,70%), hsl(60,100%,70%), hsl(120,100%,70%), hsl(180,100%,70%), hsl(240,100%,70%), hsl(300,100%,70%), hsl(360,100%,70%)); }
+  #satRange { background: linear-gradient(to right, #e0d5d6, #ff7f7f); }
+  #lightRange { background: linear-gradient(to right, #000, #fff); }
 
-  #hueRange {
-    background: linear-gradient(to right,
-      hsl(0,100%,70%), hsl(60,100%,70%), hsl(120,100%,70%),
-      hsl(180,100%,70%), hsl(240,100%,70%), hsl(300,100%,70%), hsl(360,100%,70%)
-    );
-  }
-  
-  #satRange {
-    background: linear-gradient(to right, #e0d5d6, #ff7f7f);
-  }
+  .row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 8px; align-items: center; }
+  .btn-group { display: flex; gap: 6px; }
+  .color-chip-wrapper { position: relative; width: 100%; height: 44px; }
+  .color-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 1; }
+  .color-chip { position: absolute; inset: 0; border-radius: 999px; border: 1px solid rgba(210,170,172,0.9); background: var(--chip-color, #E6A3AF); box-sizing: border-box; box-shadow: 0 1px 2px rgba(140,100,100,0.25), inset 0 0 0 1px rgba(255,255,255,0.6); }
 
-  #lightRange {
-    background: linear-gradient(to right, #000, #fff);
-  }
+  .btn-main, .btn-ghost { width: 100%; border-radius: 999px; border: none; padding: 11px 14px; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; outline: none; transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.2s ease, opacity 0.2s ease; font-family: "Yu Mincho", serif; }
+  .btn-main { margin-top: 10px; background: #cda156; color: #fffdf5; box-shadow: 0 10px 25px rgba(149,108,67,0.55), 0 0 0 1px rgba(255,255,255,0.95); }
+  .btn-main:hover { background: #d6aa5e; transform: translateY(-1px); box-shadow: 0 14px 30px rgba(149,108,67,0.75), 0 0 0 1px rgba(255,255,255,1); }
+  .btn-main:active { background: #c3974e; transform: translateY(0); box-shadow: 0 8px 18px rgba(149,108,67,0.6), 0 0 0 1px rgba(255,255,255,0.95); }
+  .btn-ghost { height: 44px; background: rgba(255,255,255,0.85); color: #7a4e54; border: 1px solid rgba(210,145,155,0.8); font-size: 11px; padding: 0; }
+  .btn-ghost:hover { background: rgba(255,255,255,1); }
+  .btn-ghost:active { background: rgba(255,245,247,1); transform: translateY(1px); }
+  #keepBtn { border-color: rgba(205, 161, 86, 0.6); color: #8c6a28; background: rgba(255, 252, 240, 0.7); }
 
-  .row {
-    display: grid;
-    grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
-    gap: 8px;
-    align-items: center;
-  }
-
-  .btn-group {
-    display: flex;
-    gap: 6px;
-  }
-
-  .color-chip-wrapper {
-    position: relative;
-    width: 100%;
-    height: 44px;
-  }
-
-  .color-input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 1;
-  }
-
-  .color-chip {
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    border: 1px solid rgba(210,170,172,0.9);
-    background: var(--chip-color, #E6A3AF);
-    box-sizing: border-box;
-    box-shadow:
-      0 1px 2px rgba(140,100,100,0.25),
-      inset 0 0 0 1px rgba(255,255,255,0.6);
-  }
-
-  .btn-main,
-  .btn-ghost {
-    width: 100%;
-    border-radius: 999px;
-    border: none;
-    padding: 11px 14px;
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    outline: none;
-    transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.2s ease, opacity 0.2s ease;
-    font-family: "Yu Mincho", "YuMincho", serif;
-  }
-
-  .btn-main {
-    margin-top: 10px;
-    background: #cda156;
-    color: #fffdf5;
-    box-shadow:
-      0 10px 25px rgba(149,108,67,0.55),
-      0 0 0 1px rgba(255,255,255,0.95);
-  }
-
-  .btn-main:hover {
-    background: #d6aa5e;
-    transform: translateY(-1px);
-    box-shadow:
-      0 14px 30px rgba(149,108,67,0.75),
-      0 0 0 1px rgba(255,255,255,1);
-  }
-
-  .btn-main:active {
-    background: #c3974e;
-    transform: translateY(0);
-    box-shadow:
-      0 8px 18px rgba(149,108,67,0.6),
-      0 0 0 1px rgba(255,255,255,0.95);
-  }
-
-  .btn-ghost {
-    height: 44px;
-    background: rgba(255,255,255,0.85);
-    color: #7a4e54;
-    border: 1px solid rgba(210,145,155,0.8);
-    font-size: 11px;
-    padding: 0;
-  }
-
-  .btn-ghost:hover {
-    background: rgba(255,255,255,1);
-  }
-
-  .btn-ghost:active {
-    background: rgba(255,245,247,1);
-    transform: translateY(1px);
-  }
-
-  #keepBtn {
-    border-color: rgba(205, 161, 86, 0.6);
-    color: #8c6a28;
-    background: rgba(255, 252, 240, 0.7);
-  }
-
-  .stock-area {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 12px;
-    height: 36px;
-    align-items: center;
-    position: relative;
-  }
-
-  .stock-dot {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 5px rgba(160,110,120,0.3);
-    cursor: pointer;
-    transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    flex-shrink: 0;
-  }
-  
-  .stock-dot:active {
-    transform: scale(0.9);
-  }
-
-  .pop-anim {
-    animation: popBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  }
-
-  @keyframes popBounce {
-    0% { transform: scale(0); opacity: 0; }
-    60% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .stock-placeholder {
-    font-size: 12px;
-    color: rgba(122,78,84,0.5);
-    letter-spacing: 0.1em;
-  }
-
-  .note {
-    margin-top: 16px;
-    font-size: 11px;
-    color: rgba(122,78,84,0.9);
-    line-height: 1.5;
-    text-align: center;
-  }
+  .stock-area { display: flex; justify-content: center; gap: 12px; margin-top: 12px; height: 36px; align-items: center; position: relative; }
+  .stock-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(160,110,120,0.3); cursor: pointer; transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; }
+  .stock-dot:active { transform: scale(0.9); }
+  .pop-anim { animation: popBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+  @keyframes popBounce { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  .stock-placeholder { font-size: 12px; color: rgba(122,78,84,0.5); letter-spacing: 0.1em; }
+  .note { margin-top: 16px; font-size: 11px; color: rgba(122,78,84,0.9); line-height: 1.5; text-align: center; }
 
   /* === モーダル共通 === */
   .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(60, 40, 45, 0.5);
-    display: none;
-    place-items: center;
-    z-index: 10000;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    backdrop-filter: blur(5px);
+    position: fixed; inset: 0; background: rgba(60, 40, 45, 0.5); display: none; place-items: center; z-index: 10000; opacity: 0; transition: opacity 0.2s ease; backdrop-filter: blur(5px);
   }
-
-  .modal-overlay.open {
-    display: grid;
-    opacity: 1;
-  }
-
+  .modal-overlay.open { display: grid; opacity: 1; }
   .modal {
-    background: #fffcfb; 
-    width: 88%;
-    max-width: 340px;
-    padding: 40px 28px 32px; 
-    border-radius: 24px;
-    text-align: center;
-    transform: scale(0.94);
-    transition: transform 0.2s ease;
-    position: relative;
+    background: #fffcfb; width: 88%; max-width: 340px; padding: 40px 28px 32px; border-radius: 24px; text-align: center;
+    transform: scale(0.94); transition: transform 0.2s ease; position: relative;
   }
-
   .modal::after {
-    content: "";
-    position: absolute;
-    inset: 12px;
-    border: 2px solid var(--gold-main);
-    border-radius: 16px;
-    pointer-events: none;
+    content: ""; position: absolute; inset: 12px; border: 2px solid var(--gold-main); border-radius: 16px; pointer-events: none;
   }
-
+  /* デフォルトのラベル（CONFIRMATION） */
   .modal::before {
-    content: "CONFIRMATION";
-    position: absolute;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    letter-spacing: 0.25em;
-    color: var(--gold-main);
-    font-family: serif;
-    opacity: 0.8;
-    pointer-events: none;
+    content: "CONFIRMATION"; position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; letter-spacing: 0.25em; color: var(--gold-main); font-family: serif; opacity: 0.8; pointer-events: none;
+  }
+  /* ゲーム招待用ラベル上書き */
+  #gameInviteModal .modal::before {
+    content: "SECRET"; /* ラベル変更 */
   }
 
-  .modal-overlay.open .modal {
-    transform: scale(1);
-  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal h3 { margin: 0 0 20px; font-size: 18px; color: var(--text-main); letter-spacing: 0.15em; font-weight: 600; font-family: "Yu Mincho", serif; border-bottom: 1px solid rgba(205, 161, 86, 0.3); display: inline-block; padding-bottom: 8px; }
+  .modal-preview-box { margin: 0 auto 16px; width: 230px; position: relative; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1)); }
+  .modal-guest-info { margin-bottom: 28px; position: relative; z-index: 1; }
+  .modal-guest-label { display: block; font-size: 9px; color: var(--gold-main); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 2px; }
+  .modal-guest-name { font-size: 20px; color: var(--text-main); font-weight: 600; font-family: "Yu Mincho", serif; display: inline-block; min-width: 140px; padding-bottom: 4px; border-bottom: 1px solid rgba(122,78,84,0.3); }
+  .modal-msg { font-size: 12px; color: var(--text-sub); margin-bottom: 24px; font-weight: 500; }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 2; padding: 0 10px; }
+  .modal-btn { padding: 12px 0; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; letter-spacing: 0.1em; font-weight: 600; font-family: "Yu Mincho", serif; transition: all 0.2s ease; }
+  .btn-cancel { background: transparent; color: #8a6e72; border: 1px solid rgba(138, 110, 114, 0.4); }
+  .btn-cancel:active { background: rgba(138, 110, 114, 0.05); }
+  .btn-confirm { background: linear-gradient(135deg, #ddb065, #cda156); color: #fff; box-shadow: 0 4px 15px rgba(205, 161, 86, 0.4); }
+  .btn-confirm:active { box-shadow: 0 2px 8px rgba(205, 161, 86, 0.4); transform: translateY(1px); }
 
-  .modal h3 {
-    margin: 0 0 20px;
-    font-size: 18px;
-    color: var(--text-main);
-    letter-spacing: 0.15em;
-    font-weight: 600;
-    font-family: "Yu Mincho", serif;
-    border-bottom: 1px solid rgba(205, 161, 86, 0.3);
-    display: inline-block;
-    padding-bottom: 8px;
-  }
-
-  .modal-preview-box {
-    margin: 0 auto 16px;
-    width: 230px;
-    position: relative;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
-  }
-
-  .modal-guest-info {
-    margin-bottom: 28px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .modal-guest-label {
-    display: block;
-    font-size: 9px;
-    color: var(--gold-main);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-
-  .modal-guest-name {
-    font-size: 20px;
-    color: var(--text-main);
-    font-weight: 600;
-    font-family: "Yu Mincho", serif;
-    display: inline-block;
-    min-width: 140px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(122,78,84,0.3);
-  }
-
-  .modal-msg {
-    font-size: 12px;
-    color: var(--text-sub);
-    margin-bottom: 24px;
-    font-weight: 500;
-  }
-
-  .modal-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    position: relative;
-    z-index: 2;
-    padding: 0 10px;
-  }
-
-  .modal-btn {
-    padding: 12px 0;
-    border-radius: 6px;
-    border: none;
-    font-size: 13px;
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    font-family: "Yu Mincho", serif;
-    transition: all 0.2s ease;
-  }
-
-  .btn-cancel {
-    background: transparent;
-    color: #8a6e72;
-    border: 1px solid rgba(138, 110, 114, 0.4);
-  }
-  .btn-cancel:active {
-    background: rgba(138, 110, 114, 0.05);
-  }
-
-  .btn-confirm {
-    background: linear-gradient(135deg, #ddb065, #cda156);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(205, 161, 86, 0.4);
-  }
-  .btn-confirm:active {
-    box-shadow: 0 2px 8px rgba(205, 161, 86, 0.4);
-    transform: translateY(1px);
-  }
-
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%) translateY(10px);
-    background: rgba(90,59,64,0.95);
-    color: #fff;
-    font-size: 12px;
-    padding: 9px 14px;
-    border-radius: 999px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s, transform 0.2s;
-    white-space: nowrap;
-    z-index: 9999;
-    border: 1px solid rgba(255,255,255,0.9);
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(10px); background: rgba(90,59,64,0.95); color: #fff; font-size: 12px; padding: 9px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; z-index: 9999; border: 1px solid rgba(255,255,255,0.9); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* === ゲーム・ランキング画面用スタイル === */
   .game-screen, .ranking-screen {
-    position: fixed;
-    inset: 0;
-    background: #fdfcf8;
-    z-index: 20000;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    text-align: center;
+    position: fixed; inset: 0; background: #fdfcf8; z-index: 20000;
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    padding: 20px; text-align: center;
   }
-  .game-screen.active, .ranking-screen.active {
-    display: flex;
-  }
+  .game-screen.active, .ranking-screen.active { display: flex; }
 
-  .game-title {
-    font-size: 14px;
-    letter-spacing: 0.15em;
-    color: var(--gold-main);
-    margin-bottom: 20px;
-  }
-
-  .timer-display {
-    font-size: 48px;
-    font-weight: bold;
-    color: var(--text-main);
-    margin-bottom: 10px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .score-display {
-    font-size: 24px;
-    color: var(--text-sub);
-    margin-bottom: 30px;
-  }
+  .game-title { font-size: 14px; letter-spacing: 0.15em; color: var(--gold-main); margin-bottom: 20px; }
+  .timer-display { font-size: 48px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+  .score-display { font-size: 24px; color: var(--text-sub); margin-bottom: 30px; }
   
   .tap-game-btn {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    border: none;
+    width: 200px; height: 200px; border-radius: 50%; border: none;
     background: linear-gradient(135deg, #E6A3AF, #d48593);
-    color: #fff;
-    font-size: 24px;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    box-shadow:
-      0 10px 25px rgba(230, 163, 175, 0.5),
-      inset 0 2px 5px rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: transform 0.05s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    color: #fff; font-size: 24px; font-weight: bold; letter-spacing: 0.1em;
+    box-shadow: 0 10px 25px rgba(230, 163, 175, 0.5), inset 0 2px 5px rgba(255,255,255,0.4);
+    cursor: pointer; transition: transform 0.05s;
+    display: flex; justify-content: center; align-items: center; flex-direction: column;
   }
-  
-  .tap-game-btn:active {
-    transform: scale(0.95);
-    background: linear-gradient(135deg, #d48593, #E6A3AF);
-  }
-  
-  .tap-game-btn:disabled {
-    background: #ccc;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
+  .tap-game-btn:active { transform: scale(0.95); background: linear-gradient(135deg, #d48593, #E6A3AF); }
+  .tap-game-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
   .countdown-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.9);
-    display: none;
-    place-items: center;
-    font-size: 80px;
-    color: var(--gold-main);
-    font-weight: bold;
-    z-index: 10;
+    position: absolute; inset: 0; background: rgba(255,255,255,0.9);
+    display: none; place-items: center; font-size: 80px; color: var(--gold-main); font-weight: bold; z-index: 10;
   }
+
+  /* 結果入力エリア */
+  #gameResultArea { display: none; flex-direction: column; align-items: center; width: 100%; }
+  #gameNameInput { text-align: center; margin-bottom: 12px; padding: 10px; border: 1px solid rgba(122,78,84,0.3); border-radius: 999px; width: 80%; max-width: 240px; font-size: 16px; color: #5a3b40; font-family: "Yu Mincho", serif; background: rgba(255,255,255,0.8); }
+  #gameNameInput:focus { outline: none; border-color: var(--gold-main); box-shadow: 0 0 0 2px rgba(205, 161, 86, 0.2); }
 
   .ranking-list {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-    width: 100%;
-    max-width: 340px;
-    max-height: 50vh;
-    overflow-y: auto;
+    list-style: none; padding: 0; margin: 20px 0; width: 100%; max-width: 340px;
+    max-height: 50vh; overflow-y: auto;
   }
-
   .ranking-item {
-    display: grid;
-    grid-template-columns: 40px 1fr 60px;
-    align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(122,78,84,0.1);
+    display: grid; grid-template-columns: 40px 1fr 60px; align-items: center;
+    padding: 10px 12px; border-bottom: 1px solid rgba(122,78,84,0.1);
     font-size: 14px;
   }
-
   .rank-badge {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #eee;
-    color: #555;
-    display: grid;
-    place-items: center;
-    font-size: 12px;
-    font-weight: bold;
+    width: 24px; height: 24px; border-radius: 50%; background: #eee; color: #555;
+    display: grid; place-items: center; font-size: 12px; font-weight: bold;
   }
-
   .rank-1 .rank-badge { background: #cda156; color: #fff; box-shadow: 0 2px 5px rgba(205,161,86,0.4); }
   .rank-2 .rank-badge { background: #a0a0a0; color: #fff; }
   .rank-3 .rank-badge { background: #c49c88; color: #fff; }
-
-  .rank-name {
-    text-align: left;
-    font-weight: 600;
-    padding: 0 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .rank-score {
-    text-align: right;
-    font-weight: bold;
-    color: var(--text-main);
-  }
+  .rank-name { text-align: left; font-weight: 600; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rank-score { text-align: right; font-weight: bold; color: var(--text-main); }
 
   .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(205,161,86,0.3);
-    border-top-color: var(--gold-main);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
+    width: 40px; height: 40px; border: 3px solid rgba(205,161,86,0.3);
+    border-top-color: var(--gold-main); border-radius: 50%;
+    animation: spin 1s linear infinite; margin: 20px auto;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -879,7 +341,7 @@
     <p class="modal-msg" style="margin-top:16px;">
       おめでとうございます！<br>
       連打ミニゲームに挑戦しますか？<br>
-      （10秒間で何回タップできるか競争！）
+      （3秒間で何回タップできるか競争！）
     </p>
     <div class="modal-actions">
       <button class="modal-btn btn-cancel" id="gameDeclineBtn">やらない</button>
@@ -890,12 +352,19 @@
 
 <div class="game-screen" id="gameScreen">
   <div class="countdown-overlay" id="gameCountdown">3</div>
-  <div class="game-title">10秒連打チャレンジ！</div>
-  <div class="timer-display" id="gameTimer">10.00</div>
+  <div class="game-title">3秒連打チャレンジ！</div>
+  <div class="timer-display" id="gameTimer">3.00</div>
   <div class="score-display">SCORE: <span id="gameScore">0</span></div>
+  
   <button class="tap-game-btn" id="tapGameBtn" disabled>
     <span id="tapBtnText">WAIT</span>
   </button>
+
+  <div id="gameResultArea">
+    <p style="font-size:12px; color:#7e5b60; margin-bottom:8px;">ニックネームを入力してランキングへ</p>
+    <input type="text" id="gameNameInput" placeholder="名前" />
+    <button id="gameSubmitBtn" class="btn-main" style="width:200px;">ランキング登録</button>
+  </div>
 </div>
 
 <div class="ranking-screen" id="rankingScreen">
@@ -1003,6 +472,9 @@
   const gameScore = document.getElementById('gameScore');
   const tapGameBtn = document.getElementById('tapGameBtn');
   const tapBtnText = document.getElementById('tapBtnText');
+  const gameResultArea = document.getElementById('gameResultArea');
+  const gameNameInput = document.getElementById('gameNameInput');
+  const gameSubmitBtn = document.getElementById('gameSubmitBtn');
   const rankingScreen = document.getElementById('rankingScreen');
   const rankingListContainer = document.getElementById('rankingListContainer');
   const backToMainBtn = document.getElementById('backToMainBtn');
@@ -1172,6 +644,7 @@
     applyColor(hex);
   }
 
+  /* ========= 色適用 ========= */
   function applyColor(colorHex){
     currentColor = colorHex;
     if (colorInput && document.activeElement !== colorInput) {
@@ -1283,6 +756,10 @@
   satRange.addEventListener('input', updateFromSliders);
   lightRange.addEventListener('input', updateFromSliders);
 
+  /* === トリガーロジック: おまかせ -> KEEP === */
+  let lastActionWasRandom = false;
+  let omakaseKeepCombo = 0;
+
   randomBtn.addEventListener('click', () => {
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
@@ -1291,60 +768,90 @@
     if (colorInput) colorInput.value = hex;
     syncSlidersFromHex(hex);
     applyColor(hex);
+    
+    lastActionWasRandom = true;
   });
 
-  /* === KEEPボタン連打トリガー === */
+  /* === KEEPボタンロジック (通常+隠しコマンド) === */
   let keepTapCount = 0;
   let keepTapTimer = null;
+  const GAME_BAN_KEY = 'dress_game_ban_until';
+  let declineCount = 0;
 
   keepBtn.addEventListener('click', () => {
     triggerHaptic('medium');
     addStock(currentColor);
 
-    // 隠しコマンドロジック
+    // 1. おまかせ->KEEP の交互連打判定
+    if (lastActionWasRandom) {
+      omakaseKeepCombo++;
+      lastActionWasRandom = false; 
+      if (omakaseKeepCombo >= 7) {
+        omakaseKeepCombo = 0;
+        triggerGameInvite();
+        return;
+      }
+    } else {
+      omakaseKeepCombo = 0; 
+    }
+
+    // 2. KEEP単独連打判定 (10秒以内に7回)
     if (keepTapCount === 0) {
-      // 最初のタップから10秒カウント開始
       keepTapTimer = setTimeout(() => {
-        keepTapCount = 0; // 10秒経過でリセット
+        keepTapCount = 0; 
       }, 10000);
     }
-    
     keepTapCount++;
-
     if (keepTapCount >= 7) {
-      // 条件達成！
       clearTimeout(keepTapTimer);
       keepTapCount = 0;
-      // 少し遅らせてモーダル表示
-      setTimeout(() => {
-        gameInviteModal.classList.add('open');
-      }, 300);
+      triggerGameInvite();
     }
   });
 
-  // ゲーム招待キャンセル
+  function triggerGameInvite() {
+    // 拒否BANチェック
+    const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0');
+    if (Date.now() < banUntil) return;
+
+    // 0.4秒遅延
+    setTimeout(() => {
+      gameInviteModal.classList.add('open');
+    }, 400);
+  }
+
+  // ゲーム招待キャンセル (2回拒否で10分BAN)
   gameDeclineBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
+    declineCount++;
+    if (declineCount >= 2) {
+      const banUntil = Date.now() + 10 * 60 * 1000; // 10分
+      localStorage.setItem(GAME_BAN_KEY, banUntil);
+      declineCount = 0;
+    }
   });
 
   // ゲーム開始承諾
   gameAcceptBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
+    declineCount = 0; // 参加したらカウントリセット
     startGame();
   });
 
-  /* === ゲームロジック === */
+  /* === ゲームロジック (3秒版) === */
   let gameActive = false;
   let currentScore = 0;
-  let timeLeft = 10.00;
+  let timeLeft = 3.00;
   let gameInterval = null;
 
   function startGame() {
     gameScreen.classList.add('active');
+    gameResultArea.style.display = "none"; // 入力欄隠す
+    tapGameBtn.style.display = "flex"; // ボタン出す
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "READY";
     gameScore.textContent = "0";
-    gameTimer.textContent = "10.00";
+    gameTimer.textContent = "3.00";
     currentScore = 0;
     
     // カウントダウン
@@ -1369,7 +876,7 @@
 
   function startMainGame() {
     gameActive = true;
-    timeLeft = 10.00;
+    timeLeft = 3.00;
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
     
@@ -1378,7 +885,7 @@
     gameInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = (now - startTime) / 1000;
-      const remain = 10.00 - elapsed;
+      const remain = 3.00 - elapsed;
       
       if (remain <= 0) {
         gameTimer.textContent = "0.00";
@@ -1386,11 +893,10 @@
       } else {
         gameTimer.textContent = remain.toFixed(2);
       }
-    }, 33); // 約30fps
+    }, 33); 
   }
 
   tapGameBtn.addEventListener('click', (e) => {
-    // ボタンアニメーションのリセット（連打用）
     e.currentTarget.style.transform = "scale(0.9)";
     setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
 
@@ -1407,25 +913,25 @@
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "FINISH";
     
-    // 少し待ってからランキングへ
-    setTimeout(async () => {
-      gameScreen.classList.remove('active');
-      await submitAndShowRanking(currentScore);
-    }, 1500);
+    setTimeout(() => {
+      tapGameBtn.style.display = "none";
+      gameNameInput.value = nameInput.value;
+      gameResultArea.style.display = "flex";
+    }, 1000);
   }
 
-  /* === ランキングロジック === */
-  async function submitAndShowRanking(score) {
+  /* === ランキング登録ボタンクリック === */
+  gameSubmitBtn.addEventListener('click', async () => {
+    const finalName = gameNameInput.value.trim() || "名無しランカー";
+    await submitAndShowRanking(currentScore, finalName);
+  });
+
+  async function submitAndShowRanking(score, name) {
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
-
-    let name = nameInput.value.trim();
-    if (!name) name = "名無しゲスト";
     
-    // スコア送信 & ランキング取得
-    // GAS側で action=game_score を処理してもらう
     const payload = {
-      action: 'game_score', // GASでの分岐用
+      action: 'game_score',
       timestamp: new Date().toISOString(),
       name: name,
       score: score,
@@ -1457,7 +963,6 @@
 
     rankingListContainer.innerHTML = '';
     
-    // 自分のスコアをトップに簡易表示
     const meDiv = document.createElement('div');
     meDiv.style.marginBottom = "10px";
     meDiv.style.fontWeight = "bold";
@@ -1491,6 +996,7 @@
   // 元の画面に戻る
   backToMainBtn.addEventListener('click', () => {
     rankingScreen.classList.remove('active');
+    gameScreen.classList.remove('active');
   });
 
 
@@ -1594,7 +1100,7 @@
   }
 
   const PENDING_KEY = 'dress_pending_submissions';
-  const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbxMQgwCErKqdx6BcwnTnix2MPRDV-BeRGfqf79VZ2n4HaA4aolmsbg0-qonOtDRU4dTdA/exec';
+  const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbzgQzBzzvYbASv-wxf4IoGlx9Ta7-__1MTRoF-jiwSi7QokU2rTeQgznSPC2K1Gvv7c5g/exec';
 
   function enqueueSubmission(payload){
     let arr;
