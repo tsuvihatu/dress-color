@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1"
+  content="width=device-width, initial-scale=1.0"
 />
 <title>ドレスの色あてクイズ</title>
 
@@ -19,14 +19,18 @@
     --text-sub: #7e5b60;
   }
 
-  /* 全体設定：ダブルタップ拡大防止 */
+  /* 全体設定：ダブルタップ拡大防止、ピンチは許可 */
   html {
     touch-action: manipulation;
+    overflow-x: hidden; /* 横スクロール防止 */
+    height: 100%;
   }
 
   * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    /* すべての要素でダブルタップ拡大判定を無効化 */
+    touch-action: manipulation; 
   }
 
   body {
@@ -40,7 +44,10 @@
       linear-gradient(135deg, rgba(255,248,244,0.1), rgba(255,234,239,0.1)),
       #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
+    /* 全体のバウンススクロール防止 */
     overscroll-behavior-y: none;
+    overflow-x: hidden;
+    position: relative;
   }
 
   .card {
@@ -190,8 +197,14 @@
     background: radial-gradient(circle at center, #2b1f22 0%, #0f080a 100%);
     z-index: 20000;
     display: none; flex-direction: column; justify-content: center; align-items: center;
-    padding: 20px; /* ← 40pxから減らして余白を調整 */
+    padding: 20px;
+    
+    /* 修正箇所：スクロール挙動の改善 */
+    width: 100vw;
+    height: 100dvh; /* ビューポートの高さに合わせる */
     overflow-y: auto; 
+    overflow-x: hidden; /* 横スクロール完全禁止 */
+    overscroll-behavior: none; /* 端でのバウンス禁止 */
     -webkit-overflow-scrolling: touch;
   }
   .game-screen.active, .ranking-screen.active { display: flex; }
@@ -211,6 +224,7 @@
     font-size: 14px; letter-spacing: 0.15em; color: var(--gold-main); 
     margin-bottom: 20px; 
     font-family: "Yu Mincho", serif;
+    flex-shrink: 0;
   }
 
   .timer-display { 
@@ -218,11 +232,13 @@
     margin-bottom: 10px; font-variant-numeric: tabular-nums; 
     font-family: "Yu Mincho", serif;
     text-shadow: 0 0 15px rgba(255,255,255,0.4);
+    flex-shrink: 0;
   }
   
   .score-display { 
     font-size: 24px; color: rgba(255,255,255,0.9); 
     margin-bottom: 20px; font-family: "Yu Mincho", serif;
+    flex-shrink: 0;
   }
 
   /* ガラスボタン (元のスタイル) */
@@ -295,6 +311,8 @@
   #gameResultArea { 
     display: none; flex-direction: column; align-items: center; width: 100%; 
     position: relative; z-index: 10;
+    /* 縦レイアウトの調整 */
+    margin: auto 0;
   }
   #gameResultArea p { color: rgba(255,255,255,0.8); }
 
