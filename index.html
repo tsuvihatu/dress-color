@@ -21,7 +21,6 @@
 
   * {
     box-sizing: border-box;
-    /* タップ時のハイライトを無効化 */
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -39,7 +38,6 @@
     overscroll-behavior-y: none;
   }
 
-  /* 連打拡大防止 */
   button, input, .stock-dot, .color-chip-wrapper, .stock-area, .tap-game-btn {
     touch-action: manipulation;
   }
@@ -112,7 +110,6 @@
   .slider-label { font-size: 11px; letter-spacing: 0.08em; color: rgba(122,78,84,0.9); width: 56px; white-space: nowrap; font-weight: normal; }
   .slider-value { display: none; }
 
-  /* スライダー設定 (10px線, 25pxつまみ) */
   input[type="range"] { width: 100%; height: 10px; border-radius: 999px; -webkit-appearance: none; appearance: none; outline: none; cursor: pointer; background: rgba(255,255,255,0.7); border: 1px solid rgba(222,180,184,0.7); touch-action: none; }
   input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 999px; }
   input[type="range"]::-webkit-slider-thumb {
@@ -161,14 +158,12 @@
   .modal::after {
     content: ""; position: absolute; inset: 12px; border: 2px solid var(--gold-main); border-radius: 16px; pointer-events: none;
   }
-  /* デフォルトのラベル（CONFIRMATION） */
   .modal::before {
     content: "CONFIRMATION"; position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
     font-size: 9px; letter-spacing: 0.25em; color: var(--gold-main); font-family: serif; opacity: 0.8; pointer-events: none;
   }
-  /* ゲーム招待用ラベル上書き */
   #gameInviteModal .modal::before {
-    content: "SECRET"; /* ラベル変更 */
+    content: "SECRET"; 
   }
 
   .modal-overlay.open .modal { transform: scale(1); }
@@ -188,39 +183,145 @@
   .toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(10px); background: rgba(90,59,64,0.95); color: #fff; font-size: 12px; padding: 9px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; z-index: 9999; border: 1px solid rgba(255,255,255,0.9); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* === ゲーム・ランキング画面用スタイル === */
+  /* === ゲーム画面 === */
   .game-screen, .ranking-screen {
-    position: fixed; inset: 0; background: #fdfcf8; z-index: 20000;
+    position: fixed; inset: 0; 
+    background: radial-gradient(circle at center, #2b1f22 0%, #0f080a 100%);
+    z-index: 20000;
     display: none; flex-direction: column; justify-content: center; align-items: center;
     padding: 20px; text-align: center;
+    overflow: hidden;
   }
   .game-screen.active, .ranking-screen.active { display: flex; }
 
-  .game-title { font-size: 14px; letter-spacing: 0.15em; color: var(--gold-main); margin-bottom: 20px; }
-  .timer-display { font-size: 48px; font-weight: bold; color: var(--text-main); margin-bottom: 10px; font-variant-numeric: tabular-nums; }
-  .score-display { font-size: 24px; color: var(--text-sub); margin-bottom: 30px; }
-  
-  .tap-game-btn {
-    width: 200px; height: 200px; border-radius: 50%; border: none;
-    background: linear-gradient(135deg, #E6A3AF, #d48593);
-    color: #fff; font-size: 24px; font-weight: bold; letter-spacing: 0.1em;
-    box-shadow: 0 10px 25px rgba(230, 163, 175, 0.5), inset 0 2px 5px rgba(255,255,255,0.4);
-    cursor: pointer; transition: transform 0.05s;
-    display: flex; justify-content: center; align-items: center; flex-direction: column;
+  /* 背景アニメーション */
+  .game-screen::before {
+    content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(205, 161, 86, 0.15), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(230, 163, 175, 0.15), transparent 40%);
+    animation: floatLight 15s infinite linear;
+    pointer-events: none; z-index: -1;
   }
-  .tap-game-btn:active { transform: scale(0.95); background: linear-gradient(135deg, #d48593, #E6A3AF); }
-  .tap-game-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+  @keyframes floatLight { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+  .game-title { 
+    font-size: 14px; letter-spacing: 0.15em; color: var(--gold-main); 
+    margin-bottom: 20px; 
+    font-family: "Yu Mincho", serif;
+  }
+
+  .timer-display { 
+    font-size: 48px; font-weight: bold; color: #fff; 
+    margin-bottom: 10px; font-variant-numeric: tabular-nums; 
+    font-family: "Yu Mincho", serif;
+    text-shadow: 0 0 15px rgba(255,255,255,0.4);
+  }
+  
+  .score-display { 
+    font-size: 24px; color: rgba(255,255,255,0.9); 
+    margin-bottom: 20px; font-family: "Yu Mincho", serif;
+  }
+
+  /* ガラスボタン (元のスタイル) */
+  .tap-game-btn {
+    width: 240px; height: 240px; border-radius: 50%; 
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    color: #fff; font-size: 24px; font-weight: bold; letter-spacing: 0.1em;
+    /* 影の範囲を狭く調整 */
+    box-shadow: 
+      0 0 15px rgba(230, 163, 175, 0.25),
+      inset 0 0 12px rgba(255,255,255,0.1);
+    cursor: pointer; transition: all 0.1s ease;
+    display: flex; justify-content: center; align-items: center; flex-direction: column;
+    position: relative; overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    font-family: "Yu Mincho", serif;
+  }
+  
+  .tap-game-btn:active { 
+    transform: scale(0.96); 
+    background: rgba(255, 255, 255, 0.15);
+    /* 押した時も少し控えめに */
+    box-shadow: 0 0 30px rgba(230, 163, 175, 0.5), inset 0 0 20px rgba(255,255,255,0.3);
+  }
+  .tap-game-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+  /* 飾り用のエネルギーリング（結果画面用） */
+  .decoration-wrapper {
+    position: relative; width: 240px; height: 240px; margin: 0 auto 16px;
+  }
+  .energy-ring-deco {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 15px rgba(230, 163, 175, 0.2);
+    animation: ringBreath 3s ease-in-out infinite;
+  }
+  .energy-ring-deco::before {
+    content: ""; position: absolute; inset: -2px; border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: rgba(205, 161, 86, 0.8);
+    border-bottom-color: rgba(205, 161, 86, 0.1);
+    animation: ringSpin 8s linear infinite;
+  }
+  @keyframes ringBreath {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+  }
+  @keyframes ringSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .particle {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: #fff; pointer-events: none;
+    box-shadow: 0 0 6px #fff, 0 0 12px var(--accent);
+  }
 
   .countdown-overlay {
-    position: absolute; inset: 0; background: rgba(255,255,255,0.9);
-    display: none; place-items: center; font-size: 80px; color: var(--gold-main); font-weight: bold; z-index: 10;
+    position: absolute; inset: 0; background: rgba(15,8,10,0.85);
+    backdrop-filter: blur(5px);
+    display: none; place-items: center; font-size: 80px; 
+    color: var(--gold-main); font-weight: bold; z-index: 10;
+    font-family: "Yu Mincho", serif;
   }
 
   /* 結果入力エリア */
-  #gameResultArea { display: none; flex-direction: column; align-items: center; width: 100%; }
-  #gameNameInput { text-align: center; margin-bottom: 12px; padding: 10px; border: 1px solid rgba(122,78,84,0.3); border-radius: 999px; width: 80%; max-width: 240px; font-size: 16px; color: #5a3b40; font-family: "Yu Mincho", serif; background: rgba(255,255,255,0.8); }
-  #gameNameInput:focus { outline: none; border-color: var(--gold-main); box-shadow: 0 0 0 2px rgba(205, 161, 86, 0.2); }
+  #gameResultArea { 
+    display: none; flex-direction: column; align-items: center; width: 100%; 
+    position: relative; z-index: 10;
+  }
+  #gameResultArea p { color: rgba(255,255,255,0.8); }
 
+  /* 入力欄とボタンの幅統一 (240px) */
+  #gameNameInput { 
+    text-align: center; margin-bottom: 12px; padding: 10px; 
+    border: 1px solid rgba(255,255,255,0.5); border-radius: 999px; 
+    width: 240px; max-width: 240px; box-sizing: border-box;
+    font-size: 16px; 
+    color: #5a3b40; font-family: "Yu Mincho", serif; background: rgba(255,255,255,0.9); 
+  }
+  #gameNameInput:focus { border-color: var(--gold-main); background: #fff; outline: none; }
+
+  .btn-game-submit {
+    width: 240px; max-width: 240px; box-sizing: border-box;
+  }
+
+  /* 再挑戦ボタンの間隔を広げる */
+  .btn-retry {
+    background: transparent; color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.4);
+    margin-top: 24px; /* 間隔を広げた */
+    font-size: 12px; padding: 11px 14px;
+    width: 240px; max-width: 240px; box-sizing: border-box;
+  }
+  .btn-retry:active { background: rgba(255,255,255,0.1); }
+
+  /* ランキング画面 */
+  .ranking-screen { background: #fdfcf8; color: #5a3b40; } 
   .ranking-list {
     list-style: none; padding: 0; margin: 20px 0; width: 100%; max-width: 340px;
     max-height: 50vh; overflow-y: auto;
@@ -361,9 +462,15 @@
   </button>
 
   <div id="gameResultArea">
-    <p style="font-size:12px; color:#7e5b60; margin-bottom:8px;">ニックネームを入力してランキングへ</p>
+    <div class="decoration-wrapper">
+      <div class="energy-ring-deco"></div>
+    </div>
+    
+    <p style="font-size:12px; margin-bottom:8px;">ニックネームを入力してランキングへ</p>
     <input type="text" id="gameNameInput" placeholder="名前" />
-    <button id="gameSubmitBtn" class="btn-main" style="width:200px;">ランキング登録</button>
+    <button id="gameSubmitBtn" class="btn-main btn-game-submit">ランキング登録</button>
+    
+    <button id="retryGameBtn" class="btn-ghost btn-retry">もう一度挑戦する</button>
   </div>
 </div>
 
@@ -475,6 +582,7 @@
   const gameResultArea = document.getElementById('gameResultArea');
   const gameNameInput = document.getElementById('gameNameInput');
   const gameSubmitBtn = document.getElementById('gameSubmitBtn');
+  const retryGameBtn = document.getElementById('retryGameBtn'); 
   const rankingScreen = document.getElementById('rankingScreen');
   const rankingListContainer = document.getElementById('rankingListContainer');
   const backToMainBtn = document.getElementById('backToMainBtn');
@@ -896,34 +1004,111 @@
     }, 33); 
   }
 
-  tapGameBtn.addEventListener('click', (e) => {
-    e.currentTarget.style.transform = "scale(0.9)";
-    setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
-
-    if (gameActive) {
-      currentScore++;
-      gameScore.textContent = currentScore;
-      triggerHaptic('light');
-    }
-  });
-
   async function finishGame() {
     clearInterval(gameInterval);
     gameActive = false;
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "FINISH";
     
+    // ボタンの非表示を遅延させるが、リングは残す
     setTimeout(() => {
-      tapGameBtn.style.display = "none";
+      tapGameBtn.style.display = "none"; 
       gameNameInput.value = nameInput.value;
       gameResultArea.style.display = "flex";
     }, 1000);
   }
 
+  /* --- パーティクル・演出 --- */
+  function spawnParticles(x, y) {
+    const particleCount = 8; // 一度に出る数
+    const colors = ['#fff', '#E6A3AF', '#cda156', '#fffdf5'];
+
+    for (let i = 0; i < particleCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      
+      // ランダムな色とサイズ
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      const size = Math.random() * 6 + 2; // 2px ~ 8px
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      
+      // 発生位置
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      
+      document.body.appendChild(p);
+
+      // アニメーション (Web Animations API)
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 100 + 60; // 飛び散る距離
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity;
+
+      const anim = p.animate([
+        { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+      ], {
+        duration: Math.random() * 400 + 400, // 0.4~0.8秒
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+      });
+
+      anim.onfinish = () => p.remove();
+    }
+  }
+
+  function createRipple(x, y, parent) {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.position = 'absolute';
+    ripple.style.borderRadius = '50%';
+    ripple.style.border = '2px solid rgba(255,255,255,0.6)';
+    ripple.style.width = '100%'; 
+    ripple.style.height = '100%';
+    ripple.style.top = '0';
+    ripple.style.left = '0';
+    ripple.style.pointerEvents = 'none';
+    
+    parent.appendChild(ripple);
+
+    const anim = ripple.animate([
+       { transform: 'scale(1)', opacity: 1, borderWidth: '2px' },
+       { transform: 'scale(1.5)', opacity: 0, borderWidth: '0px' }
+    ], { duration: 500, easing: 'ease-out' });
+    
+    anim.onfinish = () => ripple.remove();
+  }
+
+  tapGameBtn.addEventListener('click', (e) => {
+    // ボタンのへこみ演出
+    e.currentTarget.style.transform = "scale(0.95)";
+    setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
+
+    if (gameActive) {
+      currentScore++;
+      gameScore.textContent = currentScore;
+      triggerHaptic('light');
+
+      // 演出の追加
+      const rect = tapGameBtn.getBoundingClientRect();
+      const x = e.clientX || (rect.left + rect.width / 2);
+      const y = e.clientY || (rect.top + rect.height / 2);
+
+      spawnParticles(x, y);
+      createRipple(x, y, tapGameBtn);
+    }
+  });
+
   /* === ランキング登録ボタンクリック === */
   gameSubmitBtn.addEventListener('click', async () => {
     const finalName = gameNameInput.value.trim() || "名無しランカー";
     await submitAndShowRanking(currentScore, finalName);
+  });
+
+  // リトライボタンクリック
+  retryGameBtn.addEventListener('click', () => {
+    gameResultArea.style.display = 'none'; // 入力欄隠す
+    startGame(); // ゲーム再開
   });
 
   async function submitAndShowRanking(score, name) {
@@ -1100,7 +1285,7 @@
   }
 
   const PENDING_KEY = 'dress_pending_submissions';
-  const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbzgQzBzzvYbASv-wxf4IoGlx9Ta7-__1MTRoF-jiwSi7QokU2rTeQgznSPC2K1Gvv7c5g/exec';
+  const ENDPOINT_URL = 'https://script.google.com/macros/s/AKfycbxMQgwCErKqdx6BcwnTnix2MPRDV-BeRGfqf79VZ2n4HaA4aolmsbg0-qonOtDRU4dTdA/exec';
 
   function enqueueSubmission(payload){
     let arr;
