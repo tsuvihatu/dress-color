@@ -184,11 +184,12 @@
     box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3);
   }
 
+  /* === スライダーエリア === */
   .slider-group {
     margin-bottom: 4px;
     background: rgba(255,242,245,0.96);
-    padding: 14px 14px 8px;
-    border-radius: 16px;
+    padding: 10px 10px 4px; /* 元のパディングに戻しました */
+    border-radius: 14px;
     border: 1px solid rgba(230,163,175,0.5);
     box-shadow: inset 0 1px 4px rgba(160,110,120,0.05);
   }
@@ -196,9 +197,9 @@
   .slider-row {
     display: grid;
     grid-template-columns: 56px 1fr;
-    column-gap: 12px;
+    column-gap: 8px; /* 元の間隔に戻しました */
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 11px; /* 元の間隔に戻しました */
   }
 
   .slider-row:last-child {
@@ -206,21 +207,22 @@
   }
 
   .slider-label {
-    font-size: 12px;
+    font-size: 11px; /* 元のサイズに戻しました */
     letter-spacing: 0.08em;
     color: rgba(122,78,84,0.9);
     width: 56px;
     white-space: nowrap;
-    font-weight: bold;
+    font-weight: normal; /* 太字解除 */
   }
 
   .slider-value {
     display: none;
   }
 
+  /* === スライダー本体（サイズを元に戻しつつ、デザインは維持） === */
   input[type="range"] {
     width: 100%;
-    height: 12px;
+    height: 8px; /* 12px -> 8px に戻す */
     border-radius: 999px;
     -webkit-appearance: none;
     appearance: none;
@@ -232,58 +234,64 @@
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
-    height: 12px;
+    height: 8px; /* 12px -> 8px に戻す */
     border-radius: 999px;
   }
 
-  /* === つまみのデザイン調整（二重丸に変更） === */
+  /* つまみのデザイン（サイズを18pxに戻し、二重丸デザインは維持） */
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 26px;
-    height: 26px;
+    width: 18px;  /* 26px -> 18px に戻す */
+    height: 18px; /* 26px -> 18px に戻す */
     border-radius: 50%;
     background: #ffffff;
-    /* 外側の枠線 */
-    border: 1px solid rgba(210,145,155,0.6);
-    /* box-shadowで内側の二重線を表現 */
+    /* 外枠 */
+    border: 1px solid rgba(210,145,155,0.9);
+    /* 二重丸デザイン（サイズに合わせてinset値を調整） */
     box-shadow:
-      0 1px 4px rgba(160,110,120,0.4),       /* 外側の影 */
-      inset 0 0 0 2px #ffffff,               /* 白い隙間 */
-      inset 0 0 0 3.5px rgba(210,145,155,0.5); /* 内側の色付きリング */
-    transform: translateY(-8px);
+      0 1px 3px rgba(160,110,120,0.4),          /* 影 */
+      inset 0 0 0 1.5px #ffffff,                /* 白い隙間 (2px -> 1.5px) */
+      inset 0 0 0 3px rgba(210,145,155,0.5);    /* 内側のリング (3.5px -> 3px) */
+    
+    transform: translateY(-5px); /* (Track8px - Thumb18px)/2 = -5px */
     transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.1s ease;
   }
 
   input[type="range"]:active::-webkit-slider-thumb {
-    transform: translateY(-8px) scale(1.1);
-    /* アクティブ時は色を濃くする */
+    transform: translateY(-5px) scale(1.15); /* 小さいので少し拡大率アップ */
     border-color: var(--gold-main);
     box-shadow:
-      0 2px 8px rgba(160,110,120,0.6),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 3.5px var(--gold-main);
+      0 2px 6px rgba(160,110,120,0.6),
+      inset 0 0 0 1.5px #ffffff,
+      inset 0 0 0 3px var(--gold-main);
   }
 
-  /* Firefox用も同様に */
+  /* Firefox用 */
+  input[type="range"]::-moz-range-track {
+    height: 8px;
+    border-radius: 999px;
+  }
+
   input[type="range"]::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #ffffff;
-    border: 1px solid rgba(210,145,155,0.6);
+    border: 1px solid rgba(210,145,155,0.9);
     box-shadow:
-      0 1px 4px rgba(160,110,120,0.4),
-      inset 0 0 0 2px #ffffff,
-      inset 0 0 0 3.5px rgba(210,145,155,0.5);
+      0 1px 3px rgba(160,110,120,0.4),
+      inset 0 0 0 1.5px #ffffff,
+      inset 0 0 0 3px rgba(210,145,155,0.5);
   }
+  
   input[type="range"]:active::-moz-range-thumb {
-      border-color: var(--gold-main);
-      box-shadow:
-        0 2px 8px rgba(160,110,120,0.6),
-        inset 0 0 0 2px #ffffff,
-        inset 0 0 0 3.5px var(--gold-main);
+    border-color: var(--gold-main);
+    box-shadow:
+      0 2px 6px rgba(160,110,120,0.6),
+      inset 0 0 0 1.5px #ffffff,
+      inset 0 0 0 3px var(--gold-main);
   }
-  /* === つまみのデザイン調整終了 === */
+  /* === スライダーデザイン終了 === */
 
   #hueRange {
     background: linear-gradient(to right,
