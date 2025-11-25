@@ -1646,10 +1646,10 @@
       // 3. 指を離したり止まったりして「0.3秒」経過したら、計測をリセット
       sliderGapTimer = setTimeout(() => {
         sliderStartTime = 0;
-      }, 300); // 0.3秒の猶予
+      }, 700); // 0.7秒の猶予
 
-      // 4. 開始時刻から「3.0秒(3000ms)」経過していれば発動
-      if (Date.now() - sliderStartTime >= 3000) {
+      // 4. 開始時刻から「2.5秒(2500ms)」経過していれば発動
+      if (Date.now() - sliderStartTime >= 2500) {
         sliderStartTime = 0; // 重複発動防止のためリセット
         resetTriggerCounters();
         triggerGameInvite();
