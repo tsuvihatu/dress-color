@@ -507,7 +507,7 @@
     <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
       連打ミニゲームに挑戦しますか？<br>
       7秒間で何回タップできるか競争！<br>
-      <span style="font-size: 100%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
+      <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
     <p style="font-size: 11px; color: #999; margin-bottom: 24px;">
        ※ゲーム終了後、元の画面に戻って投票できます
@@ -1049,6 +1049,11 @@
   let keepTapCount = 0;
   // let keepTapTimer = null; // タイマーは不要になったので使いません
   const GAME_BAN_KEY = 'dress_game_ban_until';
+  
+  // ★ 新規: 永久停止キー & 確認抑制キー
+  const PERMANENT_BAN_KEY = 'dress_game_permanent_ban';
+  const SUPPRESS_CONFIRM_KEY = 'dress_game_suppress_confirm';
+  
   let declineCount = 0;
 
   keepBtn.addEventListener('click', () => {
@@ -1090,6 +1095,9 @@
   const TOTAL_SECRETS = 7; 
 
   function triggerGameInvite(discoveryId) {
+    // ★ 変更: 永久停止チェック
+    if (localStorage.getItem(PERMANENT_BAN_KEY)) return;
+
     // 禁止時間チェック
     const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0', 10);
     if (!isNaN(banUntil) && Date.now() < banUntil) return;
@@ -1139,12 +1147,35 @@
   gameDeclineBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
     declineCount++;
-    if (declineCount >= 2) {
-      const banUntil = Date.now() + 3 * 60 * 1000;
-      localStorage.setItem(GAME_BAN_KEY, String(banUntil));
-      declineCount = 0;
+    
+    // ★ 変更: 2回拒否時のロジック
+    const isSuppressed = localStorage.getItem(SUPPRESS_CONFIRM_KEY);
+    
+    if (!isSuppressed && declineCount >= 2) {
+      // モーダルが閉じるのを少し待ってからconfirmを出す
+      setTimeout(() => {
+        const stopShowing = confirm(
+          "裏モードの起動条件が見つかるたびに通知が表示されます。\n" +
+          "今後、この通知を表示しないようにしますか？\n\n" +
+          "「OK」：通知をオフにする（ゲーム無効化）\n" +
+          "「キャンセル」：通知は続ける"
+        );
+
+        if (stopShowing) {
+          // はい（永久停止）
+          localStorage.setItem(PERMANENT_BAN_KEY, 'true');
+          alert("裏モードの通知をオフにしました。");
+        } else {
+          // いいえ（確認抑制＆ゲーム継続）
+          localStorage.setItem(SUPPRESS_CONFIRM_KEY, 'true');
+          declineCount = 0; // カウントリセット
+        }
+      }, 300);
+    } else {
+      // 通常のクールダウン処理 (一時BAN)
+      // ここではシンプルにリセットのみにして、次回もすぐ出るようにしておく（いいえ選択時の挙動に合わせるため）
+      resetTriggerCounters();
     }
-    resetTriggerCounters();
   });
 
   gameAcceptBtn.addEventListener('click', () => {
