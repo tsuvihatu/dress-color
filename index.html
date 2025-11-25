@@ -93,7 +93,7 @@
   }
 
   .tagline { margin: 0 0 4px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(140,90,100,0.7); }
-  h2 { margin: 0; font-weight: 600; color: #4a2f33; letter-spacing: 0.12em; font-size: 20px; }
+  h2 { margin: 0; font-weight: 600; color: #4a2f33; letter-spacing: 0.12em; font-size: 22px; }
   .card-sub { margin: 8px 0 12px; font-size: 12px; color: rgba(122,78,84,0.9); text-align: center; letter-spacing: 0.04em; }
 
   .dress-display { margin: 6px 0 16px; display: grid; place-items: center; }
@@ -977,6 +977,9 @@
   /* === トリガーロジック: おまかせ -> KEEP === */
   let lastActionWasRandom = false;
   let omakaseKeepCombo = 0;
+  // 追加: おまかせ連打用
+  let omakaseTapCount = 0;
+  let omakaseTapTimer = null;
 
   randomBtn.addEventListener('click', () => {
     const h = Math.random() * 360;
@@ -988,6 +991,22 @@
     applyColor(hex);
     
     lastActionWasRandom = true;
+
+    // ▼ 追加ロジック ▼
+    omakaseTapCount++;
+
+    // タイマーリセット（連打が途切れたら0に戻す）
+    if (omakaseTapTimer) clearTimeout(omakaseTapTimer);
+    omakaseTapTimer = setTimeout(() => {
+      omakaseTapCount = 0;
+    }, 10000); // 10秒猶予
+
+    // 20回で発動
+    if (omakaseTapCount >= 20) {
+      omakaseTapCount = 0;
+      resetTriggerCounters();
+      triggerGameInvite();
+    }
   });
 
   /* === KEEPボタンロジック (通常+隠しコマンド) === */
@@ -1359,6 +1378,8 @@
     dotTapCount = 0;
     sliderShakeCount = 0; // 追加
     titleTapCount = 0; // 追加
+    dressTapCount = 0; // 追加
+    omakaseTapCount = 0; // 追加
     lastActionWasRandom = false;
   }
 
@@ -1602,8 +1623,8 @@
   }
   
   /* === スライダーガチャガチャ用変数 === */
-  let sliderShakeCount = 0;
-  let sliderShakeTimer = null;
+  let sliderStartTime = 0;   // 動き始めた時刻
+  let sliderGapTimer = null; // 途切れ判定用タイマー
 
   [hueRange, satRange, lightRange].forEach(range => {
     let lastVal = parseInt(range.value, 10);
@@ -1612,17 +1633,24 @@
       if (currentVal % 10 === 0 && currentVal !== lastVal) { triggerHaptic('light'); }
       lastVal = currentVal;
 
-      /* === 追加: スライダーガチャガチャ検知 === */
-      sliderShakeCount++;
-      if (sliderShakeTimer) clearTimeout(sliderShakeTimer);
-      // 2秒間に一定回数以上の入力イベントが起きたら発火
-      sliderShakeTimer = setTimeout(() => {
-        sliderShakeCount = 0;
-      }, 2500);
+      /* === 修正: 3.5秒間動かし続けたら発動 === */
+      
+      // 1. まだ計測が始まっていなければ（またはリセットされていたら）、開始時刻を記録
+      if (sliderStartTime === 0) {
+        sliderStartTime = Date.now();
+      }
 
-      // 閾値: 2秒間に30回以上のイベント発火（かなり激しく動かす必要がある）
-      if (sliderShakeCount >= 40) {
-        sliderShakeCount = 0;
+      // 2. 「途切れ判定」タイマーをクリア（動かし続けている限りリセットされ続ける）
+      if (sliderGapTimer) clearTimeout(sliderGapTimer);
+
+      // 3. 指を離したり止まったりして「0.3秒」経過したら、計測をリセット
+      sliderGapTimer = setTimeout(() => {
+        sliderStartTime = 0;
+      }, 300); // 0.3秒の猶予
+
+      // 4. 開始時刻から「3.5秒(3500ms)」経過していれば発動
+      if (Date.now() - sliderStartTime >= 3500) {
+        sliderStartTime = 0; // 重複発動防止のためリセット
         resetTriggerCounters();
         triggerGameInvite();
       }
@@ -1662,10 +1690,39 @@
       if (titleTapTimer) clearTimeout(titleTapTimer);
       titleTapTimer = setTimeout(() => {
         titleTapCount = 0;
-      }, 2000); // 2秒以内に連打
+      }, 5000); // 2秒以内に連打
 
       if (titleTapCount >= 5) {
         titleTapCount = 0;
+        resetTriggerCounters();
+        triggerGameInvite();
+      }
+    });
+  }
+
+  /* === 追加: ドレス連打でゲーム起動 === */
+  let dressTapCount = 0;
+  let dressTapTimer = null;
+
+  if (dressWrapper) {
+    dressWrapper.addEventListener('click', () => {
+      triggerHaptic('light');
+      
+      dressWrapper.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(0.95)' },
+        { transform: 'scale(1)' }
+      ], { duration: 100 });
+
+      dressTapCount++;
+      
+      if (dressTapTimer) clearTimeout(dressTapTimer);
+      dressTapTimer = setTimeout(() => {
+        dressTapCount = 0;
+      }, 5000);
+
+      if (dressTapCount >= 5) {
+        dressTapCount = 0;
         resetTriggerCounters();
         triggerGameInvite();
       }
