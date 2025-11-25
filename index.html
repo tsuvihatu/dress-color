@@ -513,11 +513,13 @@
       <button id="gameSubmitBtn" class="btn-main btn-game-submit">ランキング登録</button>
       
       <button id="retryGameBtn" class="btn-ghost btn-retry">もう一度挑戦する</button>
-    </div>
-    <!-- ▼ reCAPTCHA 用コンテナ（追加） ▼ -->
+      
+      <p id="skipRegisterBtn" style="margin-top: 16px; font-size: 12px; text-decoration: underline; color: rgba(255,255,255,0.6); cursor: pointer; letter-spacing: 0.05em;">
+        登録せずにランキングを見る
+      </p>
+      </div>
     <div id="gameRecaptcha" style="display:none;"></div>
-    <!-- ▲ reCAPTCHA 用コンテナ（追加） ▲ -->
-  </div>
+    </div>
 </div>
 
 <div class="ranking-screen" id="rankingScreen">
@@ -688,6 +690,8 @@
   const rankingListContainer = document.getElementById('rankingListContainer');
   const backToMainBtn = document.getElementById('backToMainBtn');
   const myScoreDisplay = document.getElementById('myScoreDisplay');
+  // 追加DOM
+  const skipRegisterBtn = document.getElementById('skipRegisterBtn');
 
   /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
@@ -1258,14 +1262,30 @@
     startGame();
   });
 
-  async function submitAndShowRankingWithToken(score, name, recaptchaToken) {
+  // ▼ 追加イベント: 登録せずにランキングを見る ▼
+  if (skipRegisterBtn) {
+    skipRegisterBtn.addEventListener('click', () => {
+      // 名前入力欄リセット
+      gameNameInput.value = "";
+      // 登録しないモード(get_ranking)で送信関数を呼ぶ
+      // 名前は保存されないので適当な文字列でOK
+      submitAndShowRankingWithToken(currentScore, "Guest", "", "get_ranking");
+    });
+  }
+
+  // ▼ 変更: actionType 引数を追加 ▼
+  async function submitAndShowRankingWithToken(score, name, recaptchaToken, actionType = 'game_score') {
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     
-    if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
+    if(myScoreDisplay) {
+      // 登録しない場合は「(未登録)」などを添えると親切（任意）
+      const note = actionType === 'get_ranking' ? ' (未登録)' : '';
+      myScoreDisplay.textContent = `あなたのスコア: ${score}回${note}`;
+    }
 
     const payload = {
-      action: 'game_score',
+      action: actionType, // 引数で受け取ったアクションを指定
       timestamp: new Date().toISOString(),
       name: name,
       score: score,
