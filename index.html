@@ -455,7 +455,7 @@
     
     <div class="field">
       <label for="nameInput" style="display:flex; align-items:center; gap:6px;">
-      <input type="text" id="nameInput" placeholder="例）山田花子" />
+      <input type="text" id="nameInput" placeholder="例）山田花子" maxlength="10" />
     </div>
   </div>
 
@@ -695,7 +695,7 @@
 
   /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
-  const MAX_NAME_LENGTH = 50;
+  const MAX_NAME_LENGTH = 10;
 
   const RATE_LIMIT_KEY = 'dress_rate_limit';
   const RATE_LIMIT_MAX = 5;
