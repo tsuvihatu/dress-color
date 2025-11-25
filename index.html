@@ -1650,7 +1650,7 @@
       // 3. 指を離したり止まったりして「0.3秒」経過したら、計測をリセット
       sliderGapTimer = setTimeout(() => {
         sliderStartTime = 0;
-      }, 700); // 0.7秒の猶予
+      }, 400); // 0.4秒の猶予
 
       // 4. 開始時刻から「3.5秒(3500ms)」経過していれば発動
       if (Date.now() - sliderStartTime >= 3500) {
