@@ -1700,34 +1700,6 @@
     });
   }
 
-  /* === 追加: ドレス連打でゲーム起動 === */
-  let dressTapCount = 0;
-  let dressTapTimer = null;
-
-  if (dressWrapper) {
-    dressWrapper.addEventListener('click', () => {
-      triggerHaptic('light');
-      
-      dressWrapper.animate([
-        { transform: 'scale(1)' },
-        { transform: 'scale(0.95)' },
-        { transform: 'scale(1)' }
-      ], { duration: 100 });
-
-      dressTapCount++;
-      
-      if (dressTapTimer) clearTimeout(dressTapTimer);
-      dressTapTimer = setTimeout(() => {
-        dressTapCount = 0;
-      }, 5000);
-
-      if (dressTapCount >= 5) {
-        dressTapCount = 0;
-        resetTriggerCounters();
-        triggerGameInvite();
-      }
-    });
-  }
 </script>
 <script src="https://www.google.com/recaptcha/api.js?onload=onGameRecaptchaLoad&render=explicit" async defer></script>
 </body>
