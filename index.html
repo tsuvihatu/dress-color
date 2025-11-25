@@ -1615,13 +1615,13 @@
       /* === 追加: スライダーガチャガチャ検知 === */
       sliderShakeCount++;
       if (sliderShakeTimer) clearTimeout(sliderShakeTimer);
-      // 1秒間に一定回数以上の入力イベントが起きたら発火
+      // 2秒間に一定回数以上の入力イベントが起きたら発火
       sliderShakeTimer = setTimeout(() => {
         sliderShakeCount = 0;
-      }, 1000);
+      }, 2000);
 
-      // 閾値: 1秒間に30回以上のイベント発火（かなり激しく動かす必要がある）
-      if (sliderShakeCount >= 10) {
+      // 閾値: 2秒間に30回以上のイベント発火（かなり激しく動かす必要がある）
+      if (sliderShakeCount >= 40) {
         sliderShakeCount = 0;
         resetTriggerCounters();
         triggerGameInvite();
