@@ -42,7 +42,7 @@
       #fdfcf8 url('file_back.jpg') center/cover no-repeat fixed;
     font-weight: 600;
     overscroll-behavior-y: none;
-    padding: 24px 0; /* 【修正3】上下にスペースを空ける */
+    padding: 24px 0;
   }
 
   .card {
@@ -152,14 +152,14 @@
   /* === モーダル共通 === */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(60, 40, 45, 0.5); display: none; place-items: center; z-index: 10000; opacity: 0; transition: opacity 0.2s ease; backdrop-filter: blur(5px);
-    padding: 24px; /* 【修正3】モーダルが画面端に張り付かないように余白追加 */
+    padding: 24px;
     box-sizing: border-box;
   }
   .modal-overlay.open { display: grid; opacity: 1; }
   .modal {
     background: #fffcfb; width: 100%; max-width: 340px; padding: 40px 28px 32px; border-radius: 24px; text-align: center;
     transform: scale(0.94); transition: transform 0.2s ease; position: relative;
-    margin: auto; /* 余白内で中央配置 */
+    margin: auto;
   }
   .modal::after {
     content: ""; position: absolute; inset: 12px; border: 2px solid var(--gold-main); border-radius: 16px; pointer-events: none;
@@ -205,7 +205,6 @@
     flex-direction: column;
   }
 
-  /* コンテンツをラップしてmargin:autoで中央配置 */
   .scroll-content-wrapper {
     margin: auto;
     width: 100%;
@@ -365,7 +364,6 @@
   .rank-name { text-align: left; font-weight: 600; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rank-score { text-align: right; font-weight: bold; color: var(--text-main); }
 
-  /* 【修正1】自分のスコア用の固定表示クラス */
   .my-score-fixed {
     margin: 0 auto 10px;
     font-weight: bold;
@@ -383,9 +381,17 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Bot対策用ハニーポット(不可視) */
+  #hp_container { display: none; visibility: hidden; opacity: 0; position: absolute; left: -9999px; }
+
 </style>
 </head>
 <body>
+
+<div id="hp_container">
+  <label for="honeypot">Please leave this blank</label>
+  <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
+</div>
 
 <div class="card">
   <header class="card-header">
@@ -504,6 +510,7 @@
       
       <p style="font-size:12px; margin-bottom:8px;">名前を入力してランキングへ</p>
       <input type="text" id="gameNameInput" placeholder="名前" />
+      <input type="text" id="gameNameInput" placeholder="名前" maxlength="10" />
       <button id="gameSubmitBtn" class="btn-main btn-game-submit">ランキング登録</button>
       
       <button id="retryGameBtn" class="btn-ghost btn-retry">もう一度挑戦する</button>
@@ -526,6 +533,27 @@
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
+  /* ========= セキュリティ・ユーティリティ ========= */
+  // XSS対策: 入力値のサニタイズ
+  function sanitizeInput(str) {
+    if (!str) return "";
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // 簡易署名生成 (簡易的な改ざん検知用)
+  // ※本来はサーバー側で行うべきですが、GAS単体の構成なので
+  // フロントエンドで簡易ハッシュを生成し、少しでも解析を面倒にします。
+  async function generateSignature(data) {
+    const secret = "WEDDING_SECRET_SALT_2025"; // 解析されればバレますが、カジュアルな攻撃は防げます
+    const msg = JSON.stringify(data) + secret;
+    const msgBuffer = new TextEncoder().encode(msg);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
   /* ========= 色変換ユーティリティ ========= */
   function hexToRgb(hex){
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -603,6 +631,7 @@
   const stockArea    = document.getElementById('stockArea');
   const nameInput    = document.getElementById('nameInput');
   const toast        = document.getElementById('toast');
+  const honeypot     = document.getElementById('honeypot'); // ハニーポット
 
   const confirmModal = document.getElementById('confirmModal');
   const modalBody    = document.getElementById('modalBody');
@@ -626,7 +655,7 @@
   const rankingScreen = document.getElementById('rankingScreen');
   const rankingListContainer = document.getElementById('rankingListContainer');
   const backToMainBtn = document.getElementById('backToMainBtn');
-  const myScoreDisplay = document.getElementById('myScoreDisplay'); // 【修正1】参照追加
+  const myScoreDisplay = document.getElementById('myScoreDisplay');
 
   /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
@@ -978,7 +1007,7 @@
       localStorage.setItem(GAME_BAN_KEY, banUntil);
       declineCount = 0;
     }
-    resetTriggerCounters(); // 【修正5】戻ってきた時にリセット
+    resetTriggerCounters();
   });
 
   // ゲーム開始承諾
@@ -988,11 +1017,12 @@
     startGame();
   });
 
-  /* === ゲームロジック (5秒版) === */
+  /* === ゲームロジック (5秒版 + Anti-Cheat) === */
   let gameActive = false;
   let currentScore = 0;
   let timeLeft = 5.00;
   let gameInterval = null;
+  let gameStartTime = 0; // 不正対策: 開始時間記録
 
   function startGame() {
     gameScreen.classList.add('active');
@@ -1030,6 +1060,7 @@
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
     
+    gameStartTime = Date.now(); // 厳密な開始時刻
     const startTime = Date.now();
     
     gameInterval = setInterval(() => {
@@ -1143,14 +1174,34 @@
 
   /* === ランキング登録ボタンクリック === */
   gameSubmitBtn.addEventListener('click', async () => {
-    let finalName = gameNameInput.value.trim();
-    // 【修正2】名前入力なし時のポップアップとデフォルト登録
+    // Bot対策: ハニーポットチェック
+    if (honeypot.value !== "") {
+      alert("Error: Bot detected.");
+      return;
+    }
+
+    let finalName = sanitizeInput(gameNameInput.value.trim()); // 名前をサニタイズ
+    const GAME_NAME_MAX = 10; // ここで文字数制限を設定
+      if (finalName.length > GAME_NAME_MAX) {
+        alert(`名前は${GAME_NAME_MAX}文字以内で入力してください`);
+        return;
+      }
     if (!finalName) {
       if (!confirm("名前が入力されていません。\n「名無しのゲスト」として登録しますか？")) {
         return; // キャンセルの場合は入力に戻る
       }
       finalName = "名無しのゲスト";
     }
+
+    // 不正対策: スコア妥当性チェック
+    // 5秒で80回（秒間16連打）を超えるのは人間にはほぼ不可能。
+    const durationSec = (Date.now() - gameStartTime) / 1000;
+    const maxPossible = Math.ceil(durationSec * 20) + 10; // バッファ込みで秒間20許容
+    if (currentScore > maxPossible) {
+      alert("エラー：異常なスコアを検知しました。");
+      return;
+    }
+
     await submitAndShowRanking(currentScore, finalName);
   });
 
@@ -1164,7 +1215,6 @@
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     
-    // 【修正1】リスト更新前に自分のスコアを更新
     if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
 
     const payload = {
@@ -1174,6 +1224,10 @@
       score: score,
       clientId: CLIENT_ID
     };
+
+    // 署名生成
+    const signature = await generateSignature(payload);
+    payload.signature = signature;
 
     try {
       const body = new URLSearchParams(payload).toString();
@@ -1200,7 +1254,6 @@
 
     rankingListContainer.innerHTML = '';
     
-    // 【修正1】リスト内への自分のスコア追加は削除し、リストのみ生成
     list.forEach((item, index) => {
       const row = document.createElement('div');
       row.className = `ranking-item rank-${index+1}`;
@@ -1211,6 +1264,7 @@
       
       const nameDiv = document.createElement('div');
       nameDiv.className = 'rank-name';
+      // XSS対策: textContentで安全に挿入
       nameDiv.textContent = item.name;
       
       const scoreDiv = document.createElement('div');
@@ -1228,10 +1282,10 @@
   backToMainBtn.addEventListener('click', () => {
     rankingScreen.classList.remove('active');
     gameScreen.classList.remove('active');
-    resetTriggerCounters(); // 【修正5】戻ってきた時にリセット
+    resetTriggerCounters(); 
   });
 
-  /* 【修正5】カウンターリセット関数 */
+  /* カウンターリセット関数 */
   function resetTriggerCounters() {
     omakaseKeepCombo = 0;
     keepTapCount = 0;
@@ -1240,7 +1294,6 @@
   }
 
   /* === 通常機能 === */
-  // 【修正4】キープ色の連打用変数
   let dotTapCount = 0;
   let dotTapTimer = null;
 
@@ -1264,7 +1317,7 @@
       newDot.style.transform = 'scale(1.2)';
       setTimeout(()=> newDot.style.transform = '', 200);
 
-      // 【修正4】キープ色連打トリガー
+      // キープ色連打トリガー
       if (dotTapTimer) clearTimeout(dotTapTimer);
       dotTapTimer = setTimeout(() => {
         dotTapCount = 0;
@@ -1402,7 +1455,13 @@
   }
 
   submitBtn.addEventListener('click', () => {
-    let name = nameInput.value.trim();
+    // Bot対策: ハニーポットチェック
+    if (honeypot.value !== "") {
+      alert("Error: Bot detected.");
+      return;
+    }
+    
+    let name = sanitizeInput(nameInput.value.trim()); // サニタイズ
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
     if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
@@ -1444,7 +1503,7 @@
 
   finalSendBtn.addEventListener('click', async () => {
     confirmModal.classList.remove('open');
-    const name = nameInput.value.trim().replace(/[\u0000-\u001F\u007F]/g, '');
+    const name = sanitizeInput(nameInput.value.trim().replace(/[\u0000-\u001F\u007F]/g, ''));
     const rl = checkRateLimit();
     if (!rl.canSubmit) { showToast(formatWaitMessage(rl.waitMs)); return; }
     registerSubmit(rl.history);
@@ -1457,6 +1516,11 @@
       userAgent: navigator.userAgent,
       clientId: CLIENT_ID
     };
+
+    // 署名付与
+    const signature = await generateSignature(payload);
+    payload.signature = signature;
+
     const ok = await sendPayload(ENDPOINT_URL, payload);
     if (!ok) enqueueSubmission(payload);
     showToast('投票を送信しました');
