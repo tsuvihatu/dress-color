@@ -1001,8 +1001,8 @@
       omakaseTapCount = 0;
     }, 10000); // 10秒猶予
 
-    // 20回で発動
-    if (omakaseTapCount >= 20) {
+    // 15回で発動
+    if (omakaseTapCount >= 15) {
       omakaseTapCount = 0;
       resetTriggerCounters();
       triggerGameInvite();
@@ -1648,8 +1648,8 @@
         sliderStartTime = 0;
       }, 300); // 0.3秒の猶予
 
-      // 4. 開始時刻から「3.5秒(3500ms)」経過していれば発動
-      if (Date.now() - sliderStartTime >= 3500) {
+      // 4. 開始時刻から「3.0秒(3000ms)」経過していれば発動
+      if (Date.now() - sliderStartTime >= 3000) {
         sliderStartTime = 0; // 重複発動防止のためリセット
         resetTriggerCounters();
         triggerGameInvite();
