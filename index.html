@@ -1226,7 +1226,7 @@
       recaptchaFallbackTimer = null;
     }
 
-    // reCAPTCHA が使える場合は実行し、5秒で帰ってこなければフォールバック
+    // reCAPTCHA が使える場合は実行し、1秒で帰ってこなければフォールバック
     if (typeof grecaptcha !== 'undefined' && gameRecaptchaWidgetId !== null) {
       try {
         recaptchaFallbackTimer = setTimeout(() => {
@@ -1237,7 +1237,7 @@
             // ★ トークンなしで強制送信（サーバ側で recaptchaToken='' をどう扱うかは.gs側のロジック次第）
             submitAndShowRankingWithToken(score, name, '');
           }
-        }, 5000); // 5秒待っても返ってこなければフォールバック
+        }, 1000); // 1秒待っても返ってこなければフォールバック
 
         grecaptcha.execute(gameRecaptchaWidgetId);
       } catch (e) {
