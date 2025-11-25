@@ -32,6 +32,8 @@
 
   html {
     touch-action: manipulation; /* 念のためhtmlにも指定 */
+    user-select: none; /* 長押し選択防止（タグライン長押し用） */
+    -webkit-user-select: none;
   }
 
   body {
@@ -92,14 +94,22 @@
     background: linear-gradient(90deg, transparent, rgba(205, 161, 86,0.6), transparent);
   }
 
-  .tagline { margin: 0 0 4px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(140,90,100,0.7); }
+  .tagline { 
+    margin: 0 0 4px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(140,90,100,0.7); 
+    cursor: pointer; position: relative; display: inline-block;
+  }
+  .tagline.pressing { color: var(--gold-main); transform: scale(1.05); transition: transform 0.2s; }
+
   h2 { margin: 0; font-weight: 600; color: #4a2f33; letter-spacing: 0.12em; font-size: 22px; }
   .card-sub { margin: 8px 0 12px; font-size: 12px; color: rgba(122,78,84,0.9); text-align: center; letter-spacing: 0.04em; }
 
   .dress-display { margin: 6px 0 16px; display: grid; place-items: center; }
-  .dress-wrapper { position: relative; width: 230px; height: 290px; max-width: 100%; }
-  #dressObj { width: 100%; height: 100%; border: 0; display: block; position: relative; z-index: 1; }
-  #dressImg { width: 100%; height: 100%; display: none; object-fit: contain; position: relative; z-index: 1; }
+  .dress-wrapper { 
+    position: relative; width: 230px; height: 290px; max-width: 100%; 
+    cursor: pointer; 
+  }
+  #dressObj { width: 100%; height: 100%; border: 0; display: block; position: relative; z-index: 1; pointer-events: none; }
+  #dressImg { width: 100%; height: 100%; display: none; object-fit: contain; position: relative; z-index: 1; pointer-events: none; }
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 12px; color: #7a4e54; margin-bottom: 6px; letter-spacing: 0.04em; }
@@ -108,6 +118,7 @@
     border-bottom: 1px solid rgba(122,78,84,0.5); background: transparent;
     color: #5a3b40; font-size: 16px; outline: none; font-family: "Yu Mincho", serif;
     transition: border-bottom-color 0.3s ease; text-align: center;
+    user-select: text; -webkit-user-select: text;
   }
   .field input[type="text"]:focus { border-bottom: 2px solid var(--gold-main); box-shadow: 0 5px 10px -5px rgba(205, 161, 86, 0.3); }
 
@@ -378,6 +389,15 @@
     flex-shrink: 0;
   }
 
+  /* シークレット状態表示 */
+  #discoveryStatus {
+    margin-top: 20px;
+    font-size: 10px;
+    text-align: center;
+    color: rgba(122,78,84,0.5);
+    letter-spacing: 0.05em;
+  }
+
   .loading-spinner {
     width: 40px; height: 40px; border: 3px solid rgba(205,161,86,0.3);
     border-top-color: var(--gold-main); border-radius: 50%;
@@ -489,6 +509,9 @@
       7秒間で何回タップできるか競争！<br>
       <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
+    <p style="font-size: 11px; color: #999; margin-bottom: 24px;">
+       ※ゲーム終了後、元の画面に戻って投票できます
+    </p>
     <div class="modal-actions">
       <button class="modal-btn btn-cancel" id="gameDeclineBtn">やらない</button>
       <button class="modal-btn btn-confirm" id="gameAcceptBtn">挑戦する！</button>
@@ -534,7 +557,10 @@
     <div id="rankingListContainer" class="ranking-list">
       <div class="loading-spinner"></div>
     </div>
+    
     <button class="btn-main" id="backToMainBtn" style="max-width:200px;">戻る</button>
+    
+    <div id="discoveryStatus"></div>
   </div>
 </div>
 
@@ -545,7 +571,7 @@
   // === reCAPTCHA (ゲーム用) ===
   let gameRecaptchaWidgetId = null;
   let pendingGameSubmit = null;
-  // ★ 追加: reCAPTCHA が返ってこないとき用のフォールバックタイマー
+  // ★ reCAPTCHA が返ってこないとき用のフォールバックタイマー
   let recaptchaFallbackTimer = null;
 
   function onGameRecaptchaLoad() {
@@ -724,6 +750,8 @@
 
   let currentColor = COLORS[0];
   let currentL = 0.7;
+  // ★ 追加: 操作検知フラグ
+  let hasInteracted = false; 
 
   function setChipColor(hex){
     if (colorChip) colorChip.style.background = hex;
@@ -852,6 +880,9 @@
   }
 
   function updateFromSliders(){
+    // ★ 変更: スライダー操作を検知
+    hasInteracted = true;
+
     const h = parseFloat(hueRange.value);
     const s = parseFloat(satRange.value) / 100;
     const l = parseFloat(lightRange.value) / 100;
@@ -964,6 +995,8 @@
 
   if (colorInput) {
     colorInput.addEventListener('input', e => {
+      // ★ 変更: カラーピッカー操作を検知
+      hasInteracted = true;
       const val = e.target.value;
       syncSlidersFromHex(val);
       applyColor(val);
@@ -982,6 +1015,9 @@
   let omakaseTapTimer = null;
 
   randomBtn.addEventListener('click', () => {
+    // ★ 変更: ボタン操作を検知
+    hasInteracted = true;
+    
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
     const l = 0.6 + Math.random() * 0.3;
@@ -1005,7 +1041,7 @@
     if (omakaseTapCount >= 13) {
       omakaseTapCount = 0;
       resetTriggerCounters();
-      triggerGameInvite();
+      triggerGameInvite('random'); // 修正: discoveryId 追加
     }
   });
 
@@ -1016,6 +1052,9 @@
   let declineCount = 0;
 
   keepBtn.addEventListener('click', () => {
+    // ★ 変更: ボタン操作を検知
+    hasInteracted = true;
+    
     triggerHaptic('medium');
     addStock(currentColor);
 
@@ -1025,7 +1064,7 @@
       lastActionWasRandom = false; 
       if (omakaseKeepCombo >= 7) {
         omakaseKeepCombo = 0;
-        triggerGameInvite();
+        triggerGameInvite('combo'); // 修正: discoveryId 追加
         return;
       }
     } else {
@@ -1041,16 +1080,60 @@
     if (keepTapCount >= 13) {
       keepTapCount = 0;
       resetTriggerCounters();
-      triggerGameInvite();
+      triggerGameInvite('keep'); // 修正: discoveryId 追加
     }
   });
 
-  function triggerGameInvite() {
+  /* === シークレット発見トラッキング === */
+  const DISCOVERY_KEY = 'dress_game_discoveries';
+  // random, keep, combo, slider, title, dot, default (計7種類)
+  const TOTAL_SECRETS = 7; 
+
+  function triggerGameInvite(discoveryId) {
+    // 禁止時間チェック
     const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0', 10);
     if (!isNaN(banUntil) && Date.now() < banUntil) return;
+    
+    // 発見を記録
+    if (discoveryId) {
+      let discovered = [];
+      try {
+        discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]');
+        if (!Array.isArray(discovered)) discovered = [];
+      } catch(e) { discovered = []; }
+
+      if (!discovered.includes(discoveryId)) {
+        discovered.push(discoveryId);
+        localStorage.setItem(DISCOVERY_KEY, JSON.stringify(discovered));
+      }
+    }
+
     setTimeout(() => {
       gameInviteModal.classList.add('open');
     }, 500);
+  }
+
+  function updateDiscoveryUI() {
+    const el = document.getElementById('discoveryStatus');
+    if (!el) return;
+    
+    let discovered = [];
+    try {
+      discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]');
+    } catch(e) { discovered = []; }
+    
+    const count = discovered.length;
+    const remain = TOTAL_SECRETS - count;
+
+    if (remain <= 0) {
+      el.innerHTML = '🎉 裏モード起動条件コンプリート！おめでとうございます！ 🎉';
+      el.style.color = '#cda156'; // Gold
+      el.style.fontWeight = 'bold';
+    } else {
+      el.innerHTML = `裏モード起動条件: 残り ${remain} パターン`;
+      el.style.color = 'rgba(122,78,84,0.5)';
+      el.style.fontWeight = 'normal';
+    }
   }
 
   gameDeclineBtn.addEventListener('click', () => {
@@ -1306,6 +1389,9 @@
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     
+    // シークレット状況更新
+    updateDiscoveryUI();
+
     if(myScoreDisplay) {
       myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
     }
@@ -1404,6 +1490,9 @@
     newDot.style.opacity = '0'; 
     
     newDot.addEventListener('click', () => {
+      // ★ 変更: ドット操作を検知
+      hasInteracted = true;
+      
       triggerHaptic('light'); 
       applyColor(hex);
       syncSlidersFromHex(hex);
@@ -1418,7 +1507,7 @@
       if (dotTapCount >= 7) {
         dotTapCount = 0;
         resetTriggerCounters();
-        triggerGameInvite();
+        triggerGameInvite('dot'); // 修正: discoveryId 追加
       }
     });
 
@@ -1557,6 +1646,23 @@
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
     if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
+
+    // ★ 追加: 初期状態のまま送ろうとした場合、投票データは送らずシークレットへ
+    if (!hasInteracted) {
+       // 既に発見済みかどうかチェック
+       let discovered = [];
+       try {
+         discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]');
+       } catch(e){}
+
+       // まだ発見していない（初回）なら、投票を中断してシークレットへ
+       if (!discovered.includes('default')) {
+          triggerGameInvite('default');
+          return; 
+       }
+       // 発見済みなら、そのままスルーして下の確認画面へ進む（投票可能）
+    }
+
     modalBody.innerHTML = '';
     const previewContainer = document.createElement('div');
     previewContainer.className = 'modal-preview-box';
@@ -1656,7 +1762,7 @@
       if (Date.now() - sliderStartTime >= 3500) {
         sliderStartTime = 0; // 重複発動防止のためリセット
         resetTriggerCounters();
-        triggerGameInvite();
+        triggerGameInvite('slider'); // 修正: discoveryId 追加
       }
     });
   });
@@ -1699,7 +1805,7 @@
       if (titleTapCount >= 5) {
         titleTapCount = 0;
         resetTriggerCounters();
-        triggerGameInvite();
+        triggerGameInvite('title'); // 修正: discoveryId 追加
       }
     });
   }
