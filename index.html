@@ -509,7 +509,7 @@
       </div>
       
       <p style="font-size:12px; margin-bottom:8px;">名前を入力してランキングへ</p>
-      <input type="text" id="gameNameInput" placeholder="名前" maxlength="10" />
+      <input type="text" id="gameNameInput" placeholder="例）山田花子" maxlength="10" />
       <button id="gameSubmitBtn" class="btn-main btn-game-submit">ランキング登録</button>
       
       <button id="retryGameBtn" class="btn-ghost btn-retry">もう一度挑戦する</button>
@@ -972,19 +972,14 @@
       omakaseKeepCombo = 0; 
     }
 
-    // 2. KEEP単独連打判定 (10秒以内に7回)
-    if (keepTapCount === 0) {
-      keepTapTimer = setTimeout(() => {
-        keepTapCount = 0; 
-      }, 10000);
-    }
-    keepTapCount++;
-    if (keepTapCount >= 10) {
-      clearTimeout(keepTapTimer);
-      keepTapCount = 0;
-      triggerGameInvite();
-    }
-  });
+    // 2. KEEP単独連打判定 (7回)
+  keepTapCount++;
+
+      if (keepTapCount >= 7) {
+        keepTapCount = 0;
+        triggerGameInvite();
+      }
+    });
 
   function triggerGameInvite() {
     // 拒否BANチェック
@@ -1322,7 +1317,7 @@
         dotTapCount = 0;
       }, 10000); // 10秒以内に
       dotTapCount++;
-      if (dotTapCount >= 10) {
+      if (dotTapCount >= 7) {
         dotTapCount = 0;
         triggerGameInvite();
       }
