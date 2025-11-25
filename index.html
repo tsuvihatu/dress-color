@@ -514,6 +514,9 @@
       
       <button id="retryGameBtn" class="btn-ghost btn-retry">もう一度挑戦する</button>
     </div>
+    <!-- ▼ reCAPTCHA 用コンテナ（追加） ▼ -->
+    <div id="gameRecaptcha" style="display:none;"></div>
+    <!-- ▲ reCAPTCHA 用コンテナ（追加） ▲ -->
   </div>
 </div>
 
@@ -533,6 +536,29 @@
 
 <script>
   /* ========= セキュリティ・ユーティリティ ========= */
+  // === reCAPTCHA (ゲーム用) ===
+  let gameRecaptchaWidgetId = null;
+  let pendingGameSubmit = null;
+
+  function onGameRecaptchaLoad() {
+    if (!window.grecaptcha) return;
+    gameRecaptchaWidgetId = grecaptcha.render('gameRecaptcha', {
+      sitekey: '6LfPqxcsAAAAAPeYLBqjvMKiwO1IT15jOLvzJ_Mr', // ★ここにサイトキーをセット
+      size: 'invisible',
+      callback: onGameRecaptchaSuccess
+    });
+  }
+
+  function onGameRecaptchaSuccess(token) {
+    if (!pendingGameSubmit) return;
+    submitAndShowRankingWithToken(
+      pendingGameSubmit.score,
+      pendingGameSubmit.name,
+      token
+    );
+    pendingGameSubmit = null;
+  }
+
   // XSS対策: 入力値のサニタイズ
   function sanitizeInput(str) {
     if (!str) return "";
@@ -781,20 +807,20 @@
     const sPercent = clamp01(s) * 100;
     const lPercent = clamp01(l) * 100;
 
-    const satStart = `hsl(${h}, 0%, ${lPercent}%)`;
-    const satEnd   = `hsl(${h}, 100%, ${lPercent}%)`;
+    const satStart = hsl(${h}, 0%, ${lPercent}%);
+    const satEnd   = hsl(${h}, 100%, ${lPercent}%);
     satRange.style.background =
-      `linear-gradient(to right, ${satStart}, ${satEnd})`;
+      linear-gradient(to right, ${satStart}, ${satEnd});
 
-    const lightStart = `hsl(${h}, ${sPercent}%, 0%)`;
-    const lightMid   = `hsl(${h}, ${sPercent}%, 50%)`;
-    const lightEnd   = `hsl(${h}, ${sPercent}%, 100%)`;
+    const lightStart = hsl(${h}, ${sPercent}%, 0%);
+    const lightMid   = hsl(${h}, ${sPercent}%, 50%);
+    const lightEnd   = hsl(${h}, ${sPercent}%, 100%);
     lightRange.style.background =
-      `linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd})`;
+      linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd});
 
-    if (hueValue)   hueValue.textContent   = `${Math.round(h)}°`;
-    if (satValue)   satValue.textContent   = `${Math.round(clamp01(s) * 100)}%`;
-    if (lightValue) lightValue.textContent = `${Math.round(clamp01(l) * 100)}%`;
+    if (hueValue)   hueValue.textContent   = ${Math.round(h)}°;
+    if (satValue)   satValue.textContent   = ${Math.round(clamp01(s) * 100)}%;
+    if (lightValue) lightValue.textContent = ${Math.round(clamp01(l) * 100)}%;
   }
 
   function syncSlidersFromHex(hex){
@@ -837,7 +863,7 @@
     document.documentElement.style.setProperty('--accent', colorHex);
     document.documentElement.style.setProperty(
       '--accent-soft',
-      `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`
+      rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)
     );
     if (colorHexLabel) {
       colorHexLabel.textContent = colorHex.toUpperCase();
@@ -905,7 +931,7 @@
     if (mode === 'fallback') {
       if (baseHSL.s < 0.05) {
         const brightness = 0.4 + 1.2 * baseHSL.l;
-        dressImg.style.filter = `grayscale(1) brightness(${brightness})`;
+        dressImg.style.filter = grayscale(1) brightness(${brightness});
       } else {
         const hueRotate = baseHSL.h;
         const sat       = 0.6 + baseHSL.s;
@@ -916,7 +942,7 @@
           brightness = 0.85 + (baseHSL.l - 0.5) * 0.7;
         }
         dressImg.style.filter =
-          `hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness})`;
+          hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness});
       }
     }
   }
@@ -1114,7 +1140,7 @@
 
       const anim = p.animate([
         { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+        { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0), opacity: 0 }
       ], {
         duration: Math.random() * 400 + 400, // 0.4~0.8秒
         easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
@@ -1176,10 +1202,10 @@
 
     let finalName = sanitizeInput(gameNameInput.value.trim()); // 名前をサニタイズ
     const GAME_NAME_MAX = 10; // ここで文字数制限を設定
-      if (finalName.length > GAME_NAME_MAX) {
-        alert(`名前は${GAME_NAME_MAX}文字以内で入力してください`);
-        return;
-      }
+    if (finalName.length > GAME_NAME_MAX) {
+      alert(`名前は${GAME_NAME_MAX}文字以内で入力してください`);
+      return;
+    }
     if (!finalName) {
       if (!confirm("名前が入力されていません。\n「名無しのゲスト」として登録しますか？")) {
         return; // キャンセルの場合は入力に戻る
@@ -1196,7 +1222,19 @@
       return;
     }
 
-    await submitAndShowRanking(currentScore, finalName);
+    // reCAPTCHA 用に一時保存
+    pendingGameSubmit = {
+      score: currentScore,
+      name: finalName
+    };
+
+    if (typeof grecaptcha !== 'undefined' && gameRecaptchaWidgetId !== null) {
+      // invisible reCAPTCHA 実行
+      grecaptcha.execute(gameRecaptchaWidgetId);
+    } else {
+      // reCAPTCHA が利用できない場合のフォールバック
+      await submitAndShowRankingWithToken(currentScore, finalName, '');
+    }
   });
 
   // リトライボタンクリック
@@ -1205,7 +1243,7 @@
     startGame(); // ゲーム再開
   });
 
-  async function submitAndShowRanking(score, name) {
+  async function submitAndShowRankingWithToken(score, name, recaptchaToken) {
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     
@@ -1216,7 +1254,8 @@
       timestamp: new Date().toISOString(),
       name: name,
       score: score,
-      clientId: CLIENT_ID
+      clientId: CLIENT_ID,
+      recaptchaToken: recaptchaToken || ''
     };
 
     // 署名生成
@@ -1250,7 +1289,7 @@
     
     list.forEach((item, index) => {
       const row = document.createElement('div');
-      row.className = `ranking-item rank-${index+1}`;
+      row.className = ranking-item rank-${index+1};
       
       const badge = document.createElement('div');
       badge.className = 'rank-badge';
@@ -1395,9 +1434,9 @@
 
   function formatWaitMessage(ms){
     const sec = Math.ceil(ms / 1000);
-    if (sec < 60) return `${sec}秒後に再度お試しください`;
+    if (sec < 60) return ${sec}秒後に再度お試しください;
     const min = Math.ceil(sec / 60);
-    return `${min}分後に再度お試しください`;
+    return ${min}分後に再度お試しください;
   }
 
   const PENDING_KEY = 'dress_pending_submissions';
@@ -1457,7 +1496,7 @@
     
     let name = sanitizeInput(nameInput.value.trim()); // サニタイズ
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
-    if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
+    if (name.length > MAX_NAME_LENGTH) { alert(お名前は${MAX_NAME_LENGTH}文字以内で入力してください); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
     modalBody.innerHTML = '';
     const previewContainer = document.createElement('div');
@@ -1502,7 +1541,7 @@
     if (!rl.canSubmit) { showToast(formatWaitMessage(rl.waitMs)); return; }
     registerSubmit(rl.history);
     const rgb = hexToRgb(currentColor);
-    const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
+    const colorToSend = rgb ? ${rgb.r}, ${rgb.g}, ${rgb.b} : currentColor;
     const payload = {
       timestamp: new Date().toISOString(),
       name: name,
@@ -1548,5 +1587,6 @@
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
   applyColor(currentColor);
 </script>
+<script src="https://www.google.com/recaptcha/api.js?onload=onGameRecaptchaLoad&render=explicit" async defer></script>
 </body>
 </html>
