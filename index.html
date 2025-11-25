@@ -1279,8 +1279,7 @@
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     
     if(myScoreDisplay) {
-      const note = actionType === 'get_ranking' ? ' (未登録)' : '';
-      myScoreDisplay.textContent = `あなたのスコア: ${score}回$`;
+      myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
     }
 
     const payload = {
