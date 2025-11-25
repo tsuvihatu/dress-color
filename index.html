@@ -1011,7 +1011,7 @@
 
   /* === KEEPボタンロジック (通常+隠しコマンド) === */
   let keepTapCount = 0;
-  let keepTapTimer = null;
+  // let keepTapTimer = null; // タイマーは不要になったので使いません
   const GAME_BAN_KEY = 'dress_game_ban_until';
   let declineCount = 0;
 
@@ -1019,11 +1019,11 @@
     triggerHaptic('medium');
     addStock(currentColor);
 
-    // 1. おまかせ->KEEP の交互連打判定
+    // 1. おまかせ->KEEP の交互連打判定（ここはそのまま）
     if (lastActionWasRandom) {
       omakaseKeepCombo++;
       lastActionWasRandom = false; 
-      if (omakaseKeepCombo >= 5) {
+      if (omakaseKeepCombo >= 6) {
         omakaseKeepCombo = 0;
         triggerGameInvite();
         return;
@@ -1032,11 +1032,15 @@
       omakaseKeepCombo = 0; 
     }
 
-    // 2. KEEP単独連打判定 (5回)
+    // 2. KEEP単独連打判定 (修正: 累積15回で発動・時間制限なし)
     keepTapCount++;
-    if (keepTapCount >= 5) {
-      resetTriggerCounters();
+
+    // タイマーリセット処理を削除しました。
+    // これにより、途中で止めてもカウントは維持されます。
+
+    if (keepTapCount >= 13) {
       keepTapCount = 0;
+      resetTriggerCounters();
       triggerGameInvite();
     }
   });
