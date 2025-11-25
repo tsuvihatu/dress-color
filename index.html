@@ -482,7 +482,7 @@
     <h3>隠しモード発見！</h3>
     <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
       連打ミニゲームに挑戦しますか？<br>
-      5秒間で何回タップできるか競争！<br>
+      7秒間で何回タップできるか競争！<br>
       <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
     <div class="modal-actions">
@@ -495,7 +495,7 @@
 <div class="game-screen" id="gameScreen">
   <div class="scroll-content-wrapper">
     <div class="countdown-overlay" id="gameCountdown">3</div>
-    <div class="game-title">5秒連打チャレンジ！</div>
+    <div class="game-title">7秒連打チャレンジ！</div>
     <div class="timer-display" id="gameTimer">3.00</div>
     <div class="score-display">SCORE: <span id="gameScore">0</span></div>
     
@@ -1042,10 +1042,10 @@
     startGame();
   });
 
-  /* === ゲームロジック (5秒版 + Anti-Cheat) === */
+  /* === ゲームロジック (7秒版 + Anti-Cheat) === */
   let gameActive = false;
   let currentScore = 0;
-  let timeLeft = 5.00;
+  let timeLeft = 7.00;
   let gameInterval = null;
   let gameStartTime = 0;
 
@@ -1056,7 +1056,7 @@
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "READY";
     gameScore.textContent = "0";
-    gameTimer.textContent = "5.00";
+    gameTimer.textContent = "7.00";
     currentScore = 0;
     
     let count = 3;
@@ -1080,7 +1080,7 @@
 
   function startMainGame() {
     gameActive = true;
-    timeLeft = 5.00;
+    timeLeft = 7.00;
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
     
@@ -1090,7 +1090,7 @@
     gameInterval = setInterval(() => {
       const now = Date.now();
       const elapsed = (now - startTime) / 1000;
-      const remain = 5.00 - elapsed;
+      const remain = 7.00 - elapsed;
       
       if (remain <= 0) {
         gameTimer.textContent = "0.00";
