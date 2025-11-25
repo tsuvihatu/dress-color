@@ -539,6 +539,8 @@
   // === reCAPTCHA (ゲーム用) ===
   let gameRecaptchaWidgetId = null;
   let pendingGameSubmit = null;
+  // ★ 追加: reCAPTCHA が返ってこないとき用のフォールバックタイマー
+  let recaptchaFallbackTimer = null;
 
   function onGameRecaptchaLoad() {
     if (!window.grecaptcha) return;
@@ -550,13 +552,20 @@
   }
 
   function onGameRecaptchaSuccess(token) {
+    // reCAPTCHA が正常終了したときだけ呼ばれる
     if (!pendingGameSubmit) return;
-    submitAndShowRankingWithToken(
-      pendingGameSubmit.score,
-      pendingGameSubmit.name,
-      token
-    );
+
+    // フォールバックタイマーが動いていたら止める
+    if (recaptchaFallbackTimer !== null) {
+      clearTimeout(recaptchaFallbackTimer);
+      recaptchaFallbackTimer = null;
+    }
+
+    const { score, name } = pendingGameSubmit;
     pendingGameSubmit = null;
+
+    // reCAPTCHA のトークン付きで送信
+    submitAndShowRankingWithToken(score, name, token);
   }
 
   // XSS対策: 入力値のサニタイズ
@@ -1177,42 +1186,72 @@
 
   /* === ランキング登録ボタンクリック === */
   gameSubmitBtn.addEventListener('click', async () => {
+    // Bot対策: ハニーポットチェック
     if (honeypot.value !== "") {
       alert("Error: Bot detected.");
       return;
     }
 
-    let finalName = sanitizeInput(gameNameInput.value.trim());
-    const GAME_NAME_MAX = 10;
+    let finalName = sanitizeInput(gameNameInput.value.trim()); // 名前をサニタイズ
+    const GAME_NAME_MAX = 10; // ここで文字数制限を設定
     if (finalName.length > GAME_NAME_MAX) {
       alert(`名前は${GAME_NAME_MAX}文字以内で入力してください`);
       return;
     }
     if (!finalName) {
       if (!confirm("名前が入力されていません。\n「名無しのゲスト」として登録しますか？")) {
-        return;
+        return; // キャンセルの場合は入力に戻る
       }
       finalName = "名無しのゲスト";
     }
 
+    // 不正対策: スコア妥当性チェック
+    // 5秒で80回（秒間16連打）を超えるのは人間にはほぼ不可能。
     const durationSec = (Date.now() - gameStartTime) / 1000;
-    const maxPossible = Math.ceil(durationSec * 20) + 10;
+    const maxPossible = Math.ceil(durationSec * 20) + 10; // バッファ込みで秒間20許容
     if (currentScore > maxPossible) {
       alert("エラー：異常なスコアを検知しました。");
       return;
     }
 
+    // reCAPTCHA 用に一時保存
     pendingGameSubmit = {
       score: currentScore,
       name: finalName
     };
 
+    // すでに動いているフォールバックタイマーがあればクリア
+    if (recaptchaFallbackTimer !== null) {
+      clearTimeout(recaptchaFallbackTimer);
+      recaptchaFallbackTimer = null;
+    }
+
+    // reCAPTCHA が使える場合は実行し、5秒で帰ってこなければフォールバック
     if (typeof grecaptcha !== 'undefined' && gameRecaptchaWidgetId !== null) {
-      grecaptcha.execute(gameRecaptchaWidgetId);
+      try {
+        recaptchaFallbackTimer = setTimeout(() => {
+          // まだ pending が残っている = reCAPTCHA コールバックが来ていない
+          if (pendingGameSubmit) {
+            const { score, name } = pendingGameSubmit;
+            pendingGameSubmit = null;
+            // ★ トークンなしで強制送信（サーバ側で recaptchaToken='' をどう扱うかは.gs側のロジック次第）
+            submitAndShowRankingWithToken(score, name, '');
+          }
+        }, 5000); // 5秒待っても返ってこなければフォールバック
+
+        grecaptcha.execute(gameRecaptchaWidgetId);
+      } catch (e) {
+        console.error(e);
+        pendingGameSubmit = null;
+        // reCAPTCHA 実行で例外が出た場合もフォールバックで送信
+        await submitAndShowRankingWithToken(currentScore, finalName, '');
+      }
     } else {
+      // reCAPTCHA が読み込めていないときはそのまま送信
       await submitAndShowRankingWithToken(currentScore, finalName, '');
     }
   });
+
 
   retryGameBtn.addEventListener('click', () => {
     gameResultArea.style.display = 'none';
