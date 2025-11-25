@@ -271,7 +271,7 @@
 
   /* 飾り用のエネルギーリング */
   .decoration-wrapper {
-    position: relative; width: 240px; height: 240px; margin: 0 auto 16px;
+    position: relative; width: 220px; height: 220px; margin: 0 auto 16px;
     flex-shrink: 0;
   }
   .energy-ring-deco {
@@ -412,7 +412,7 @@
   </div>
 
   <div class="field">
-    <label>色見本・おまかせ・KEEP</label>
+    <label>色見本・おまかせ・キープ</label>
     <div class="row">
       <div class="color-chip-wrapper">
         <input type="color" id="colorInput" class="color-input" value="#E6A3AF" />
@@ -420,11 +420,11 @@
       </div>
       <div class="btn-group">
         <button id="randomBtn" class="btn-ghost" style="flex:1;">おまかせ</button>
-        <button id="keepBtn" class="btn-ghost" style="flex:1;">KEEP</button>
+        <button id="keepBtn" class="btn-ghost" style="flex:1;">キープ</button>
       </div>
     </div>
     <div id="stockArea" class="stock-area">
-      <span class="stock-placeholder">気になる色をKEEP!</span>
+      <span class="stock-placeholder">気になる色をここにキープ!</span>
     </div>
   </div>
 
@@ -488,7 +488,7 @@
         <div class="energy-ring-deco"></div>
       </div>
       
-      <p style="font-size:12px; margin-bottom:8px;">ニックネームを入力してランキングへ</p>
+      <p style="font-size:12px; margin-bottom:8px;">名前を入力してランキングへ</p>
       <input type="text" id="gameNameInput" placeholder="名前" />
       <button id="gameSubmitBtn" class="btn-main btn-game-submit">ランキング登録</button>
       
@@ -935,7 +935,7 @@
       }, 10000);
     }
     keepTapCount++;
-    if (keepTapCount >= 7) {
+    if (keepTapCount >= 10) {
       clearTimeout(keepTapTimer);
       keepTapCount = 0;
       triggerGameInvite();
