@@ -1681,14 +1681,14 @@
       /* === 変更箇所: バイブレーションの条件を緩和 === */
       
       // パターンA: 1刻みで振動（最も細かい・ヌルヌル動く感触）
-      if (currentVal !== lastVal) {
-         triggerHaptic('light');
-      }
-
-      // パターンB: もしAが細かすぎる場合は、以下の「2刻み」を使ってください
-      // if (Math.abs(currentVal - lastVal) >= 2) {
+      // if (currentVal !== lastVal) {
       //    triggerHaptic('light');
       // }
+
+      // パターンB: もしAが細かすぎる場合は、以下の「2刻み」を使ってください
+      if (Math.abs(currentVal - lastVal) >= 3) {
+          triggerHaptic('light');
+      }
 
       /* === 変更終了 === */
 
