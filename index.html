@@ -63,6 +63,8 @@
       0 0 0 1px rgba(255,255,255,0.8);
     backdrop-filter: blur(8px);
     z-index: 1;
+    /* パフォーマンス最適化: 合成レイヤーへの昇格 */
+    transform: translateZ(0); 
   }
 
   .card::before {
@@ -107,6 +109,8 @@
   .dress-wrapper { 
     position: relative; width: 230px; height: 290px; max-width: 100%; 
     cursor: pointer; 
+    /* パフォーマンス最適化: SVG描画の再計算をGPUに任せる */
+    will-change: transform;
   }
   #dressObj { width: 100%; height: 100%; border: 0; display: block; position: relative; z-index: 1; pointer-events: none; }
   #dressImg { width: 100%; height: 100%; display: none; object-fit: contain; position: relative; z-index: 1; pointer-events: none; }
@@ -231,7 +235,7 @@
     min-height: min-content;
   }
 
-  /* 背景アニメーション */
+  /* 背景アニメーション - パフォーマンス最適化 */
   .game-screen::before {
     content: ""; position: fixed; 
     top: -50%; left: -50%; width: 200%; height: 200%;
@@ -240,6 +244,7 @@
       radial-gradient(circle at 80% 70%, rgba(230, 163, 175, 0.15), transparent 40%);
     animation: floatLight 15s infinite linear;
     pointer-events: none; z-index: -1;
+    will-change: transform; /* GPU合成を有効化 */
   }
   @keyframes floatLight { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 
@@ -507,10 +512,10 @@
     <p class="modal-msg" style="margin-top:16px; line-height: 1.8;">
       連打ミニゲームに挑戦しますか？<br>
       7秒間で何回タップできるか競争！<br>
-      <span style="font-size: 100%;">（1位だと景品がある…かも？）</span>
+      <span style="font-size: 85%; opacity: 0.9;">（1位だと景品がある…かも？）</span>
     </p>
     <p style="font-size: 11px; color: #999; margin-bottom: 24px;">
-       ※ゲーム終了後、元の画面に戻って投票できます
+        ※ゲーム終了後、元の画面に戻って投票できます
     </p>
     <div class="modal-actions">
       <button class="modal-btn btn-cancel" id="gameDeclineBtn">やらない</button>
@@ -558,6 +563,8 @@
       <div class="loading-spinner"></div>
     </div>
     
+    <button class="btn-ghost" id="rankRetryBtn" style="margin-bottom:12px; max-width:200px;">もう一度挑戦する</button>
+    
     <button class="btn-main" id="backToMainBtn" style="max-width:200px;">戻る</button>
     
     <div id="discoveryStatus"></div>
@@ -567,40 +574,45 @@
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
+  /* ========= 設定: リロード時リセット ========= */
+  // このブロックにより、リロードするたびに保存されたゲームデータが削除され、初期状態に戻ります。
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('dress_')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  /* ========= 最適化: requestAnimationFrame用変数 ========= */
+  let isVisualUpdatePending = false;
+  let pendingH = 0, pendingS = 0, pendingL = 0;
+  let pendingHex = "";
+  
   /* ========= セキュリティ・ユーティリティ ========= */
   // === reCAPTCHA (ゲーム用) ===
   let gameRecaptchaWidgetId = null;
   let pendingGameSubmit = null;
-  // ★ reCAPTCHA が返ってこないとき用のフォールバックタイマー
   let recaptchaFallbackTimer = null;
 
   function onGameRecaptchaLoad() {
     if (!window.grecaptcha) return;
     gameRecaptchaWidgetId = grecaptcha.render('gameRecaptcha', {
-      sitekey: '6LfPqxcsAAAAAPeYLBqjvMKiwO1IT15jOLvzJ_Mr', // サイトキー
+      sitekey: '6LfPqxcsAAAAAPeYLBqjvMKiwO1IT15jOLvzJ_Mr',
       size: 'invisible',
       callback: onGameRecaptchaSuccess
     });
   }
 
   function onGameRecaptchaSuccess(token) {
-    // reCAPTCHA が正常終了したときだけ呼ばれる
     if (!pendingGameSubmit) return;
-
-    // フォールバックタイマーが動いていたら止める
     if (recaptchaFallbackTimer !== null) {
       clearTimeout(recaptchaFallbackTimer);
       recaptchaFallbackTimer = null;
     }
-
     const { score, name } = pendingGameSubmit;
     pendingGameSubmit = null;
-
-    // reCAPTCHA のトークン付きで送信
     submitAndShowRankingWithToken(score, name, token);
   }
 
-  // XSS対策: 入力値のサニタイズ
   function sanitizeInput(str) {
     if (!str) return "";
     const div = document.createElement('div');
@@ -608,7 +620,6 @@
     return div.innerHTML;
   }
 
-  // 簡易署名生成 (簡易的な改ざん検知用)
   async function generateSignature(data) {
     const secret = "WEDDING_SECRET_SALT_2025";
     const msg = JSON.stringify(data) + secret;
@@ -665,12 +676,6 @@
     return '#'+toHex(r)+toHex(g)+toHex(b);
   }
 
-  function rgbToHex(r,g,b){
-    const toHex=v=>Math.max(0,Math.min(255,Math.round(v)))
-                    .toString(16).padStart(2,'0');
-    return '#'+toHex(r)+toHex(g)+toHex(b);
-  }
-
   function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
 
   /* ========= DOM参照 ========= */
@@ -695,7 +700,7 @@
   const stockArea    = document.getElementById('stockArea');
   const nameInput    = document.getElementById('nameInput');
   const toast        = document.getElementById('toast');
-  const honeypot     = document.getElementById('honeypot'); // ハニーポット
+  const honeypot     = document.getElementById('honeypot');
 
   const confirmModal = document.getElementById('confirmModal');
   const modalBody    = document.getElementById('modalBody');
@@ -720,13 +725,12 @@
   const rankingListContainer = document.getElementById('rankingListContainer');
   const backToMainBtn = document.getElementById('backToMainBtn');
   const myScoreDisplay = document.getElementById('myScoreDisplay');
-  // 追加DOM
   const skipRegisterBtn = document.getElementById('skipRegisterBtn');
+  const rankRetryBtn = document.getElementById('rankRetryBtn');
 
   /* ========= 定数 ========= */
   const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   const MAX_NAME_LENGTH = 10;
-
   const RATE_LIMIT_KEY = 'dress_rate_limit';
   const RATE_LIMIT_MAX = 5;
   const RATE_LIMIT_WINDOW_MS = 15*60*1000;
@@ -744,26 +748,11 @@
       }
       localStorage.setItem(CLIENT_ID_KEY, CLIENT_ID);
     }
-  } catch(e){
-    CLIENT_ID = 'unknown';
-  }
+  } catch(e){ CLIENT_ID = 'unknown'; }
 
   let currentColor = COLORS[0];
   let currentL = 0.7;
-  // ★ 追加: 操作検知フラグ
   let hasInteracted = false; 
-
-  function setChipColor(hex){
-    if (colorChip) colorChip.style.background = hex;
-  }
-
-  if (colorInput) {
-    colorInput.value = currentColor;
-    syncSlidersFromHex(currentColor);
-  }
-
-  const params = new URLSearchParams(location.search);
-  if (params.get('name')) nameInput.value = decodeURIComponent(params.get('name'));
 
   /* ========= SVG 直接塗り替え用 ========= */
   let directParts = [];
@@ -774,15 +763,11 @@
     try {
       const doc = dressObj.contentDocument;
       if (!doc) return false;
-
       void doc.documentElement.getBBox();
-
       const root = doc.getElementById('dress');
       if (!root) return false;
 
-      const elems = Array.from(
-        root.querySelectorAll('path,polygon,circle,ellipse,use')
-      );
+      const elems = Array.from(root.querySelectorAll('path,polygon,circle,ellipse,use'));
       if (!elems.length) return false;
 
       const colored = [];
@@ -816,22 +801,17 @@
       });
 
       if (!colored.length) return false;
-
       directParts = colored.map(c => c.el);
       baseAvgL = sumL / colored.length;
       baseAvgS = sumS / colored.length;
       minOrigL = localMinL;
       maxOrigL = localMaxL;
-
       directParts.forEach(el => { el.style.transition = 'fill .12s ease'; });
-
       dressWrapper.dataset.mode = 'direct';
       dressObj.style.display = 'block';
       dressImg.style.display = 'none';
       return true;
-    } catch(e){
-      return false;
-    }
+    } catch(e){ return false; }
   }
 
   function enableFallback(){
@@ -841,90 +821,65 @@
     dressImg.style.filter = 'none';
   }
 
-  /* ========= UI 更新系 ========= */
-  function updateSliderUI(h, s, l) {
-    if (typeof h !== 'number') h = parseFloat(hueRange.value) || 0;
-    if (typeof s !== 'number') s = (parseFloat(satRange.value) || 0) / 100;
-    if (typeof l !== 'number') l = (parseFloat(lightRange.value) || 50) / 100;
-
-    const sPercent = clamp01(s) * 100;
-    const lPercent = clamp01(l) * 100;
-
-    const satStart = `hsl(${h}, 0%, ${lPercent}%)`;
-    const satEnd   = `hsl(${h}, 100%, ${lPercent}%)`;
-    satRange.style.background =
-      `linear-gradient(to right, ${satStart}, ${satEnd})`;
-
-    const lightStart = `hsl(${h}, ${sPercent}%, 0%)`;
-    const lightMid   = `hsl(${h}, ${sPercent}%, 50%)`;
-    const lightEnd   = `hsl(${h}, ${sPercent}%, 100%)`;
-    lightRange.style.background =
-      `linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd})`;
-
-    if (hueValue)   hueValue.textContent   = `${Math.round(h)}°`;
-    if (satValue)   satValue.textContent   = `${Math.round(clamp01(s) * 100)}%`;
-    if (lightValue) lightValue.textContent = `${Math.round(clamp01(l) * 100)}%`;
-  }
-
-  function syncSlidersFromHex(hex){
-    const rgb = hexToRgb(hex);
-    if (!rgb) return;
-    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-
-    hueRange.value   = hsl.h;
-    satRange.value   = hsl.s * 100;
-    lightRange.value = hsl.l * 100;
-    currentL         = hsl.l;
-
-    updateSliderUI(hsl.h, hsl.s, hsl.l);
-  }
-
-  function updateFromSliders(){
-    // ★ 変更: スライダー操作を検知
-    hasInteracted = true;
-
-    const h = parseFloat(hueRange.value);
-    const s = parseFloat(satRange.value) / 100;
-    const l = parseFloat(lightRange.value) / 100;
-    currentL = l;
-
-    updateSliderUI(h, s, l);
-    const hex = hslToHex(h, s, l);
-    applyColor(hex);
-  }
-
-  /* ========= 色適用 ========= */
-  function applyColor(colorHex){
-    currentColor = colorHex;
-    if (colorInput && document.activeElement !== colorInput) {
-      colorInput.value = currentColor;
+  /* ========= 最適化済み: UI更新システム ========= */
+  
+  // スライダーやパレットからの入力は変数を更新してフレーム更新を要求するだけにする
+  function requestVisualUpdate(h, s, l, hex) {
+    pendingH = h;
+    pendingS = s;
+    pendingL = l;
+    pendingHex = hex;
+    
+    if (!isVisualUpdatePending) {
+      isVisualUpdatePending = true;
+      requestAnimationFrame(processVisualUpdate);
     }
-    setChipColor(colorHex);
+  }
 
-    const rgb = hexToRgb(colorHex);
-    if (!rgb) return;
+  // フレーム描画処理 (重いSVG書き換えやDOM操作をここに集約)
+  function processVisualUpdate() {
+    isVisualUpdatePending = false;
+    
+    // 1. スライダー背景・数値更新 (DOM操作)
+    const sPercent = clamp01(pendingS) * 100;
+    const lPercent = clamp01(pendingL) * 100;
 
-    const baseHSL = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    const satStart = `hsl(${pendingH}, 0%, ${lPercent}%)`;
+    const satEnd   = `hsl(${pendingH}, 100%, ${lPercent}%)`;
+    satRange.style.background = `linear-gradient(to right, ${satStart}, ${satEnd})`;
 
-    document.documentElement.style.setProperty('--accent', colorHex);
-    document.documentElement.style.setProperty(
-      '--accent-soft',
-      `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`
-    );
-    if (colorHexLabel) {
-      colorHexLabel.textContent = colorHex.toUpperCase();
+    const lightStart = `hsl(${pendingH}, ${sPercent}%, 0%)`;
+    const lightMid   = `hsl(${pendingH}, ${sPercent}%, 50%)`;
+    const lightEnd   = `hsl(${pendingH}, ${sPercent}%, 100%)`;
+    lightRange.style.background = `linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd})`;
+
+    if (hueValue)   hueValue.textContent   = `${Math.round(pendingH)}°`;
+    if (satValue)   satValue.textContent   = `${Math.round(sPercent)}%`;
+    if (lightValue) lightValue.textContent = `${Math.round(lPercent)}%`;
+
+    // 2. 共通色適用
+    if (colorChip) colorChip.style.background = pendingHex;
+    const rgb = hexToRgb(pendingHex);
+    if (rgb) {
+        document.documentElement.style.setProperty('--accent', pendingHex);
+        document.documentElement.style.setProperty('--accent-soft', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`);
     }
 
+    // 3. 重い処理: SVGの書き換え (モード別)
     const mode = dressWrapper.dataset.mode;
-    if (mode === 'auto') return;
-
     if (mode === 'direct') {
-      const S0 = baseHSL.s;
-      const L0 = baseHSL.l;
-      const H0 = baseHSL.h;
+      applyDirectSVGColor(pendingHex, pendingS, pendingL, pendingH);
+    } else if (mode === 'fallback') {
+      applyFallbackFilter(pendingS, pendingL, pendingH);
+    }
+  }
 
+  // 元の applyColor からSVGロジックを抽出
+  function applyDirectSVGColor(hex, S0, L0, H0) {
+      const rgb = hexToRgb(hex);
+      if(!rgb) return;
+      
       const rangeOrigL = Math.max(1e-4, maxOrigL - minOrigL);
-
       const greyLevel  = clamp01((0.12 - S0) / 0.12);
       const edgeDark   = clamp01((0.08 - L0) / 0.08);
       const edgeLight  = clamp01((L0 - 0.92) / 0.08);
@@ -949,8 +904,7 @@
       }
 
       directParts.forEach(el => {
-        const orig = el.__origHSL || baseHSL;
-
+        const orig = el.__origHSL || {h:0,s:0,l:0};
         let t = (orig.l - minOrigL) / rangeOrigL;
         t = clamp01(t);
 
@@ -971,138 +925,167 @@
         const newHex = hslToHex(H0, newS, newL);
         el.setAttribute('fill', newHex);
       });
-      return;
-    }
+  }
 
-    if (mode === 'fallback') {
-      if (baseHSL.s < 0.05) {
-        const brightness = 0.4 + 1.2 * baseHSL.l;
+  function applyFallbackFilter(s, l, h) {
+      if (s < 0.05) {
+        const brightness = 0.4 + 1.2 * l;
         dressImg.style.filter = `grayscale(1) brightness(${brightness})`;
       } else {
-        const hueRotate = baseHSL.h;
-        const sat       = 0.6 + baseHSL.s;
+        const hueRotate = h;
+        const sat = 0.6 + s;
         let brightness;
-        if (baseHSL.s >= 0.7) {
-          brightness = 0.9 + (baseHSL.l - 0.5) * 0.5;
+        if (s >= 0.7) {
+          brightness = 0.9 + (l - 0.5) * 0.5;
         } else {
-          brightness = 0.85 + (baseHSL.l - 0.5) * 0.7;
+          brightness = 0.85 + (l - 0.5) * 0.7;
         }
-        dressImg.style.filter =
-          `hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness})`;
+        dressImg.style.filter = `hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness})`;
       }
+  }
+
+  /* 入力ハンドラ（最適化版） */
+  function onSliderInput() {
+    hasInteracted = true;
+    const h = parseFloat(hueRange.value);
+    const s = parseFloat(satRange.value) / 100;
+    const l = parseFloat(lightRange.value) / 100;
+    const hex = hslToHex(h, s, l);
+    
+    currentColor = hex;
+    currentL = l;
+    
+    // カラーコードのテキスト反映は軽いのでここでやる(UX向上)
+    if (colorHexLabel) colorHexLabel.textContent = hex.toUpperCase();
+    if (colorInput && document.activeElement !== colorInput) {
+        colorInput.value = hex; // これも軽い
     }
+    
+    // 重い描画処理をリクエスト
+    requestVisualUpdate(h, s, l, hex);
   }
 
   if (colorInput) {
     colorInput.addEventListener('input', e => {
-      // ★ 変更: カラーピッカー操作を検知
       hasInteracted = true;
-      const val = e.target.value;
-      syncSlidersFromHex(val);
-      applyColor(val);
+      const hex = e.target.value;
+      const rgb = hexToRgb(hex);
+      if (rgb) {
+        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+        // スライダーの値だけ先に更新（見た目の反映はrequestVisualUpdateで）
+        hueRange.value = hsl.h;
+        satRange.value = hsl.s * 100;
+        lightRange.value = hsl.l * 100;
+        currentColor = hex;
+        currentL = hsl.l;
+        requestVisualUpdate(hsl.h, hsl.s, hsl.l, hex);
+      }
     });
   }
 
-  hueRange.addEventListener('input', updateFromSliders);
-  satRange.addEventListener('input', updateFromSliders);
-  lightRange.addEventListener('input', updateFromSliders);
+  // スライダーイベントリスナ (Passiveでパフォーマンス向上)
+  hueRange.addEventListener('input', onSliderInput, {passive: true});
+  satRange.addEventListener('input', onSliderInput, {passive: true});
+  lightRange.addEventListener('input', onSliderInput, {passive: true});
+
+  /* === 初期化 === */
+  function initColor(hex) {
+    currentColor = hex;
+    if (colorInput) colorInput.value = hex;
+    const rgb = hexToRgb(hex);
+    if(rgb){
+        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+        hueRange.value = hsl.h;
+        satRange.value = hsl.s * 100;
+        lightRange.value = hsl.l * 100;
+        currentL = hsl.l;
+        requestVisualUpdate(hsl.h, hsl.s, hsl.l, hex);
+    }
+  }
 
   /* === トリガーロジック: おまかせ -> KEEP === */
   let lastActionWasRandom = false;
   let omakaseKeepCombo = 0;
-  // 追加: おまかせ連打用
   let omakaseTapCount = 0;
   let omakaseTapTimer = null;
 
   randomBtn.addEventListener('click', () => {
-    // ★ 変更: ボタン操作を検知
     hasInteracted = true;
-    
     const h = Math.random() * 360;
     const s = 0.4 + Math.random() * 0.5;
     const l = 0.6 + Math.random() * 0.3;
     const hex = hslToHex(h, s, l);
-    if (colorInput) colorInput.value = hex;
-    syncSlidersFromHex(hex);
-    applyColor(hex);
+    
+    initColor(hex); // 最適化済みの初期化関数を使用
     
     lastActionWasRandom = true;
-
-    // ▼ 追加ロジック ▼
     omakaseTapCount++;
-
-    // タイマーリセット（連打が途切れたら0に戻す）
     if (omakaseTapTimer) clearTimeout(omakaseTapTimer);
-    omakaseTapTimer = setTimeout(() => {
-      omakaseTapCount = 0;
-    }, 10000); // 10秒猶予
-
-    // 15回で発動
+    omakaseTapTimer = setTimeout(() => { omakaseTapCount = 0; }, 10000);
     if (omakaseTapCount >= 13) {
       omakaseTapCount = 0;
       resetTriggerCounters();
-      triggerGameInvite('random'); // 修正: discoveryId 追加
+      triggerGameInvite('random');
     }
   });
 
-  /* === KEEPボタンロジック (通常+隠しコマンド) === */
+  /* === KEEPボタンロジック === */
   let keepTapCount = 0;
-  // let keepTapTimer = null; // タイマーは不要になったので使いません
   const GAME_BAN_KEY = 'dress_game_ban_until';
-  
-  // ★ 新規: 永久停止キー & 確認抑制キー
   const PERMANENT_BAN_KEY = 'dress_game_permanent_ban';
   const SUPPRESS_CONFIRM_KEY = 'dress_game_suppress_confirm';
-  
   let declineCount = 0;
 
   keepBtn.addEventListener('click', () => {
-    // ★ 変更: ボタン操作を検知
     hasInteracted = true;
-    
     triggerHaptic('medium');
     addStock(currentColor);
 
-    // 1. おまかせ->KEEP の交互連打判定（ここはそのまま）
     if (lastActionWasRandom) {
       omakaseKeepCombo++;
       lastActionWasRandom = false; 
       if (omakaseKeepCombo >= 7) {
         omakaseKeepCombo = 0;
-        triggerGameInvite('combo'); // 修正: discoveryId 追加
+        triggerGameInvite('combo');
         return;
       }
     } else {
       omakaseKeepCombo = 0; 
     }
 
-    // 2. KEEP単独連打判定 (修正: 累積15回で発動・時間制限なし)
     keepTapCount++;
-
-    // タイマーリセット処理を削除しました。
-    // これにより、途中で止めてもカウントは維持されます。
-
     if (keepTapCount >= 13) {
       keepTapCount = 0;
       resetTriggerCounters();
-      triggerGameInvite('keep'); // 修正: discoveryId 追加
+      triggerGameInvite('keep');
     }
   });
 
   /* === シークレット発見トラッキング === */
   const DISCOVERY_KEY = 'dress_game_discoveries';
-  // random, keep, combo, slider, title, dot, default (計7種類)
   const TOTAL_SECRETS = 7; 
+  const TRIGGER_COOLDOWN_MS = 15 * 60 * 1000; 
+  const TRIGGER_COOLDOWN_KEY = 'dress_trigger_cooldowns';
 
+  function checkTriggerCooldown(triggerId) {
+    try {
+      const data = JSON.parse(localStorage.getItem(TRIGGER_COOLDOWN_KEY) || '{}');
+      const expiry = data[triggerId];
+      if (expiry && Date.now() < expiry) return true;
+    } catch(e) {}
+    return false;
+  }
+
+  function setTriggerCooldown(triggerId) {
+    try {
+      const data = JSON.parse(localStorage.getItem(TRIGGER_COOLDOWN_KEY) || '{}');
+      data[triggerId] = Date.now() + TRIGGER_COOLDOWN_MS;
+      localStorage.setItem(TRIGGER_COOLDOWN_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  // 戻り値: モーダルを開いたか(true/false)
   function triggerGameInvite(discoveryId) {
-    // ★ 変更: 永久停止チェック
-    if (localStorage.getItem(PERMANENT_BAN_KEY)) return;
-
-    // 禁止時間チェック
-    const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0', 10);
-    if (!isNaN(banUntil) && Date.now() < banUntil) return;
-    
-    // 発見を記録
     if (discoveryId) {
       let discovered = [];
       try {
@@ -1113,29 +1096,33 @@
       if (!discovered.includes(discoveryId)) {
         discovered.push(discoveryId);
         localStorage.setItem(DISCOVERY_KEY, JSON.stringify(discovered));
+        updateDiscoveryUI();
       }
     }
 
-    setTimeout(() => {
-      gameInviteModal.classList.add('open');
-    }, 500);
+    if (localStorage.getItem(PERMANENT_BAN_KEY)) return false;
+    const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0', 10);
+    if (!isNaN(banUntil) && Date.now() < banUntil) return false;
+    if (discoveryId && checkTriggerCooldown(discoveryId)) return false;
+    
+    // 開く前にクールダウンを設定
+    if (discoveryId) setTriggerCooldown(discoveryId);
+    
+    setTimeout(() => { gameInviteModal.classList.add('open'); }, 500);
+    return true; // モーダル開いた
   }
 
   function updateDiscoveryUI() {
     const el = document.getElementById('discoveryStatus');
     if (!el) return;
-    
     let discovered = [];
-    try {
-      discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]');
-    } catch(e) { discovered = []; }
-    
+    try { discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]'); } catch(e) { discovered = []; }
     const count = discovered.length;
     const remain = TOTAL_SECRETS - count;
 
     if (remain <= 0) {
       el.innerHTML = '🎉 裏モード起動条件コンプリート！おめでとうございます！ 🎉';
-      el.style.color = '#cda156'; // Gold
+      el.style.color = '#cda156';
       el.style.fontWeight = 'bold';
     } else {
       el.innerHTML = `裏モード起動条件: 残り ${remain} パターン`;
@@ -1147,33 +1134,18 @@
   gameDeclineBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
     declineCount++;
-    
-    // ★ 変更: 2回拒否時のロジック
     const isSuppressed = localStorage.getItem(SUPPRESS_CONFIRM_KEY);
-    
     if (!isSuppressed && declineCount >= 2) {
-      // モーダルが閉じるのを少し待ってからconfirmを出す
       setTimeout(() => {
-        const stopShowing = confirm(
-          "裏モードの起動条件が見つかるたびに通知が表示されます。\n" +
-          "今後、この通知を表示しないようにしますか？\n\n" +
-          "「OK」：通知をオフにする（ゲーム無効化）\n" +
-          "「キャンセル」：通知は続ける"
-        );
-
+        const stopShowing = confirm("裏モードの通知をオフにしますか？\nOKで以後表示しません。");
         if (stopShowing) {
-          // はい（永久停止）
           localStorage.setItem(PERMANENT_BAN_KEY, 'true');
-          alert("裏モードの通知をオフにしました。");
         } else {
-          // いいえ（確認抑制＆ゲーム継続）
           localStorage.setItem(SUPPRESS_CONFIRM_KEY, 'true');
-          declineCount = 0; // カウントリセット
+          declineCount = 0;
         }
       }, 300);
     } else {
-      // 通常のクールダウン処理 (一時BAN)
-      // ここではシンプルにリセットのみにして、次回もすぐ出るようにしておく（いいえ選択時の挙動に合わせるため）
       resetTriggerCounters();
     }
   });
@@ -1181,10 +1153,12 @@
   gameAcceptBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
     declineCount = 0;
+    // ゲーム承諾時もインタラクション済みとする
+    hasInteracted = true; 
     startGame();
   });
 
-  /* === ゲームロジック (7秒版 + Anti-Cheat) === */
+  /* === ゲームロジック === */
   let gameActive = false;
   let currentScore = 0;
   let timeLeft = 7.00;
@@ -1201,6 +1175,9 @@
     gameTimer.textContent = "7.00";
     currentScore = 0;
     
+    // ゲーム開始時も念のためインタラクション済みとする
+    hasInteracted = true;
+
     let count = 3;
     gameCountdown.textContent = count;
     gameCountdown.style.display = "grid";
@@ -1225,7 +1202,6 @@
     timeLeft = 7.00;
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
-    
     gameStartTime = Date.now();
     const startTime = Date.now();
     
@@ -1233,7 +1209,6 @@
       const now = Date.now();
       const elapsed = (now - startTime) / 1000;
       const remain = 7.00 - elapsed;
-      
       if (remain <= 0) {
         gameTimer.textContent = "0.00";
         finishGame();
@@ -1248,7 +1223,6 @@
     gameActive = false;
     tapGameBtn.disabled = true;
     tapBtnText.textContent = "FINISH";
-    
     setTimeout(() => {
       tapGameBtn.style.display = "none"; 
       gameNameInput.value = nameInput.value;
@@ -1259,33 +1233,24 @@
   function spawnParticles(x, y) {
     const particleCount = 8;
     const colors = ['#fff', '#E6A3AF', '#cda156', '#fffdf5'];
-
     for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
-      
       p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       const size = Math.random() * 6 + 2;
       p.style.width = size + 'px';
       p.style.height = size + 'px';
-      
       p.style.left = x + 'px';
       p.style.top = y + 'px';
       document.body.appendChild(p);
-
       const angle = Math.random() * Math.PI * 2;
       const velocity = Math.random() * 100 + 60;
       const tx = Math.cos(angle) * velocity;
       const ty = Math.sin(angle) * velocity;
-
       const anim = p.animate([
         { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
         { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
-      ], {
-        duration: Math.random() * 400 + 400,
-        easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
-      });
-
+      ], { duration: Math.random() * 400 + 400, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
       anim.onfinish = () => p.remove();
     }
   }
@@ -1301,18 +1266,16 @@
     ripple.style.top = '0';
     ripple.style.left = '0';
     ripple.style.pointerEvents = 'none';
-    
     parent.appendChild(ripple);
-
     const anim = ripple.animate([
        { transform: 'scale(1)', opacity: 1, borderWidth: '2px' },
        { transform: 'scale(1.5)', opacity: 0, borderWidth: '0px' }
     ], { duration: 500, easing: 'ease-out' });
-    
     anim.onfinish = () => ripple.remove();
   }
 
   tapGameBtn.addEventListener('click', (e) => {
+    // 処理落ち防止のためアニメーションはCSSでなくJS側で制御
     e.currentTarget.style.transform = "scale(0.95)";
     setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
 
@@ -1320,115 +1283,77 @@
       currentScore++;
       gameScore.textContent = currentScore;
       triggerHaptic('light');
-
       const rect = tapGameBtn.getBoundingClientRect();
       const x = e.clientX || (rect.left + rect.width / 2);
       const y = e.clientY || (rect.top + rect.height / 2);
-
       spawnParticles(x, y);
       createRipple(x, y, tapGameBtn);
     }
   });
 
-  /* === ランキング登録ボタンクリック === */
   gameSubmitBtn.addEventListener('click', async () => {
-    // Bot対策: ハニーポットチェック
-    if (honeypot.value !== "") {
-      alert("Error: Bot detected.");
-      return;
-    }
-
-    let finalName = sanitizeInput(gameNameInput.value.trim()); // 名前をサニタイズ
-    const GAME_NAME_MAX = 10; // ここで文字数制限を設定
-    if (finalName.length > GAME_NAME_MAX) {
-      alert(`名前は${GAME_NAME_MAX}文字以内で入力してください`);
-      return;
-    }
+    if (honeypot.value !== "") return;
+    let finalName = sanitizeInput(gameNameInput.value.trim());
+    if (finalName.length > 10) { alert(`名前は10文字以内で入力してください`); return; }
     if (!finalName) {
-      if (!confirm("名前が入力されていません。\n「名無しのゲスト」として登録しますか？")) {
-        return; // キャンセルの場合は入力に戻る
-      }
+      if (!confirm("「名無しのゲスト」として登録しますか？")) return;
       finalName = "名無しのゲスト";
     }
-
-    // 不正対策: スコア妥当性チェック
-    // 5秒で80回（秒間16連打）を超えるのは人間にはほぼ不可能。
     const durationSec = (Date.now() - gameStartTime) / 1000;
-    const maxPossible = Math.ceil(durationSec * 20) + 10; // バッファ込みで秒間20許容
-    if (currentScore > maxPossible) {
-      alert("エラー：異常なスコアを検知しました。");
-      return;
-    }
+    const maxPossible = Math.ceil(durationSec * 20) + 10; 
+    if (currentScore > maxPossible) { alert("エラー：異常なスコアです"); return; }
 
-    // reCAPTCHA 用に一時保存
-    pendingGameSubmit = {
-      score: currentScore,
-      name: finalName
-    };
-
-    // すでに動いているフォールバックタイマーがあればクリア
+    pendingGameSubmit = { score: currentScore, name: finalName };
     if (recaptchaFallbackTimer !== null) {
       clearTimeout(recaptchaFallbackTimer);
-      recaptchaFallbackTimer = null;
     }
-
-    // reCAPTCHA が使える場合は実行し、1秒で帰ってこなければフォールバック
     if (typeof grecaptcha !== 'undefined' && gameRecaptchaWidgetId !== null) {
       try {
         recaptchaFallbackTimer = setTimeout(() => {
-          // まだ pending が残っている = reCAPTCHA コールバックが来ていない
           if (pendingGameSubmit) {
             const { score, name } = pendingGameSubmit;
             pendingGameSubmit = null;
-            // ★ トークンなしで強制送信（サーバ側で recaptchaToken='' をどう扱うかは.gs側のロジック次第）
             submitAndShowRankingWithToken(score, name, '');
           }
-        }, 1000); // 1秒待っても返ってこなければフォールバック
-
+        }, 1000);
         grecaptcha.execute(gameRecaptchaWidgetId);
       } catch (e) {
-        console.error(e);
         pendingGameSubmit = null;
-        // reCAPTCHA 実行で例外が出た場合もフォールバックで送信
         await submitAndShowRankingWithToken(currentScore, finalName, '');
       }
     } else {
-      // reCAPTCHA が読み込めていないときはそのまま送信
       await submitAndShowRankingWithToken(currentScore, finalName, '');
     }
   });
-
 
   retryGameBtn.addEventListener('click', () => {
     gameResultArea.style.display = 'none';
     startGame();
   });
 
-  // ▼ 追加イベント: 登録せずにランキングを見る ▼
   if (skipRegisterBtn) {
     skipRegisterBtn.addEventListener('click', () => {
-      // 名前入力欄リセット
       gameNameInput.value = "";
-      // 登録しないモード(get_ranking)で送信関数を呼ぶ
-      // 名前は保存されないので適当な文字列でOK
       submitAndShowRankingWithToken(currentScore, "Guest", "", "get_ranking");
     });
   }
+  
+  if (rankRetryBtn) {
+    rankRetryBtn.addEventListener('click', () => {
+      rankingScreen.classList.remove('active');
+      startGame();
+    });
+  }
 
-  // ▼ 変更: actionType 引数を追加 ▼
   async function submitAndShowRankingWithToken(score, name, recaptchaToken, actionType = 'game_score') {
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
-    
-    // シークレット状況更新
     updateDiscoveryUI();
 
-    if(myScoreDisplay) {
-      myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
-    }
+    if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
 
     const payload = {
-      action: actionType, // 引数で受け取ったアクションを指定
+      action: actionType,
       timestamp: new Date().toISOString(),
       name: name,
       score: score,
@@ -1446,13 +1371,10 @@
         headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
         body: body
       });
-      
       const result = await response.json();
       renderRanking(result.ranking, score, name);
-      
     } catch(e) {
       rankingListContainer.innerHTML = '<p>ランキングの取得に失敗しました</p>';
-      console.error(e);
     }
   }
 
@@ -1461,25 +1383,19 @@
       rankingListContainer.innerHTML = '<p>データがありません</p>';
       return;
     }
-
     rankingListContainer.innerHTML = '';
-    
     list.forEach((item, index) => {
       const row = document.createElement('div');
       row.className = `ranking-item rank-${index+1}`;
-      
       const badge = document.createElement('div');
       badge.className = 'rank-badge';
       badge.textContent = index + 1;
-      
       const nameDiv = document.createElement('div');
       nameDiv.className = 'rank-name';
       nameDiv.textContent = item.name;
-      
       const scoreDiv = document.createElement('div');
       scoreDiv.className = 'rank-score';
       scoreDiv.textContent = item.score;
-      
       row.appendChild(badge);
       row.appendChild(nameDiv);
       row.appendChild(scoreDiv);
@@ -1490,6 +1406,9 @@
   backToMainBtn.addEventListener('click', () => {
     rankingScreen.classList.remove('active');
     gameScreen.classList.remove('active');
+    // ランキング画面から戻った時点でインタラクション済みとみなす
+    // これにより、再度ボタンを押しても裏モードは発動せず、投票確認が出る
+    hasInteracted = true;
     resetTriggerCounters(); 
   });
 
@@ -1497,10 +1416,10 @@
     omakaseKeepCombo = 0;
     keepTapCount = 0;
     dotTapCount = 0;
-    sliderShakeCount = 0; // 追加
-    titleTapCount = 0; // 追加
-    dressTapCount = 0; // 追加
-    omakaseTapCount = 0; // 追加
+    sliderShakeCount = 0;
+    titleTapCount = 0;
+    dressTapCount = 0;
+    omakaseTapCount = 0;
     lastActionWasRandom = false;
   }
 
@@ -1521,24 +1440,19 @@
     newDot.style.opacity = '0'; 
     
     newDot.addEventListener('click', () => {
-      // ★ 変更: ドット操作を検知
       hasInteracted = true;
-      
       triggerHaptic('light'); 
-      applyColor(hex);
-      syncSlidersFromHex(hex);
+      initColor(hex);
       newDot.style.transform = 'scale(1.2)';
       setTimeout(()=> newDot.style.transform = '', 200);
 
       if (dotTapTimer) clearTimeout(dotTapTimer);
-      dotTapTimer = setTimeout(() => {
-        dotTapCount = 0;
-      }, 10000);
+      dotTapTimer = setTimeout(() => { dotTapCount = 0; }, 10000);
       dotTapCount++;
       if (dotTapCount >= 7) {
         dotTapCount = 0;
         resetTriggerCounters();
-        triggerGameInvite('dot'); // 修正: discoveryId 追加
+        triggerGameInvite('dot');
       }
     });
 
@@ -1549,7 +1463,6 @@
   function runFlyAnimation(startElem, endElem, color) {
     const startRect = startElem.getBoundingClientRect();
     const endRect = endElem.getBoundingClientRect();
-
     const flyer = document.createElement('div');
     flyer.style.position = 'fixed';
     flyer.style.width = '32px';
@@ -1579,12 +1492,8 @@
   dressObj.addEventListener('load', () => {
     const ok = tryWireSvgDirect();
     if (!ok) enableFallback();
-    applyColor(currentColor);
-    const rgb = hexToRgb(currentColor);
-    if (rgb) {
-      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-      updateSliderUI(hsl.h, hsl.s, hsl.l);
-    }
+    // 初期カラー適用（ロード時は即時実行）
+    initColor(currentColor);
   });
 
   function checkRateLimit(){
@@ -1668,30 +1577,24 @@
   }
 
   submitBtn.addEventListener('click', () => {
-    if (honeypot.value !== "") {
-      alert("Error: Bot detected.");
-      return;
-    }
-    
+    if (honeypot.value !== "") return;
     let name = sanitizeInput(nameInput.value.trim());
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
     if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
 
-    // ★ 追加: 初期状態のまま送ろうとした場合、投票データは送らずシークレットへ
+    // 未操作の場合の隠し要素チェック
     if (!hasInteracted) {
-       // 既に発見済みかどうかチェック
        let discovered = [];
-       try {
-         discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]');
-       } catch(e){}
-
-       // まだ発見していない（初回）なら、投票を中断してシークレットへ
-       if (!discovered.includes('default')) {
-          triggerGameInvite('default');
-          return; 
+       try { discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]'); } catch(e){}
+       
+       // 「default」をまだ発見していない、または確認抑制状態ならチェックへ進む
+       if (!discovered.includes('default') || localStorage.getItem(SUPPRESS_CONFIRM_KEY)) {
+          // ★修正: 戻り値(modalOpened)を受け取る
+          const modalOpened = triggerGameInvite('default');
+          // ★修正: モーダルが開いた場合のみ中断。開かなかった(クールタイム中)ならそのまま下の投票処理へ進む
+          if (modalOpened) return; 
        }
-       // 発見済みなら、そのままスルーして下の確認画面へ進む（投票可能）
     }
 
     modalBody.innerHTML = '';
@@ -1745,10 +1648,8 @@
       userAgent: navigator.userAgent,
       clientId: CLIENT_ID
     };
-
     const signature = await generateSignature(payload);
     payload.signature = signature;
-
     const ok = await sendPayload(ENDPOINT_URL, payload);
     if (!ok) enqueueSubmission(payload);
     showToast('投票を送信しました');
@@ -1756,46 +1657,43 @@
 
   function triggerHaptic(style = 'light') {
     if (!navigator.vibrate) return;
-    switch (style) {
-      case 'light': navigator.vibrate(5); break;
-      case 'medium': navigator.vibrate(15); break;
-      case 'heavy': navigator.vibrate([30, 50, 30]); break;
-    }
+    try {
+      switch (style) {
+        case 'light': navigator.vibrate(5); break;
+        case 'medium': navigator.vibrate(15); break;
+        case 'heavy': navigator.vibrate([30, 50, 30]); break;
+      }
+    } catch(e){}
   }
   
   /* === スライダーガチャガチャ用変数 === */
-  let sliderStartTime = 0;   // 動き始めた時刻
-  let sliderGapTimer = null; // 途切れ判定用タイマー
+  let sliderStartTime = 0;  
+  let sliderGapTimer = null; 
+  let sliderShakeCount = 0;
 
   [hueRange, satRange, lightRange].forEach(range => {
     let lastVal = parseInt(range.value, 10);
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value, 10);
-      if (currentVal % 10 === 0 && currentVal !== lastVal) { triggerHaptic('light'); }
+      if (Math.abs(currentVal - lastVal) > 5) { 
+        if(currentVal % 10 === 0) triggerHaptic('light'); 
+      }
       lastVal = currentVal;
-
-      /* === 修正: 3.5秒間動かし続けたら発動 === */
       
-      // 1. まだ計測が始まっていなければ（またはリセットされていたら）、開始時刻を記録
       if (sliderStartTime === 0) {
         sliderStartTime = Date.now();
       }
-
-      // 2. 「途切れ判定」タイマーをクリア（動かし続けている限りリセットされ続ける）
       if (sliderGapTimer) clearTimeout(sliderGapTimer);
-
-      // 3. 指を離したり止まったりして「0.3秒」経過したら、計測をリセット
       sliderGapTimer = setTimeout(() => {
         sliderStartTime = 0;
-      }, 400); // 0.4秒の猶予
+      }, 400); 
 
-      // 4. 開始時刻から「3.5秒(3500ms)」経過していれば発動
       if (Date.now() - sliderStartTime >= 3500) {
-        sliderStartTime = 0; // 重複発動防止のためリセット
+        sliderStartTime = 0; 
         resetTriggerCounters();
-        triggerGameInvite('slider'); // 修正: discoveryId 追加
+        triggerGameInvite('slider');
       }
-    });
+    }, {passive: true});
   });
 
   const clickableIds = ['submitBtn', 'randomBtn', 'keepBtn', 'cancelSendBtn', 'finalSendBtn'];
@@ -1806,9 +1704,14 @@
   if (colorInput) { colorInput.addEventListener('click', () => triggerHaptic('medium')); }
 
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
-  applyColor(currentColor);
+  // ロード完了時に再度適用を試みる
+  if (document.readyState === 'complete') {
+     initColor(currentColor);
+  } else {
+     window.addEventListener('load', () => initColor(currentColor));
+  }
 
-  /* === 追加: タイトル連打でゲーム起動 === */
+  /* === タイトル連打でゲーム起動 === */
   const titleElement = document.querySelector('.card-header h2'); 
   let titleTapCount = 0;
   let titleTapTimer = null;
@@ -1819,28 +1722,21 @@
 
     titleElement.addEventListener('click', () => {
       triggerHaptic('light');
-      
       titleElement.animate([
         { transform: 'scale(1)' },
         { transform: 'scale(0.9) translateY(2px)', opacity: 0.7 },
         { transform: 'scale(1)' }
       ], { duration: 100 });
-
       titleTapCount++;
-      
       if (titleTapTimer) clearTimeout(titleTapTimer);
-      titleTapTimer = setTimeout(() => {
-        titleTapCount = 0;
-      }, 5000); // 2秒以内に連打
-
+      titleTapTimer = setTimeout(() => { titleTapCount = 0; }, 5000); 
       if (titleTapCount >= 5) {
         titleTapCount = 0;
         resetTriggerCounters();
-        triggerGameInvite('title'); // 修正: discoveryId 追加
+        triggerGameInvite('title');
       }
     });
   }
-
 </script>
 <script src="https://www.google.com/recaptcha/api.js?onload=onGameRecaptchaLoad&render=explicit" async defer></script>
 </body>
