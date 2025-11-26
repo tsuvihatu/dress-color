@@ -1677,14 +1677,27 @@
     let lastVal = parseInt(range.value, 10);
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value, 10);
-      if (Math.abs(currentVal - lastVal) > 5) { 
-        if(currentVal % 10 === 0) triggerHaptic('light'); 
+      
+      /* === 変更箇所: バイブレーションの条件を緩和 === */
+      
+      // パターンA: 1刻みで振動（最も細かい・ヌルヌル動く感触）
+      if (currentVal !== lastVal) {
+         triggerHaptic('light');
       }
+
+      // パターンB: もしAが細かすぎる場合は、以下の「2刻み」を使ってください
+      // if (Math.abs(currentVal - lastVal) >= 2) {
+      //    triggerHaptic('light');
+      // }
+
+      /* === 変更終了 === */
+
       lastVal = currentVal;
       
       if (sliderStartTime === 0) {
         sliderStartTime = Date.now();
       }
+      // ...（以下のゲーム起動用ロジックはそのまま残す）
       if (sliderGapTimer) clearTimeout(sliderGapTimer);
       sliderGapTimer = setTimeout(() => {
         sliderStartTime = 0;
