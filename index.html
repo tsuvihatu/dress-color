@@ -574,10 +574,12 @@
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
-  /* ========= 設定: リロード時リセット ========= */
-  // このブロックにより、リロードするたびに保存されたゲームデータが削除され、初期状態に戻ります。
+  /* ========= 設定: リロード時リセット (発見済みデータは保持) ========= */
+  // 意図: 隠しモードの発見記録だけ残し、それ以外のゲーム状態(クールダウン等)はリセットする
+  const KEEP_KEYS = ['dress_game_discoveries']; 
+
   Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('dress_')) {
+    if (key.startsWith('dress_') && !KEEP_KEYS.includes(key)) {
       localStorage.removeItem(key);
     }
   });
