@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GK7B3GLZNM"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GK7B3GLZNM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    gtag('config', 'G-GK7B3GLZNM');
-  </script>
+  gtag('config', 'G-GK7B3GLZNM');
+</script>
 <meta charset="UTF-8" />
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1"
+  content="width=device-width, initial-scale=1.0"
 />
 <title>ドレスの色あてクイズ</title>
 
@@ -23,7 +23,7 @@
 <style>
   :root {
     --card-w: 380px;
-    --accent: #e6a3af;
+    --accent: #DBB3B3;
     --accent-soft: rgba(230, 163, 175, 0.35);
 
     --gold-main: #cda156;
@@ -472,7 +472,7 @@
     <label>色見本・おまかせ・キープ</label>
     <div class="row">
       <div class="color-chip-wrapper">
-        <input type="color" id="colorInput" class="color-input" value="#E6A3AF" />
+        <input type="color" id="colorInput" class="color-input" value="#DBB3B3" />
         <div id="colorChip" class="color-chip"></div>
       </div>
       <div class="btn-group">
@@ -739,7 +739,7 @@
   const rankRetryBtn = document.getElementById('rankRetryBtn');
 
   /* ========= 定数 ========= */
-  const COLORS = ['#E6A3AF','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
+  const COLORS = ['#DBB3B3','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   const MAX_NAME_LENGTH = 10;
   const RATE_LIMIT_KEY = 'dress_rate_limit';
   const RATE_LIMIT_MAX = 5;
@@ -1316,6 +1316,7 @@
     pendingGameSubmit = { score: currentScore, name: finalName };
     if (recaptchaFallbackTimer !== null) {
       clearTimeout(recaptchaFallbackTimer);
+      recaptchaFallbackTimer = null;
     }
     if (typeof grecaptcha !== 'undefined' && gameRecaptchaWidgetId !== null) {
       try {
