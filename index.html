@@ -290,6 +290,7 @@
     -webkit-tap-highlight-color: transparent;
     font-family: "Yu Mincho", serif;
     flex-shrink: 0;
+    touch-action: none; /* ★追加: ボタン上でのブラウザ標準操作(ズーム等)を無効化 */
   }
   
   .tap-game-btn:active { 
@@ -854,25 +855,25 @@
     const sPercent = clamp01(pendingS) * 100;
     const lPercent = clamp01(pendingL) * 100;
 
-    const satStart = `hsl(${pendingH}, 0%, ${lPercent}%)`;
-    const satEnd   = `hsl(${pendingH}, 100%, ${lPercent}%)`;
-    satRange.style.background = `linear-gradient(to right, ${satStart}, ${satEnd})`;
+    const satStart = hsl(${pendingH}, 0%, ${lPercent}%);
+    const satEnd   = hsl(${pendingH}, 100%, ${lPercent}%);
+    satRange.style.background = linear-gradient(to right, ${satStart}, ${satEnd});
 
-    const lightStart = `hsl(${pendingH}, ${sPercent}%, 0%)`;
-    const lightMid   = `hsl(${pendingH}, ${sPercent}%, 50%)`;
-    const lightEnd   = `hsl(${pendingH}, ${sPercent}%, 100%)`;
-    lightRange.style.background = `linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd})`;
+    const lightStart = hsl(${pendingH}, ${sPercent}%, 0%);
+    const lightMid   = hsl(${pendingH}, ${sPercent}%, 50%);
+    const lightEnd   = hsl(${pendingH}, ${sPercent}%, 100%);
+    lightRange.style.background = linear-gradient(to right, ${lightStart}, ${lightMid}, ${lightEnd});
 
-    if (hueValue)   hueValue.textContent   = `${Math.round(pendingH)}°`;
-    if (satValue)   satValue.textContent   = `${Math.round(sPercent)}%`;
-    if (lightValue) lightValue.textContent = `${Math.round(lPercent)}%`;
+    if (hueValue)   hueValue.textContent   = ${Math.round(pendingH)}°;
+    if (satValue)   satValue.textContent   = ${Math.round(sPercent)}%;
+    if (lightValue) lightValue.textContent = ${Math.round(lPercent)}%;
 
     // 2. 共通色適用
     if (colorChip) colorChip.style.background = pendingHex;
     const rgb = hexToRgb(pendingHex);
     if (rgb) {
         document.documentElement.style.setProperty('--accent', pendingHex);
-        document.documentElement.style.setProperty('--accent-soft', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`);
+        document.documentElement.style.setProperty('--accent-soft', rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95));
     }
 
     // 3. 重い処理: SVGの書き換え (モード別)
@@ -940,7 +941,7 @@
   function applyFallbackFilter(s, l, h) {
       if (s < 0.05) {
         const brightness = 0.4 + 1.2 * l;
-        dressImg.style.filter = `grayscale(1) brightness(${brightness})`;
+        dressImg.style.filter = grayscale(1) brightness(${brightness});
       } else {
         const hueRotate = h;
         const sat = 0.6 + s;
@@ -950,7 +951,7 @@
         } else {
           brightness = 0.85 + (l - 0.5) * 0.7;
         }
-        dressImg.style.filter = `hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness})`;
+        dressImg.style.filter = hue-rotate(${hueRotate}deg) saturate(${sat}) brightness(${brightness});
       }
   }
 
@@ -1133,7 +1134,7 @@
       el.style.color = '#cda156';
       el.style.fontWeight = 'bold';
     } else {
-      el.innerHTML = `裏モード起動条件: 残り ${remain} パターン`;
+      el.innerHTML = 裏モード起動条件: 残り ${remain} パターン;
       el.style.color = 'rgba(122,78,84,0.5)';
       el.style.fontWeight = 'normal';
     }
@@ -1257,7 +1258,7 @@
       const ty = Math.sin(angle) * velocity;
       const anim = p.animate([
         { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+        { transform: translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0), opacity: 0 }
       ], { duration: Math.random() * 400 + 400, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
       anim.onfinish = () => p.remove();
     }
@@ -1282,10 +1283,10 @@
     anim.onfinish = () => ripple.remove();
   }
 
-  tapGameBtn.addEventListener('click', (e) => {
-    // 処理落ち防止のためアニメーションはCSSでなくJS側で制御
-    e.currentTarget.style.transform = "scale(0.95)";
-    setTimeout(()=> e.currentTarget.style.transform = "scale(1)", 50);
+  // ★ここから: pointerdown化による連打対応（ダブルタップ拡大防止・高速化）
+  function handleTap(e) {
+    tapGameBtn.style.transform = "scale(0.95)";
+    setTimeout(()=> tapGameBtn.style.transform = "scale(1)", 50);
 
     if (gameActive) {
       currentScore++;
@@ -1297,12 +1298,21 @@
       spawnParticles(x, y);
       createRipple(x, y, tapGameBtn);
     }
+  }
+
+  tapGameBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); // ダブルタップ拡大やスクロールを阻止
+    if (e.button !== 0) return; // 左クリック以外無視
+    if (!tapGameBtn.disabled) {
+       handleTap(e);
+    }
   });
+  // ★ここまで: 変更終了
 
   gameSubmitBtn.addEventListener('click', async () => {
     if (honeypot.value !== "") return;
     let finalName = sanitizeInput(gameNameInput.value.trim());
-    if (finalName.length > 10) { alert(`名前は10文字以内で入力してください`); return; }
+    if (finalName.length > 10) { alert(名前は10文字以内で入力してください); return; }
     if (!finalName) {
       if (!confirm("「名無しのゲスト」として登録しますか？")) return;
       finalName = "名無しのゲスト";
@@ -1359,7 +1369,7 @@
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
     updateDiscoveryUI();
 
-    if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
+    if(myScoreDisplay) myScoreDisplay.textContent = あなたのスコア: ${score}回;
 
     const payload = {
       action: actionType,
@@ -1395,7 +1405,7 @@
     rankingListContainer.innerHTML = '';
     list.forEach((item, index) => {
       const row = document.createElement('div');
-      row.className = `ranking-item rank-${index+1}`;
+      row.className = ranking-item rank-${index+1};
       const badge = document.createElement('div');
       badge.className = 'rank-badge';
       badge.textContent = index + 1;
@@ -1532,9 +1542,9 @@
 
   function formatWaitMessage(ms){
     const sec = Math.ceil(ms / 1000);
-    if (sec < 60) return `${sec}秒後に再度お試しください`;
+    if (sec < 60) return ${sec}秒後に再度お試しください;
     const min = Math.ceil(sec / 60);
-    return `${min}分後に再度お試しください`;
+    return ${min}分後に再度お試しください;
   }
 
   const PENDING_KEY = 'dress_pending_submissions';
@@ -1589,7 +1599,7 @@
     if (honeypot.value !== "") return;
     let name = sanitizeInput(nameInput.value.trim());
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
-    if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
+    if (name.length > MAX_NAME_LENGTH) { alert(お名前は${MAX_NAME_LENGTH}文字以内で入力してください); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
 
     // 未操作の場合の隠し要素チェック
@@ -1649,7 +1659,7 @@
     if (!rl.canSubmit) { showToast(formatWaitMessage(rl.waitMs)); return; }
     registerSubmit(rl.history);
     const rgb = hexToRgb(currentColor);
-    const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
+    const colorToSend = rgb ? ${rgb.r}, ${rgb.g}, ${rgb.b} : currentColor;
     const payload = {
       timestamp: new Date().toISOString(),
       name: name,
