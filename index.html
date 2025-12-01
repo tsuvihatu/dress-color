@@ -1113,10 +1113,8 @@
     if (localStorage.getItem(PERMANENT_BAN_KEY)) return false;
     const banUntil = parseInt(localStorage.getItem(GAME_BAN_KEY) || '0', 10);
     if (!isNaN(banUntil) && Date.now() < banUntil) return false;
-    if (discoveryId && checkTriggerCooldown(discoveryId)) return false;
-    
-    // 開く前にクールダウンを設定
-    if (discoveryId) setTriggerCooldown(discoveryId);
+    if (discoveryId && discoveryId !== 'title' && checkTriggerCooldown(discoveryId)) return false;
+    if (discoveryId && discoveryId !== 'title') setTriggerCooldown(discoveryId);
     
     setTimeout(() => { gameInviteModal.classList.add('open'); }, 500);
     return true; // モーダル開いた
