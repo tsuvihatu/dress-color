@@ -23,7 +23,6 @@
 <style>
   :root {
     --card-w: 380px;
-    /* ▼▼▼ 変更箇所: テーマカラーをシャンパンゴールドに変更 ▼▼▼ */
     --accent: #FFFBEB;
     --accent-soft: rgba(230, 163, 175, 0.35);
 
@@ -32,16 +31,15 @@
     --text-sub: #7e5b60;
   }
 
-  /* 全体設定：ダブルタップ拡大防止を全要素に適用 */
   * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation; /* ダブルタップ拡大無効、ピンチは有効 */
+    touch-action: manipulation;
   }
 
   html {
-    touch-action: manipulation; /* 念のためhtmlにも指定 */
-    user-select: none; /* 長押し選択防止（タグライン長押し用） */
+    touch-action: manipulation;
+    user-select: none;
     -webkit-user-select: none;
   }
 
@@ -72,7 +70,6 @@
       0 0 0 1px rgba(255,255,255,0.8);
     backdrop-filter: blur(8px);
     z-index: 1;
-    /* パフォーマンス最適化: 合成レイヤーへの昇格 */
     transform: translateZ(0); 
   }
 
@@ -118,7 +115,6 @@
   .dress-wrapper { 
     position: relative; width: 230px; height: 290px; max-width: 100%; 
     cursor: pointer; 
-    /* パフォーマンス最適化: SVG描画の再計算をGPUに任せる */
     will-change: transform;
   }
   #dressObj { width: 100%; height: 100%; border: 0; display: block; position: relative; z-index: 1; pointer-events: none; }
@@ -141,7 +137,7 @@
   .slider-label { font-size: 11px; letter-spacing: 0.08em; color: rgba(122,78,84,0.9); width: 56px; white-space: nowrap; font-weight: normal; }
   .slider-value { display: none; }
 
-  input[type="range"] { width: 100%; height: 10px; border-radius: 999px; -webkit-appearance: none; appearance: none; outline: none; cursor: pointer; background: rgba(255,255,255,0.7); border: 1px solid rgba(222,180,184,0.7); touch-action: none; /* スライダー操作用にpanは無効化 */ }
+  input[type="range"] { width: 100%; height: 10px; border-radius: 999px; -webkit-appearance: none; appearance: none; outline: none; cursor: pointer; background: rgba(255,255,255,0.7); border: 1px solid rgba(222,180,184,0.7); touch-action: none; }
   input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 999px; }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 25px; height: 25px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(210,145,155,0.9);
@@ -177,7 +173,6 @@
   .stock-placeholder { font-size: 12px; color: rgba(122,78,84,0.5); letter-spacing: 0.1em; }
   .note { margin-top: 16px; font-size: 11px; color: rgba(122,78,84,0.9); line-height: 1.5; text-align: center; }
 
-  /* === モーダル共通 === */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(60, 40, 45, 0.5); display: none; place-items: center; z-index: 10000; opacity: 0; transition: opacity 0.2s ease; backdrop-filter: blur(5px);
     padding: 24px;
@@ -217,7 +212,6 @@
   .toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(10px); background: rgba(90,59,64,0.95); color: #fff; font-size: 12px; padding: 9px 14px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; z-index: 9999; border: 1px solid rgba(255,255,255,0.9); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* === ゲーム画面・ランキング画面 === */
   .game-screen, .ranking-screen {
     position: fixed; inset: 0; 
     background: radial-gradient(circle at center, #2b1f22 0%, #0f080a 100%);
@@ -244,7 +238,6 @@
     min-height: min-content;
   }
 
-  /* 背景アニメーション - パフォーマンス最適化 */
   .game-screen::before {
     content: ""; position: fixed; 
     top: -50%; left: -50%; width: 200%; height: 200%;
@@ -253,7 +246,7 @@
       radial-gradient(circle at 80% 70%, rgba(230, 163, 175, 0.15), transparent 40%);
     animation: floatLight 15s infinite linear;
     pointer-events: none; z-index: -1;
-    will-change: transform; /* GPU合成を有効化 */
+    will-change: transform;
   }
   @keyframes floatLight { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 
@@ -275,7 +268,6 @@
     margin-bottom: 20px; font-family: "Yu Mincho", serif;
   }
 
-  /* ガラスボタン */
   .tap-game-btn {
     width: 240px; height: 240px; border-radius: 50%; 
     border: 1px solid rgba(255,255,255,0.3);
@@ -291,7 +283,7 @@
     -webkit-tap-highlight-color: transparent;
     font-family: "Yu Mincho", serif;
     flex-shrink: 0;
-    touch-action: none; /* ★追加: ボタン上でのブラウザ標準操作(ズーム等)を無効化 */
+    touch-action: none;
   }
   
   .tap-game-btn:active { 
@@ -301,7 +293,6 @@
   }
   .tap-game-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-  /* 飾り用のエネルギーリング */
   .decoration-wrapper {
     position: relative; width: 220px; height: 220px; margin: 0 auto 16px;
     flex-shrink: 0;
@@ -342,14 +333,12 @@
     font-family: "Yu Mincho", serif;
   }
 
-  /* 結果入力エリア */
   #gameResultArea { 
     display: none; flex-direction: column; align-items: center; width: 100%; 
     position: relative; z-index: 10;
   }
   #gameResultArea p { color: rgba(255,255,255,0.8); }
 
-  /* 入力欄とボタンの幅統一 (240px) */
   #gameNameInput { 
     text-align: center; margin-bottom: 12px; padding: 10px; 
     border: 1px solid rgba(255,255,255,0.5); border-radius: 999px; 
@@ -363,7 +352,6 @@
     width: 240px; max-width: 240px; box-sizing: border-box;
   }
 
-  /* 再挑戦ボタン */
   .btn-retry {
     background: transparent; color: rgba(255,255,255,0.8);
     border: 1px solid rgba(255,255,255,0.4);
@@ -373,7 +361,6 @@
   }
   .btn-retry:active { background: rgba(255,255,255,0.1); }
 
-  /* ランキング画面 */
   .ranking-screen { background: #fdfcf8; color: #5a3b40; } 
   .ranking-list {
     list-style: none; padding: 0; margin: 20px 0; width: 100%; max-width: 340px;
@@ -404,7 +391,6 @@
     flex-shrink: 0;
   }
 
-  /* シークレット状態表示 */
   #discoveryStatus {
     margin-top: 20px;
     font-size: 10px;
@@ -420,7 +406,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Bot対策用ハニーポット(不可視) */
   #hp_container { display: none; visibility: hidden; opacity: 0; position: absolute; left: -9999px; }
 
 </style>
@@ -584,8 +569,6 @@
 <div id="toast" class="toast" role="status" aria-live="polite">投票を送信しました</div>
 
 <script>
-  /* ========= 設定: リロード時リセット (発見済みデータは保持) ========= */
-  // 意図: 隠しモードの発見記録だけ残し、それ以外のゲーム状態(クールダウン等)はリセットする
   const KEEP_KEYS = ['dress_game_discoveries']; 
 
   Object.keys(localStorage).forEach(key => {
@@ -594,13 +577,10 @@
     }
   });
 
-  /* ========= 最適化: requestAnimationFrame用変数 ========= */
   let isVisualUpdatePending = false;
   let pendingH = 0, pendingS = 0, pendingL = 0;
   let pendingHex = "";
   
-  /* ========= セキュリティ・ユーティリティ ========= */
-  // === reCAPTCHA (ゲーム用) ===
   let gameRecaptchaWidgetId = null;
   let pendingGameSubmit = null;
   let recaptchaFallbackTimer = null;
@@ -641,7 +621,6 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  /* ========= 色変換ユーティリティ ========= */
   function hexToRgb(hex){
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return m ? { r: parseInt(m[1],16), g: parseInt(m[2],16), b: parseInt(m[3],16) } : null;
@@ -690,7 +669,6 @@
 
   function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
 
-  /* ========= DOM参照 ========= */
   const dressWrapper = document.getElementById('dressWrapper');
   const dressObj     = document.getElementById('dressObj');
   const dressImg     = document.getElementById('dressImg');
@@ -719,7 +697,6 @@
   const cancelSendBtn= document.getElementById('cancelSendBtn');
   const finalSendBtn = document.getElementById('finalSendBtn');
 
-  /* ゲーム用DOM */
   const gameInviteModal = document.getElementById('gameInviteModal');
   const gameDeclineBtn = document.getElementById('gameDeclineBtn');
   const gameAcceptBtn = document.getElementById('gameAcceptBtn');
@@ -740,8 +717,6 @@
   const skipRegisterBtn = document.getElementById('skipRegisterBtn');
   const rankRetryBtn = document.getElementById('rankRetryBtn');
 
-  /* ========= 定数 ========= */
-  // ▼▼▼ 変更箇所: 初期カラーをシャンパンゴールドに変更 ▼▼▼
   const COLORS = ['#FFFBEB','#A7C7E7','#C2DEDC','#F2D1C9','#E53B3B'];
   const MAX_NAME_LENGTH = 10;
   const RATE_LIMIT_KEY = 'dress_rate_limit';
@@ -767,7 +742,6 @@
   let currentL = 0.7;
   let hasInteracted = false; 
 
-  /* ========= SVG 直接塗り替え用 ========= */
   let directParts = [];
   let baseAvgL = 0, baseAvgS = 0;
   let minOrigL = 0, maxOrigL = 1;
@@ -834,9 +808,6 @@
     dressImg.style.filter = 'none';
   }
 
-  /* ========= 最適化済み: UI更新システム ========= */
-  
-  // スライダーやパレットからの入力は変数を更新してフレーム更新を要求するだけにする
   function requestVisualUpdate(h, s, l, hex) {
     pendingH = h;
     pendingS = s;
@@ -849,11 +820,9 @@
     }
   }
 
-  // フレーム描画処理 (重いSVG書き換えやDOM操作をここに集約)
   function processVisualUpdate() {
     isVisualUpdatePending = false;
     
-    // 1. スライダー背景・数値更新 (DOM操作)
     const sPercent = clamp01(pendingS) * 100;
     const lPercent = clamp01(pendingL) * 100;
 
@@ -870,7 +839,6 @@
     if (satValue)   satValue.textContent   = `${Math.round(sPercent)}%`;
     if (lightValue) lightValue.textContent = `${Math.round(lPercent)}%`;
 
-    // 2. 共通色適用
     if (colorChip) colorChip.style.background = pendingHex;
     const rgb = hexToRgb(pendingHex);
     if (rgb) {
@@ -878,7 +846,6 @@
         document.documentElement.style.setProperty('--accent-soft', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.95)`);
     }
 
-    // 3. 重い処理: SVGの書き換え (モード別)
     const mode = dressWrapper.dataset.mode;
     if (mode === 'direct') {
       applyDirectSVGColor(pendingHex, pendingS, pendingL, pendingH);
@@ -887,7 +854,6 @@
     }
   }
 
-  // 元の applyColor からSVGロジックを抽出
   function applyDirectSVGColor(hex, S0, L0, H0) {
       const rgb = hexToRgb(hex);
       if(!rgb) return;
@@ -957,7 +923,6 @@
       }
   }
 
-  /* 入力ハンドラ（最適化版） */
   function onSliderInput() {
     hasInteracted = true;
     const h = parseFloat(hueRange.value);
@@ -968,13 +933,11 @@
     currentColor = hex;
     currentL = l;
     
-    // カラーコードのテキスト反映は軽いのでここでやる(UX向上)
     if (colorHexLabel) colorHexLabel.textContent = hex.toUpperCase();
     if (colorInput && document.activeElement !== colorInput) {
-        colorInput.value = hex; // これも軽い
+        colorInput.value = hex;
     }
     
-    // 重い描画処理をリクエスト
     requestVisualUpdate(h, s, l, hex);
   }
 
@@ -985,7 +948,6 @@
       const rgb = hexToRgb(hex);
       if (rgb) {
         const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-        // スライダーの値だけ先に更新（見た目の反映はrequestVisualUpdateで）
         hueRange.value = hsl.h;
         satRange.value = hsl.s * 100;
         lightRange.value = hsl.l * 100;
@@ -996,12 +958,10 @@
     });
   }
 
-  // スライダーイベントリスナ (Passiveでパフォーマンス向上)
   hueRange.addEventListener('input', onSliderInput, {passive: true});
   satRange.addEventListener('input', onSliderInput, {passive: true});
   lightRange.addEventListener('input', onSliderInput, {passive: true});
 
-  /* === 初期化 === */
   function initColor(hex) {
     currentColor = hex;
     if (colorInput) colorInput.value = hex;
@@ -1016,7 +976,6 @@
     }
   }
 
-  /* === トリガーロジック: おまかせ -> KEEP === */
   let lastActionWasRandom = false;
   let omakaseKeepCombo = 0;
   let omakaseTapCount = 0;
@@ -1029,7 +988,7 @@
     const l = 0.6 + Math.random() * 0.3;
     const hex = hslToHex(h, s, l);
     
-    initColor(hex); // 最適化済みの初期化関数を使用
+    initColor(hex);
     
     lastActionWasRandom = true;
     omakaseTapCount++;
@@ -1042,7 +1001,6 @@
     }
   });
 
-  /* === KEEPボタンロジック === */
   let keepTapCount = 0;
   const GAME_BAN_KEY = 'dress_game_ban_until';
   const PERMANENT_BAN_KEY = 'dress_game_permanent_ban';
@@ -1074,7 +1032,6 @@
     }
   });
 
-  /* === シークレット発見トラッキング === */
   const DISCOVERY_KEY = 'dress_game_discoveries';
   const TOTAL_SECRETS = 7; 
   const TRIGGER_COOLDOWN_MS = 15 * 60 * 1000; 
@@ -1097,7 +1054,6 @@
     } catch(e) {}
   }
 
-  // 戻り値: モーダルを開いたか(true/false)
   function triggerGameInvite(discoveryId) {
     if (discoveryId) {
       let discovered = [];
@@ -1120,7 +1076,7 @@
     if (discoveryId && discoveryId !== 'title') setTriggerCooldown(discoveryId);
     
     setTimeout(() => { gameInviteModal.classList.add('open'); }, 500);
-    return true; // モーダル開いた
+    return true;
   }
 
   function updateDiscoveryUI() {
@@ -1164,12 +1120,10 @@
   gameAcceptBtn.addEventListener('click', () => {
     gameInviteModal.classList.remove('open');
     declineCount = 0;
-    // ゲーム承諾時もインタラクション済みとする
     hasInteracted = true; 
     startGame();
   });
 
-  /* === ゲームロジック === */
   let gameActive = false;
   let currentScore = 0;
   let timeLeft = 5.00;
@@ -1186,7 +1140,6 @@
     gameTimer.textContent = "5.00";
     currentScore = 0;
     
-    // ゲーム開始時も念のためインタラクション済みとする
     hasInteracted = true;
 
     let count = 3;
@@ -1285,7 +1238,6 @@
     anim.onfinish = () => ripple.remove();
   }
 
-  // ★ここから: pointerdown化による連打対応（ダブルタップ拡大防止・高速化）
   function handleTap(e) {
     tapGameBtn.style.transform = "scale(0.95)";
     setTimeout(()=> tapGameBtn.style.transform = "scale(1)", 50);
@@ -1303,13 +1255,12 @@
   }
 
   tapGameBtn.addEventListener('pointerdown', (e) => {
-    e.preventDefault(); // ダブルタップ拡大やスクロールを阻止
-    if (e.button !== 0) return; // 左クリック以外無視
+    e.preventDefault();
+    if (e.button !== 0) return;
     if (!tapGameBtn.disabled) {
        handleTap(e);
     }
   });
-  // ★ここまで: 変更終了
 
   gameSubmitBtn.addEventListener('click', async () => {
     if (honeypot.value !== "") return;
@@ -1427,8 +1378,6 @@
   backToMainBtn.addEventListener('click', () => {
     rankingScreen.classList.remove('active');
     gameScreen.classList.remove('active');
-    // ランキング画面から戻った時点でインタラクション済みとみなす
-    // これにより、再度ボタンを押しても裏モードは発動せず、投票確認が出る
     hasInteracted = true;
     resetTriggerCounters(); 
   });
@@ -1513,7 +1462,6 @@
   dressObj.addEventListener('load', () => {
     const ok = tryWireSvgDirect();
     if (!ok) enableFallback();
-    // 初期カラー適用（ロード時は即時実行）
     initColor(currentColor);
   });
 
@@ -1604,16 +1552,12 @@
     if (name.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); nameInput.focus(); return; }
     name = name.replace(/[\u0000-\u001F\u007F]/g, '');
 
-    // 未操作の場合の隠し要素チェック
     if (!hasInteracted) {
        let discovered = [];
        try { discovered = JSON.parse(localStorage.getItem(DISCOVERY_KEY) || '[]'); } catch(e){}
        
-       // 「default」をまだ発見していない、または確認抑制状態ならチェックへ進む
        if (!discovered.includes('default') || localStorage.getItem(SUPPRESS_CONFIRM_KEY)) {
-          // ★修正: 戻り値(modalOpened)を受け取る
           const modalOpened = triggerGameInvite('default');
-          // ★修正: モーダルが開いた場合のみ中断。開かなかった(クールタイム中)ならそのまま下の投票処理へ進む
           if (modalOpened) return; 
        }
     }
@@ -1687,7 +1631,6 @@
     } catch(e){}
   }
   
-  /* === スライダーガチャガチャ用変数 === */
   let sliderStartTime = 0;  
   let sliderGapTimer = null; 
   let sliderShakeCount = 0;
@@ -1697,26 +1640,15 @@
     range.addEventListener('input', (e) => {
       const currentVal = parseInt(e.target.value, 10);
       
-      /* === 変更箇所: バイブレーションの条件を緩和 === */
-      
-      // パターンA: 1刻みで振動（最も細かい・ヌルヌル動く感触）
-      // if (currentVal !== lastVal) {
-      //    triggerHaptic('light');
-      // }
-
-      // パターンB: もしAが細かすぎる場合は、以下の「2刻み」を使ってください
       if (Math.abs(currentVal - lastVal) >= 3) {
           triggerHaptic('light');
       }
-
-      /* === 変更終了 === */
 
       lastVal = currentVal;
       
       if (sliderStartTime === 0) {
         sliderStartTime = Date.now();
       }
-      // ...（以下のゲーム起動用ロジックはそのまま残す）
       if (sliderGapTimer) clearTimeout(sliderGapTimer);
       sliderGapTimer = setTimeout(() => {
         sliderStartTime = 0;
@@ -1738,14 +1670,12 @@
   if (colorInput) { colorInput.addEventListener('click', () => triggerHaptic('medium')); }
 
   window.addEventListener('online', () => flushQueue(ENDPOINT_URL));
-  // ロード完了時に再度適用を試みる
   if (document.readyState === 'complete') {
      initColor(currentColor);
   } else {
      window.addEventListener('load', () => initColor(currentColor));
   }
 
-  /* === タイトル連打でゲーム起動 === */
   const titleElement = document.querySelector('.card-header h2'); 
   let titleTapCount = 0;
   let titleTapTimer = null;
