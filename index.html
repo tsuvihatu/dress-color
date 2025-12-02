@@ -129,11 +129,10 @@
     pointer-events: none;
   }
 
-  /* 文字サイズ変更ボタン（修正版） */
   .a11y-toggle {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 12px;
+    right: 12px;
     background: transparent;
     border: none;
     padding: 8px;
@@ -142,7 +141,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.6; /* 通常時は少し控えめに */
+    opacity: 0.6; 
     transition: all 0.2s ease;
     color: var(--text-sub);
   }
@@ -151,24 +150,23 @@
   .a11y-toggle:active { transform: scale(0.95); }
 
   .a11y-icon-wrapper {
-    width: 28px; /* 少し大きく (元24px -> 28px) */
-    height: 28px;
-    border: 1.5px solid currentColor; /* 枠線を少し太く */
+    width: 26px; 
+    height: 26px;
+    border: 1.5px solid currentColor; 
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: rgba(255,255,255,0.2); /* ほんのり背景色 */
+    background: rgba(255,255,255,0.2); 
   }
 
   .a11y-char { 
-    font-family: "Yu Gothic", "YuGothic", sans-serif; /* 視認性重視でゴシック体 */
-    font-size: 15px; /* 少し大きく (元14px -> 15px) */
-    font-weight: 700; /* 太文字に */
+    font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif; 
+    font-size: 17px; 
+    font-weight: 700; 
     line-height: 1;
     transform: translateY(1px);
   }
 
-  /* ON状態のスタイル */
   body.large-mode .a11y-toggle {
     opacity: 1;
     color: var(--gold-main);
@@ -513,7 +511,7 @@
     <p class="tagline">WEDDING COLOR QUIZ</p>
     <h2>ドレスの色あてクイズ</h2>
     <p class="card-sub">
-      新婦のお色直しのドレスは何色でしょう？<br>
+      花嫁のお色直しのドレスは何色でしょう？<br>
       「これだ！」と思う色を選んでください。
     </p>
   </header>
