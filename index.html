@@ -1035,13 +1035,11 @@
 })();
   const KEEP_KEYS = ['dress_game_discoveries']; 
 
-  try {
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith('dress_') && !KEEP_KEYS.includes(key)) {
       localStorage.removeItem(key);
     }
   });
-  } catch(e) { /* localStorage unavailable */ }
 
   const toggleA11yBtn = document.getElementById('toggleA11yBtn');
   
@@ -1083,6 +1081,22 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  async function generateSignature(data) {
+    const secret = "WEDDING_SECRET_SALT_2025";
+    const msg = JSON.stringify(data) + secret;
+    const msgBuffer = new TextEncoder().encode(msg);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function calcSha256(str) {
+    const buff = new TextEncoder().encode(str);
+    const digest = await crypto.subtle.digest('SHA-256', buff);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   function hexToRgb(hex){
@@ -1779,8 +1793,8 @@ function drawPixelDress(H0, S0, L0){
   const TRIGGER_COOLDOWN_KEY = 'dress_trigger_cooldowns';
 
     const ALT_HOME_UNLOCK_CODE = atob('OGJpdA==');
-  const ALT_HOME_MODE_KEY = 'alt_home_mode';           
-  const ALT_CODE_ANNOUNCED_KEY = 'alt_code_announced';
+  const ALT_HOME_MODE_KEY = 'alt_home_mode';            // sessionStorage
+  const ALT_CODE_ANNOUNCED_KEY = 'alt_code_announced';  // sessionStorage
 
   function normalizeCode(str){
     return (str || '')
@@ -1848,6 +1862,63 @@ function drawPixelDress(H0, S0, L0){
   let bsodActive = false;
   let bsodCooldownUntil = 0;
 
+function looksLikeDebugAttempt(raw){
+    if (!raw) return false;
+    const s = String(raw);
+    const lower = s.toLowerCase().trim();
+    
+    if (s.length < 2) return false;
+    if (normalizeCode(s) === ALT_HOME_UNLOCK_CODE) return false;
+
+    const _0xG = [
+      'cmFua2luZw==','c2NvcmU=','ZHJlc3M=','d2VkZGluZw==','YW5zd2Vy','c2VjcmV0','Y2hlYXQ=','Y29uZmln', 
+      '44Op44Oz44Kt44Oz44Kw','6aCB5L2N','44K544Kz44Ki','44OJ44Os44K5','44Km44Kn44OH44Kj44Oz44Kw','5q2j6Kej','56GU44GI','44ON44K/44OQ44Os','56eY5a+G'
+    ].map(_0xDec);
+    if (_0xG.some(w => lower.includes(w))) return true;
+
+    const _0xA = [
+      'YWRtaW4=','cm9vdA==','YWRtaW5pc3RyYXRvcg==','bWFzdGVy','c3lzdGVt','Z20=','Z29k'
+    ].map(_0xDec);
+    if (_0xA.includes(lower)) return true;
+    
+    const _0xT = [
+      'dGVzdA==','dGV4dA==','44OG44K544OI','44Gm44GZ44Go', 
+      '44OQ44Kw','5LiN5YW35ZCI','6YGL5Za2','6ZaL55m6','566h55CG6ICF' 
+    ].map(_0xDec);
+    if (_0xT.some(w => lower === w || s.includes(w))) return true;
+
+    if (/^[\=\+\-@]/.test(s)) return true;
+    const _0xS = [
+      'Y21kfA==','cG93ZXJzaGVsbA==','ZGRlKA==', 
+      'aW1wb3J0eG1s','aW1wb3J0cmFuZ2U=','dmxvb2t1cA==','c3VtKA==','YXZlcmFnZSg=','aHlwZXJsaW5r','cXVlcnko','c3BhcmtsaW5l','aW1hZ2Uo'
+    ].map(_0xDec);
+    if (_0xS.some(f => lower.includes(f))) return true;
+
+    if (/^#[a-z0-9]+\!?\??$/i.test(s)) return true;
+
+    const _0xTech = [
+      'bnVsbA==','dW5kZWZpbmVk','bmFu','ZmFsc2U=','dHJ1ZQ==','dm9pZA==','ZGVmYXVsdA=='
+    ].map(_0xDec);
+    if (_0xTech.includes(lower)) return true;
+
+    const _0xPath = [
+      'Li4v','Yzpc','Lw==','Y2Qg', 
+      'aGFjaw==','cHdu','Y3JhY2s=','Y3NyZg==','eHNz' 
+    ].map(_0xDec);
+    if (_0xPath.some(w => lower.includes(w) || lower.startsWith(w))) return true;
+
+    if (/(.)\1{9,}/.test(s)) return true;
+    const squashed = lower.replace(/\s+/g, '');
+    const _0xP = [
+      'cXdlcnR5','YXNkZg==','endjdg==','MTIzNDU2Nzg5','MDk4NzY1NDMy','cGFzc3dvcmQ=','bGV0bWVpbg==','bG9naW4='
+    ].map(_0xDec);
+    if (_0xP.some(seq => squashed.includes(seq))) return true;
+
+    const _0xReSrc = "PHxSfDwvfGB8XHske3xcLyp8XCovfC0tfFxceHxcXHV8b25lcnJvclxifG9ubG9hZFxifGphdmFzY3JpcHQ6fGNvbnNvbGUufGRvY3VtZW50Lnx3aW5kb3cufGFsZXJ0XHMqXCh8ZXZhbFxzKlwofGZldGNoXHMqXCh8ZGVidWdnZXJcYnxcYnNlbGVjdFxifFxiZHJvcFxifFxidW5pb25cYnxcYmluc2VydFxifFxidXBkYXRlXGJ8XGJkZWxldGVcYnxcYmltcG9ydFxifFxiKHI/KGVxdWlyZSlcYnxcYm1vZHVsZVwuZXhwb3J0c1xifFxiZXhwb3J0XGJ8XGJpbmNsdWRlXGJ8XGJwcmludGZcYnxcYnN5c3RlbVwub3V0XGJ8XGJ0cmFjZWJhY2tcYnxcYmV4Y2VwdGlvblxifFxibnVsbChyZWZlcmVuY2UpP2V4Y2VwdGlvblxifFxic2VnbWVudGF0aW9uXHMqZmF1bHRcYnxcYnBhbmljXGJ8XGJhc3NlcnRcYnxcYnRvZG9cYnxcYmZpeG1lXGJ8PT18PT09fCE9fCYmfFx8fHw9Pnw7fFx7fFx9fFwofFwpfFxbfFxdfDo6fFxiY2xhc3NcYnxcYnB1YmxpY1xifFxbcHJpdmF0ZVxifFxbc3RhdGljXGJ8XGJjb25zdFxifFxibGV0XGJ8XGJ2YXJcYnxcYmlmXGJ8XGJlbHNlXGJ8XGJmb3JcYnxcYndoaWxlXGJ8XGJyZXR1cm5cYnxcYnRyeVxifFxiY2F0Y2hcYnxcYnRocm93XGJ8XGJucG1cYnxcYnlhcm5cYnxcYnBpcFxifFxiZ2l0XGJ8XGJzdWRvXGJ8cm1ccyotcmZ8XGJjaG1vZFxifFxiY2hvd25cYg==";
+    const re = new RegExp(_0xDec(_0xReSrc), 'i');
+    
+    return re.test(s);
+  }
 
   function hideBsod(){
     if (!bsodOverlay) return;
@@ -1973,6 +2044,7 @@ const DISCOVERY_LABELS = {
       if (!Array.isArray(discovered)) discovered = [];
     } catch(e) { discovered = []; }
 
+    // 表示上の重複は除去（Set）
     const unique = Array.from(new Set(discovered));
     const count = unique.length;
     const remain = Math.max(0, TOTAL_SECRETS - count);
@@ -2035,48 +2107,8 @@ gameDeclineBtn.addEventListener('click', () => {
   let timeLeft = 5.00;
   let gameInterval = null;
   let gameStartTime = 0;
-  let currentGameToken = null;
-  let tapLog = [];           
-  let gameStartTimeLocal = 0; 
 
-async function startGame() {
-  tapGameBtn.disabled = true;
-  gameScore.textContent = "0";
-  currentScore = 0;
-  
-  try {
-    const formData = new URLSearchParams();
-    formData.append('action', 'game_start');
-
-    tapBtnText.textContent = "READY...";
-
-    const res = await fetch(ENDPOINT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData
-    });
-    const data = await res.json();
-
-    if (data.status === 'success') {
-      currentGameToken = data.token; 
-      startCountdown();
-    } else {
-      alert('ゲームを開始できませんでした。通信環境を確認してください。');
-      resetGameUI();
-    }
-  } catch (e) {
-    console.error(e);
-    alert('通信エラーが発生しました');
-    resetGameUI();
-  }
-}
-
-function resetGameUI() {
-  tapGameBtn.disabled = true;
-  tapBtnText.textContent = "ERROR";
-}
-
-function startCountdown() {
+  function startGame() {
     gameScreen.classList.add('active');
     gameResultArea.style.display = "none";
     tapGameBtn.style.display = "flex";
@@ -2105,22 +2137,19 @@ function startCountdown() {
         }, 1000);
       }
     }, 1000);
-}
+  }
 
-function startMainGame() {
+  function startMainGame() {
     gameActive = true;
     timeLeft = 5.00;
-    
-    tapLog = [];
-    gameStartTimeLocal = Date.now();
-    
     tapGameBtn.disabled = false;
     tapBtnText.textContent = "TAP!";
     gameStartTime = Date.now();
+    const startTime = Date.now();
     
     gameInterval = setInterval(() => {
       const now = Date.now();
-      const elapsed = (now - gameStartTime) / 1000;
+      const elapsed = (now - startTime) / 1000;
       const remain = 5.00 - elapsed;
       if (remain <= 0) {
         gameTimer.textContent = "0.00";
@@ -2186,17 +2215,13 @@ function startMainGame() {
     anim.onfinish = () => ripple.remove();
   }
 
-function handleTap(e) {
+  function handleTap(e) {
     tapGameBtn.style.transform = "scale(0.95)";
     setTimeout(()=> tapGameBtn.style.transform = "scale(1)", 50);
 
     if (gameActive) {
-      const tapTime = Date.now() - gameStartTimeLocal;
-      tapLog.push(tapTime);
-      
-      currentScore = tapLog.length;
+      currentScore++;
       gameScore.textContent = currentScore;
-      
       triggerHaptic('light');
       const rect = tapGameBtn.getBoundingClientRect();
       const x = e.clientX || (rect.left + rect.width / 2);
@@ -2219,7 +2244,13 @@ submitBtn.addEventListener('click', async () => {
 
     const rawVal = nameInput.value.trim();
     
-
+    const normVal = normalizeCode(rawVal);
+    const inputHash = await calcSha256(normVal);
+    
+    if (inputHash === ADMIN_HASH) { 
+        openColorRanking(normVal); 
+        return; 
+    }
 
     let name = sanitizeInput(rawVal);
     if (!name) { alert('お名前を入力してください'); nameInput.focus(); return; }
@@ -2287,15 +2318,10 @@ submitBtn.addEventListener('click', async () => {
       if (!raw) { alert('お名前を入力してください'); gameNameInput.focus(); return; }
       if (raw.length > MAX_NAME_LENGTH) { alert(`お名前は${MAX_NAME_LENGTH}文字以内で入力してください`); gameNameInput.focus(); return; }
 
+      // Spreadsheetへの式注入（先頭が = + - @ など）を軽くブロック
       if (/^[=+\-@]/.test(raw)) { alert('その名前は使用できません'); gameNameInput.focus(); return; }
 
       const name = raw.replace(/[\u0000-\u001F\u007F]/g, '');
-
-      const infoEl = document.getElementById('colorRankingInfo');
-      if (infoEl) {
-        infoEl.style.display = 'none'; 
-        infoEl.innerHTML = '';
-      }
 
       rankingScreen.classList.add('active');
       rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
@@ -2342,55 +2368,77 @@ async function submitAndShowRankingWithToken(score, name, recaptchaToken, action
   isColorRankingMode = false;  
 
   const infoEl = document.getElementById('colorRankingInfo');
-  if (infoEl) { infoEl.style.display = 'none'; infoEl.innerHTML = ''; }
+  if (infoEl) {
+    infoEl.style.display = 'none';
+    infoEl.innerHTML = '';
+  }
+
   const distEl = document.getElementById('colorDistanceInfo');
-  if (distEl) { distEl.style.display = 'none'; distEl.innerHTML = ''; }
+  if (distEl) {
+    distEl.style.display = 'none';
+    distEl.innerHTML = '';
+  }
+
   const discoveryStatus = document.getElementById('discoveryStatus');
-  if (discoveryStatus) { discoveryStatus.style.display = ''; }
-  
+  if (discoveryStatus) {
+    discoveryStatus.style.display = '';
+  }
+
+  const titleEl = rankingScreen && rankingScreen.querySelector('h3');
+  if (titleEl && defaultRankingTitle) {
+    titleEl.textContent = defaultRankingTitle; 
+  }
   if (rankRetryBtn) rankRetryBtn.style.display = '';
 
-  rankingScreen.classList.add('active');
-  rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
-  updateDiscoveryUI();
+    rankingScreen.classList.add('active');
+    rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
+    updateDiscoveryUI();
 
-  if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
+    if(myScoreDisplay) myScoreDisplay.textContent = `あなたのスコア: ${score}回`;
 
-const payload = {
-    action: actionType,
-    timestamp: new Date().toISOString(),
-    name: name,
-    clientId: CLIENT_ID,
-    recaptchaToken: recaptchaToken || '',
-    gameToken: currentGameToken || '',
-    
-    tapHistory: JSON.stringify(tapLog)
-  };
+    const payload = {
+      action: actionType,
+      timestamp: new Date().toISOString(),
+      name: name,
+      score: score,
+      clientId: CLIENT_ID,
+      recaptchaToken: recaptchaToken || ''
+    };
 
-  try {
-    const body = new URLSearchParams(payload).toString();
-    const response = await fetch(ENDPOINT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: body
-    });
-    const result = await response.json();
+    const signature = await generateSignature(payload);
+    payload.signature = signature;
 
-    if (result.status === 'error') {
-      alert(result.message || 'エラーが発生しました（不正なスコアの可能性があります）');
-      rankingScreen.classList.remove('active'); 
-      return;
+    try {
+      const body = new URLSearchParams(payload).toString();
+      const response = await fetch(ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: body
+      });
+      const result = await response.json();
+      renderRanking(result.ranking, score, name);
+    } catch(e) {
+      rankingListContainer.innerHTML = '<p>ランキングの取得に失敗しました</p>';
     }
-
-    renderRanking(result.ranking, score, name);
-  } catch(e) {
-    rankingListContainer.innerHTML = '<p>ランキングの取得に失敗しました</p>';
   }
-}
 
 
+  const ADMIN_HASH = '1f76f0ab3feb7c8c600e7a1a78c09b136584e1680245f3c126d150b183d05dbd';
   let isColorRankingMode = false;
   let defaultRankingTitle = '';
+
+  const SECRET_RGB_ENC = [1010, 879, 916];
+  const SECRET_RGB_KEY = 756;
+
+  function getSecretRgbString() {
+    const comps = SECRET_RGB_ENC.map(v => v - SECRET_RGB_KEY); 
+    return 'rgb(' + comps.join(',') + ')';
+  }
+
+  function getSecretRgbLabel() {
+    const comps = SECRET_RGB_ENC.map(v => v - SECRET_RGB_KEY);
+    return 'RGB(' + comps.join(',') + ')';
+  }
 
   async function openColorRanking(secretWord){
     isColorRankingMode = true;
@@ -2410,30 +2458,61 @@ const payload = {
 
     rankingScreen.classList.add('active');
     rankingListContainer.innerHTML = '<div class="loading-spinner"></div>';
-    
-    if (myScoreDisplay) myScoreDisplay.textContent = '上位5名（タップでドレス表示）';
+    if (myScoreDisplay) myScoreDisplay.textContent = '上位10名（タップでドレス表示）';
 
-    const infoEl = document.getElementById('colorRankingInfo');
-    if (infoEl) {
-      infoEl.style.display = 'none'; 
-      infoEl.innerHTML = '';
-    }
+const infoEl = document.getElementById('colorRankingInfo');
+if (infoEl) {
+  infoEl.style.display = 'block';
+  infoEl.innerHTML = '';
 
-    const distEl = document.getElementById('colorDistanceInfo');
-    if (distEl) {
-      distEl.style.display = 'block';
-      distEl.innerHTML =
-        '<a href="https://ja.wikipedia.org/wiki/%E8%89%B2%E5%B7%AE" ' +
-        '   target="_blank" rel="noopener noreferrer">' +
-        '色の近さの計算方法（CIEDE2000）' +
-        '</a>';
-    }
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.justifyContent = 'center';
+  wrapper.style.gap = '8px';
+
+  const label = document.createElement('span');
+  label.textContent = '正解のドレス（丸をタップ）';
+
+  const dot = document.createElement('button');
+  dot.type = 'button';
+  dot.style.width = '20px';
+  dot.style.height = '20px';
+  dot.style.borderRadius = '50%';
+  dot.style.border = '1px solid rgba(0,0,0,0.15)';
+  dot.style.backgroundColor = getSecretRgbString(); 
+  dot.style.cursor = 'pointer';
+  dot.style.padding = '0';
+
+  dot.addEventListener('click', () => {
+    const comps = SECRET_RGB_ENC.map(v => v - SECRET_RGB_KEY); 
+    const csv = comps.join(','); 
+    showDressPreviewModal('正解のドレス', csv);
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(dot);
+  infoEl.appendChild(wrapper);
+}
+
+const distEl = document.getElementById('colorDistanceInfo');
+if (distEl) {
+  distEl.style.display = 'block';
+  distEl.innerHTML =
+    '<a href="https://ja.wikipedia.org/wiki/%E8%89%B2%E5%B7%AE" ' +
+    '   target="_blank" rel="noopener noreferrer">' +
+    '色の近さの計算方法（CIEDE2000）' +
+    '</a>';
+}
+
 
     const payload = {
       timestamp: new Date().toISOString(),
       name: secretWord, 
       clientId: CLIENT_ID
     };
+    const signature = await generateSignature(payload);
+    payload.signature = signature;
 
     try {
       const body = new URLSearchParams(payload).toString();
@@ -2443,55 +2522,11 @@ const payload = {
         body: body
       });
       const result = await response.json();
-
-      if (result.secretColor && Array.isArray(result.secretColor)) {
-        renderSecretColorDot(result.secretColor);
-      }
-
       renderColorRanking(result.ranking);
     } catch (e) {
       rankingListContainer.innerHTML = '<p>ランキングの取得に失敗しました</p>';
     }
   }
-
-  function renderSecretColorDot(rgbArray) {
-    const infoEl = document.getElementById('colorRankingInfo');
-    if (!infoEl) return;
-
-    infoEl.style.display = 'block';
-    infoEl.innerHTML = '';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.justifyContent = 'center';
-    wrapper.style.gap = '8px';
-
-    const label = document.createElement('span');
-    label.textContent = '正解のドレス（丸をタップ）';
-
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.style.width = '20px';
-    dot.style.height = '20px';
-    dot.style.borderRadius = '50%';
-    dot.style.border = '1px solid rgba(0,0,0,0.15)';
-    
-    const colorStr = `rgb(${rgbArray.join(',')})`;
-    dot.style.backgroundColor = colorStr;
-    
-    dot.style.cursor = 'pointer';
-    dot.style.padding = '0';
-
-    dot.addEventListener('click', () => {
-      showDressPreviewModal('正解のドレス', rgbArray.join(','));
-    });
-
-    wrapper.appendChild(label);
-    wrapper.appendChild(dot);
-    infoEl.appendChild(wrapper);
-  }
-
 
 function renderColorRanking(list) {
   if (!list || !Array.isArray(list)) {
@@ -2500,14 +2535,14 @@ function renderColorRanking(list) {
   }
 
   rankingListContainer.innerHTML = '';
-  const top10 = list.slice(0, 5);
+  const top10 = list.slice(0, 10);
 
   if (!top10.length) {
     rankingListContainer.innerHTML = '<p>データがありません</p>';
     return;
   }
 
-  let lastColor = null; 
+  let lastColor = null; // 直前の color 文字列 ("255, 20, 63" など)
   let lastRank  = 0;
   let pos       = 0;
 
@@ -2516,6 +2551,7 @@ function renderColorRanking(list) {
 
     let rank;
     if (lastColor !== null && item.color === lastColor) {
+      // 全く同じ RGB なら同順位
       rank = lastRank;
     } else {
       rank = pos;
@@ -2706,10 +2742,7 @@ function renderRanking(list, myScore, myName) {
     };
   }
 
-  function handleDressLoaded() {
-    if (dressObj.dataset.loaded === 'true') return;
-    dressObj.dataset.loaded = 'true';
-
+  dressObj.addEventListener('load', () => {
     const ok = tryWireSvgDirect();
     if (!ok) enableFallback();
     
@@ -2718,21 +2751,7 @@ function renderRanking(list, myScore, myName) {
     requestAnimationFrame(() => {
       dressObj.style.opacity = '1';
     });
-  }
-
-  dressObj.addEventListener('load', handleDressLoaded);
-
-  if (dressObj.contentDocument && 
-      dressObj.contentDocument.readyState === 'complete' &&
-      dressObj.contentDocument.documentElement) {
-    handleDressLoaded();
-  }
-
-  setTimeout(() => {
-    if (getComputedStyle(dressObj).opacity === '0') {
-      handleDressLoaded();
-    }
-  }, 1000);
+  });
   function checkRateLimit(){
     const now = Date.now();
     let arr;
@@ -2858,17 +2877,14 @@ function renderRanking(list, myScore, myName) {
 
   cancelSendBtn.addEventListener('click', () => { confirmModal.classList.remove('open'); });
 
-finalSendBtn.addEventListener('click', async () => {
+  finalSendBtn.addEventListener('click', async () => {
     confirmModal.classList.remove('open');
     const name = sanitizeInput(nameInput.value.trim().replace(/[\u0000-\u001F\u007F]/g, ''));
-    
     const rl = checkRateLimit();
     if (!rl.canSubmit) { showToast(formatWaitMessage(rl.waitMs)); return; }
     registerSubmit(rl.history);
-
     const rgb = hexToRgb(currentColor);
     const colorToSend = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : currentColor;
-    
     const payload = {
       timestamp: new Date().toISOString(),
       name: name,
@@ -2876,42 +2892,11 @@ finalSendBtn.addEventListener('click', async () => {
       userAgent: navigator.userAgent,
       clientId: CLIENT_ID
     };
-
-    try {
-      const body = new URLSearchParams(payload).toString();
-      const response = await fetch(ENDPOINT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: body
-      });
-      const result = await response.json();
-
-      if (result.status === 'success') {
-        if (result.ranking && result.secretColor) {
-           showToast('管理者モード: 色当てランキングを表示します');
-           renderSecretColorDot(result.secretColor);
-           renderColorRanking(result.ranking);
-           rankingScreen.classList.add('active'); 
-           
-           isColorRankingMode = true;
-           const titleEl = rankingScreen.querySelector('h3');
-           if (titleEl) {
-             if (!defaultRankingTitle) defaultRankingTitle = titleEl.textContent;
-             titleEl.textContent = "DRESS COLOR RANKING";
-           }
-           if (myScoreDisplay) myScoreDisplay.textContent = '上位5名（タップでドレス表示）';
-
-        } else {
-           showToast('投票を送信しました');
-        }
-      } else {
-        enqueueSubmission(payload);
-        showToast('投票を送信しました(オフライン保存)');
-      }
-    } catch (e) {
-      enqueueSubmission(payload);
-      showToast('投票を送信しました(通信エラー保存)');
-    }
+    const signature = await generateSignature(payload);
+    payload.signature = signature;
+    const ok = await sendPayload(ENDPOINT_URL, payload);
+    if (!ok) enqueueSubmission(payload);
+    showToast('投票を送信しました');
   });
 
   function triggerHaptic(style = 'light') {
